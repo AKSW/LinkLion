@@ -41,18 +41,11 @@ public class UploadFileService {
 		final Logger log = LoggerFactory.getLogger(UploadFileService.class);
 		log.debug("File upload service triggered!");
 		
-	    Model model = null;
-	    TripleStoreCommunication comm = null;
-		DataGenerator dataGenerator = new DataGenerator(fileLocation, log);
+		DataGenerator dataGenerator = new DataGenerator(stream, fileLocation, log);
+	    
 		
-	    if (stream != null) {
-	    	model = dataGenerator.generateModelFromStream(stream);
-			comm = new TripleStoreCommunication(model);
-			dataGenerator.processData(model, comm, dataGenerator.getPrefs());
-	    }
-			    
-		writeToFile(stream, fileLocation);
-		String output = "File uploaded to : " + fileLocation;
+		//writeToFile(stream, fileLocation);
+		String output = "File *not* uploaded to : " + fileLocation;
  
 		// TODO handle error case!?
 		return Response.status(200).entity(output).build();

@@ -26,6 +26,7 @@ public class TripleStoreCommunication {
 
 	Model model = ModelFactory.createDefaultModel();
 	// TODO pull to prefs
+	// TODO remove hard coded file path
 	String directory = "/home/markus/lib/fuseki/DB";
 	
 	/**
@@ -63,6 +64,7 @@ public class TripleStoreCommunication {
 
 	public  void loadTempData(Model model) {
 		// read from file, load to tdb, data not saved
+		// TODO remove hard coded file path
 		String source = "/home/markus/Mapping/Links/drugbank-dbpedia.nt.out";
 		FileManager.get().readModel( model, source, "TURTLE" );
 	}
@@ -76,5 +78,10 @@ public class TripleStoreCommunication {
 		    .createRemote(request, "http://localhost:3030/tdb/update");
 		((UpdateProcessRemote) processor).setHttpContext(httpContext);
 		processor.execute();			
+	}
+
+	public void saveModel(Model tsModel) {
+		// TODO Auto-generated method stub
+		
 	}
 }

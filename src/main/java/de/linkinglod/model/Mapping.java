@@ -1,32 +1,72 @@
 package de.linkinglod.model;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import java.io.Serializable;
+import java.sql.Timestamp;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
+ * Hibernate class mapping.
  * @author markus
- * Generate a set of links (mapping) which can be uploaded to a TripleStore
  * 
- * TODO do we need an extra mapping class like this? Jena RDF model seems to be enough.
  */
-public class Mapping {
+@Entity
+@Table(name="Mapping")
+public class Mapping implements Serializable {
 	
-	Model model = ModelFactory.createDefaultModel();
-	
-	/**
-	 * @param model
-	 */
-	public Mapping(Model model) {
-		this.model = model;
-		// TODO access to dataset, create new one?
+	public Mapping(String hashMapping, Timestamp timeGenerated, long idOwner,
+			long idUploader) {
+		super();
+		this.hashMapping = hashMapping;
+		this.timeGenerated = timeGenerated;
+		this.idOwner = idOwner;
+		this.idUploader = idUploader;
 	}
-
-	public void createMapping() {
-		
+	private static final long serialVersionUID = 1L;
+	private String hashMapping;
+	private Timestamp timeGenerated;
+	private long idOwner;
+	private long idUploader;
+	
+	@Id
+	public String getHashMapping() {
+		return hashMapping;
 	}
 	
-	public void uploadMapping() {
-		
+	public void setHashMapping(String hashMapping) {
+		this.hashMapping = hashMapping;
 	}
 	
+	public Timestamp getTimeGenerated() {
+		return timeGenerated;
+	}
+	
+	public void setTimeGenerated(Timestamp timeGenerated) {
+		this.timeGenerated = timeGenerated;
+	}
+	
+	public long getIdOwner() {
+		return idOwner;
+	}
+	
+	public void setIdOwner(long idOwner) {
+		this.idOwner = idOwner;
+	}
+	
+	public long getIdUploader() {
+		return idUploader;
+	}
+	public void setIdUploader(long idUploader) {
+		this.idUploader = idUploader;
+	}
+	
+	// interesting?
+//	java.util.Date dt = new java.util.Date();
+//
+//	java.text.SimpleDateFormat sdf = 
+//	     new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//
+//	String currentTime = sdf.format(dt);	
 }

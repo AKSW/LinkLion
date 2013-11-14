@@ -11,8 +11,8 @@ import java.nio.charset.Charset;
 
 import com.hp.hpl.jena.rdf.model.*;
 
+import de.linkinglod.service.DBCommunication;
 import de.linkinglod.service.TripleStoreCommunication;
-import de.linkinglod.service.UploadFileService;
 
 import java.security.*;
 import java.util.prefs.Preferences;
@@ -29,18 +29,33 @@ import org.slf4j.LoggerFactory;
 public class DataGenerator {
 
 	private static Preferences prefs;
+	// TODO remove hard coded file path
 	private static String fileLocation = "/home/markus/Mapping/Links/geonames-dbpedia.nt";
 	private Logger log = LoggerFactory.getLogger(DataGenerator.class);
 
 	
-	public DataGenerator(String fileLocation, Logger log) {
+	public DataGenerator(InputStream stream, String fileLocation, Logger log) {
 		setPreferences(fileLocation);
 		this.log = log;
+		
+	    Model tsModel = null;
+	    Model dbModel = null;
+	    TripleStoreCommunication tsComm = null;
+	    DBCommunication dbComm = null;
+		tsComm = new TripleStoreCommunication(tsModel);
+
+		
+	    if (stream != null) {
+	    	dbModel = generateModelFromStream(stream);
+			tsModel = processData(tsModel, getPrefs());
+			tsComm.saveModel(tsModel);
+			dbComm.saveModel(dbModel);
+	    }
 
 	}
 	
 	/**
-	 * Temp main, should be removed later
+	 * Temp main, will be removed later
 	 * @param args
 	 * @throws NoSuchAlgorithmException 
 	 * @throws UnsupportedEncodingException 
@@ -49,8 +64,8 @@ public class DataGenerator {
 
 		final Logger tempLog = LoggerFactory.getLogger(DataGenerator.class);
 
-		DataGenerator dataGenerator = new DataGenerator(fileLocation, tempLog);
 		InputStream stream = generateStreamFromFile(fileLocation);
+		DataGenerator dataGenerator = new DataGenerator(stream, fileLocation, tempLog);
 		
 	    Model model = null;
 	    TripleStoreCommunication comm = null;
@@ -58,7 +73,7 @@ public class DataGenerator {
 	    if (stream != null) {
 	    	model = dataGenerator.generateModelFromStream(stream);
 			comm = new TripleStoreCommunication(model);
-			dataGenerator.processData(model, comm, prefs);
+			dataGenerator.processData(model, prefs);
 	    }
 		
 		// TODO
@@ -94,12 +109,11 @@ public class DataGenerator {
 	 * Reification process. Each statements gets converted and submitted as a single _model_. Better would be single statements.
 	 * TODO How are large amounts of statements performing?
 	 * @param model
-	 * @param comm
 	 * @param prefs
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException
 	 */
-	public void processData(Model model, TripleStoreCommunication comm, Preferences prefs) {
+	public Model processData(Model model, Preferences prefs) {
 		StmtIterator iter = model.listStatements();
 		MessageDigest md = null;
 		try {
@@ -142,6 +156,7 @@ public class DataGenerator {
 		log.debug("resourceCount: " + resourceCount);
 		log.debug("others: " + others);
 		//convertedModel.write(System.out, "N-TRIPLE");
+		return convertedModel;
 	}
 
 	private Model convertStatement(Resource s, Property p, RDFNode o,
@@ -185,6 +200,13 @@ public class DataGenerator {
 		}
 	}
 
+	/**
+	 * Build String which is used for generating the MD5 hash, if object is not a resource, surround it with ".
+	 * @param s subject
+	 * @param p predicate
+	 * @param o object
+	 * @return 
+	 */
 	private static String buildMd5String(Resource s, Property p, RDFNode o) {
 		String statement = s.toString() + p.toString();
 		// TODO should literal be modified with quotes?
