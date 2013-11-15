@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -15,6 +16,8 @@ import de.linkinglod.service.DBCommunication;
 import de.linkinglod.service.TripleStoreCommunication;
 
 import java.security.*;
+import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
 
@@ -35,21 +38,40 @@ public class DataGenerator {
 
 	
 	public DataGenerator(InputStream stream, String fileLocation, Logger log) {
+		
 		setPreferences(fileLocation);
 		this.log = log;
 		
-	    Model tsModel = null;
-	    Model dbModel = null;
+//		ResourceBundle bundle;
+//		String foo = "aa";
+//		bundle = ResourceBundle.getBundle("DataGenerator");
+		
+//		Properties properties = new Properties();
+//		try {
+//		  properties.load(new FileInputStream("WEB-INF/classes/llod.properties"));
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		
+//		for(String key : properties.stringPropertyNames()) {
+//			  String value = properties.getProperty(key);
+//			  System.out.println(key + " => " + value);
+//		}
+		
+	    Model originalModel = null;
+	    Model transformedModel = null;
 	    TripleStoreCommunication tsComm = null;
 	    DBCommunication dbComm = null;
-		tsComm = new TripleStoreCommunication(tsModel);
+	    
+		tsComm = new TripleStoreCommunication(transformedModel);
+		dbComm = new DBCommunication();
 
-		
+		// complete model is created, perhaps too big?
 	    if (stream != null) {
-	    	dbModel = generateModelFromStream(stream);
-			tsModel = processData(tsModel, getPrefs());
-			tsComm.saveModel(tsModel);
-			dbComm.saveModel(dbModel);
+	    	originalModel = generateModelFromStream(stream);
+			transformedModel = processData(originalModel, getPrefs());
+			tsComm.saveModel(transformedModel);
+			dbComm.saveModel(originalModel);
 	    }
 
 	}
@@ -64,8 +86,22 @@ public class DataGenerator {
 
 		final Logger tempLog = LoggerFactory.getLogger(DataGenerator.class);
 
+		
 		InputStream stream = generateStreamFromFile(fileLocation);
 		DataGenerator dataGenerator = new DataGenerator(stream, fileLocation, tempLog);
+		
+		Properties properties = new Properties();
+		try {
+		  properties.load(new FileInputStream("src/main/resources/llod.properties"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		for(String key : properties.stringPropertyNames()) {
+			  String value = properties.getProperty(key);
+			  System.out.println(key + " => " + value);
+		}
+		
 		
 	    Model model = null;
 	    TripleStoreCommunication comm = null;
@@ -75,13 +111,6 @@ public class DataGenerator {
 			comm = new TripleStoreCommunication(model);
 			dataGenerator.processData(model, prefs);
 	    }
-		
-		// TODO
-		// read file
-		//comm.loadTempData(model);
-		// convert each statement
-		// check if already existent, write to store
-
 		//comm.executeQuery(model, "select * where {?s ?p ?o} limit 10");
 	}
 
@@ -97,7 +126,6 @@ public class DataGenerator {
 
 	public void setPreferences(String fileLocation) {
 		prefs = Preferences.userNodeForPackage(this.getClass());
-		//prefs.put("fileName", "/home/markus/Mapping/Links/geonames-dbpedia.nt");
 		prefs.put("fileName", fileLocation);
 		prefs.put("subjectAttr", "hasEntitySource");
 		prefs.put("objectAttr", "hasEntityTarget");

@@ -16,6 +16,12 @@ import javax.persistence.Table;
 @Table(name="Mapping")
 public class Mapping implements Serializable {
 	
+	/**
+	 * @param hashMapping
+	 * @param timeGenerated
+	 * @param idOwner
+	 * @param idUploader
+	 */
 	public Mapping(String hashMapping, Timestamp timeGenerated, long idOwner,
 			long idUploader) {
 		super();

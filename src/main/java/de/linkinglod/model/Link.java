@@ -4,7 +4,7 @@ import java.io.Serializable;
 import javax.persistence.*;
 
 /**
- * Describes a single link which is contained in a mapping.
+ * Hibernate object Link describing a single link which is contained in a mapping.
  * @author markus
  *
  */

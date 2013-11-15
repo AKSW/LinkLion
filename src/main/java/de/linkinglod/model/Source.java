@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
+ * Hibernate class Source.
  * @author markus
  *
  */

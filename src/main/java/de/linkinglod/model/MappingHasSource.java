@@ -6,6 +6,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ * Hibernate class MappingHasSource.
+ * @author markus
+ *
+ */
 @Entity
 @Table(name="MappingHasSource")
 public class MappingHasSource implements Serializable {

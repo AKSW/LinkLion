@@ -4,7 +4,7 @@ import java.io.Serializable;
 import javax.persistence.*;
 
 /**
- * Describes the link discovery framwork.
+ * Hibernate object Framework describing the link discovery framwork.
  * @author markus
  *
  */

@@ -6,6 +6,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ * Hibernate object Configuration.
+ * @author markus
+ *
+ */
 @Entity
 @Table(name="Configuration")
 public class Configuration implements Serializable {
