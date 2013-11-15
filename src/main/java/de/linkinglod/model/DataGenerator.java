@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -13,11 +12,10 @@ import java.nio.charset.Charset;
 import com.hp.hpl.jena.rdf.model.*;
 
 import de.linkinglod.service.DBCommunication;
+import de.linkinglod.service.LinkingLodProperties;
 import de.linkinglod.service.TripleStoreCommunication;
 
 import java.security.*;
-import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
 
@@ -33,30 +31,13 @@ public class DataGenerator {
 
 	private static Preferences prefs;
 	// TODO remove hard coded file path
-	private static String fileLocation = "/home/markus/Mapping/Links/geonames-dbpedia.nt";
+	private static String fileLocation = LinkingLodProperties.getString("DataGenerator.fileLocation"); //$NON-NLS-1$
 	private Logger log = LoggerFactory.getLogger(DataGenerator.class);
-
 	
 	public DataGenerator(InputStream stream, String fileLocation, Logger log) {
 		
 		setPreferences(fileLocation);
 		this.log = log;
-		
-//		ResourceBundle bundle;
-//		String foo = "aa";
-//		bundle = ResourceBundle.getBundle("DataGenerator");
-		
-//		Properties properties = new Properties();
-//		try {
-//		  properties.load(new FileInputStream("WEB-INF/classes/llod.properties"));
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		
-//		for(String key : properties.stringPropertyNames()) {
-//			  String value = properties.getProperty(key);
-//			  System.out.println(key + " => " + value);
-//		}
 		
 	    Model originalModel = null;
 	    Model transformedModel = null;
@@ -88,20 +69,7 @@ public class DataGenerator {
 
 		
 		InputStream stream = generateStreamFromFile(fileLocation);
-		DataGenerator dataGenerator = new DataGenerator(stream, fileLocation, tempLog);
-		
-		Properties properties = new Properties();
-		try {
-		  properties.load(new FileInputStream("src/main/resources/llod.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		for(String key : properties.stringPropertyNames()) {
-			  String value = properties.getProperty(key);
-			  System.out.println(key + " => " + value);
-		}
-		
+		DataGenerator dataGenerator = new DataGenerator(stream, fileLocation, tempLog);	
 		
 	    Model model = null;
 	    TripleStoreCommunication comm = null;
@@ -127,10 +95,10 @@ public class DataGenerator {
 	public void setPreferences(String fileLocation) {
 		prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.put("fileName", fileLocation);
-		prefs.put("subjectAttr", "hasEntitySource");
-		prefs.put("objectAttr", "hasEntityTarget");
-		prefs.put("linkType", "hasLinkType");
-		prefs.put("ns", "http://linkinglod.eu");
+		prefs.put("subjectAttr", LinkingLodProperties.getString("DataGenerator.subjectAttribute")); //$NON-NLS-2$
+		prefs.put("objectAttr", LinkingLodProperties.getString("DataGenerator.objectAttribute")); //$NON-NLS-2$
+		prefs.put("linkType", LinkingLodProperties.getString("DataGenerator.linkType")); //$NON-NLS-2$
+		prefs.put("ns", LinkingLodProperties.getString("DataGenerator.ns")); //$NON-NLS-2$
 	}
 
 	/**
@@ -221,7 +189,7 @@ public class DataGenerator {
 			FileWriter outFileWriter = new FileWriter(outFileString, doAppend);
 			BufferedWriter outBuffer = new BufferedWriter(outFileWriter);
 
-			model.write(outBuffer, "TURTLE");
+			model.write(outBuffer, LinkingLodProperties.getString("DataGenerator.tripleOutputFormat")); //$NON-NLS-1$
 			outBuffer.close();
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
@@ -256,6 +224,7 @@ public class DataGenerator {
 		final String result = new String(Hex.encodeHex(resultDigest));
 		return result;
 	}
+	
 
 	/**
 	 * Build a Jena model from (N-TRIPLE conform) file
@@ -266,7 +235,7 @@ public class DataGenerator {
 		Model model = ModelFactory.createDefaultModel();
 
 		if (stream != null) {
-			model.read(stream, null, "N-TRIPLE");
+			model.read(stream, null, LinkingLodProperties.getString("DataGenerator.tripleInputFormat")); //$NON-NLS-1$
 		} else {
 			System.err.println("Cannot read " + stream + ". Correct N-TRIPLE format?");;
 		}
