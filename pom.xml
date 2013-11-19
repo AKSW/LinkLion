@@ -94,19 +94,18 @@
   	</dependency>
   	<dependency>
   		<groupId>org.hibernate</groupId>
-  		<artifactId>hibernate</artifactId>
-  		<version>3.5.4-Final</version>
-  		<type>pom</type>
+  		<artifactId>hibernate-core</artifactId>
+  		<version>3.6.10.Final</version>
   	</dependency>
   	<dependency>
-  		<groupId>org.hibernate</groupId>
-  		<artifactId>hibernate-annotations</artifactId>
-  		<version>3.5.6-Final</version>
+  		<groupId>javassist</groupId>
+  		<artifactId>javassist</artifactId>
+  		<version>3.12.1.GA</version>
   	</dependency>
   	<dependency>
-  		<groupId>org.hibernate</groupId>
-  		<artifactId>hibernate-commons-annotations</artifactId>
-  		<version>3.3.0.ga</version>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>4.11</version>
   	</dependency>
   </dependencies>
   <packaging>war</packaging>

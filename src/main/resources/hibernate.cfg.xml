@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC 
+    "-//Hibernate/Hibernate Configuration DTD 3.0//EN" 
+    "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory name="java:hibernate/SessionFactory">
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<!-- <property name="hibernate.connection.url">jdbc:mysql://wdiserv1.informatik.uni-leipzig.de:3306/linkinglod</property> -->
+		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/linkinglod</property>
+		<property name="hibernate.connection.username">nentwig</property>
+		<property name="hibernate.connection.password">monskyho</property>
+		<property name="hibernate.current_session_context_class">org.hibernate.context.ThreadLocalSessionContext</property>
+
+		<mapping package="de.linkinglod.model" />
+		<mapping class="de.linkinglod.model.Configuration" />
+		<mapping class="de.linkinglod.model.Framework" />
+		<mapping class="de.linkinglod.model.Link" />
+		<mapping class="de.linkinglod.model.Mapping" />
+		<mapping class="de.linkinglod.model.MappingHasSource" />
+		<mapping class="de.linkinglod.model.MappingUsesMapping" />
+		<mapping class="de.linkinglod.model.Object" />
+		<mapping class="de.linkinglod.model.Source" />
+		<mapping class="de.linkinglod.model.User" />
+	</session-factory>
+</hibernate-configuration>

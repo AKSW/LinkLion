@@ -29,32 +29,34 @@ import org.slf4j.LoggerFactory;
  */
 public class DataGenerator {
 
-	private static Preferences prefs;
-	// TODO remove hard coded file path
+	// only used in main, should be removed later. TODO its hard coded, change it!
 	private static String fileLocation = LinkingLodProperties.getString("DataGenerator.fileLocation"); //$NON-NLS-1$
-	private Logger log = LoggerFactory.getLogger(DataGenerator.class);
+	private static Logger log = LoggerFactory.getLogger(DataGenerator.class);
+
+	private Model originalModel = null;
+    private Model transformedModel = null;
+    private DBCommunication dbComm = null;
+    private TripleStoreCommunication tsComm = null;
 	
 	public DataGenerator(InputStream stream, String fileLocation, Logger log) {
 		
-		setPreferences(fileLocation);
-		this.log = log;
-		
-	    Model originalModel = null;
-	    Model transformedModel = null;
-	    TripleStoreCommunication tsComm = null;
-	    DBCommunication dbComm = null;
-	    
+		this.log = log; 
 		tsComm = new TripleStoreCommunication(transformedModel);
 		dbComm = new DBCommunication();
 
-		// complete model is created, perhaps too big?
 	    if (stream != null) {
 	    	originalModel = generateModelFromStream(stream);
-			transformedModel = processData(originalModel, getPrefs());
+	    	System.out.println("generateModelFromStream().isEmpty(): " + originalModel.isEmpty());
+
+			transformedModel = processData(originalModel);
+			System.out.println("processData(model): done");
+
 			tsComm.saveModel(transformedModel);
 			dbComm.saveModel(originalModel);
-	    }
-
+			System.out.println("saveModel(): ");
+	    } else {
+			System.err.println("Cannot read InputStream " + stream + ". Correct N-TRIPLE format?");
+		}
 	}
 	
 	/**
@@ -65,40 +67,35 @@ public class DataGenerator {
 	 */
 	public static void main(String[] args) {
 
-		final Logger tempLog = LoggerFactory.getLogger(DataGenerator.class);
-
-		
 		InputStream stream = generateStreamFromFile(fileLocation);
-		DataGenerator dataGenerator = new DataGenerator(stream, fileLocation, tempLog);	
+		DataGenerator dataGenerator = new DataGenerator(stream, fileLocation, log);	
 		
-	    Model model = null;
-	    TripleStoreCommunication comm = null;
-	    
-	    if (stream != null) {
-	    	model = dataGenerator.generateModelFromStream(stream);
-			comm = new TripleStoreCommunication(model);
-			dataGenerator.processData(model, prefs);
-	    }
+//	    if (stream != null) {
+//	    	model = generateModelFromStream(stream);
+//	    	System.out.println("generateModelFromStream(): done!");
+//			processData(model);
+//			System.out.println("processData(model): done!");
+//			dbCommTest.saveModel(model);
+//			System.out.println("saveModel(): ");
+//		} else {
+//			System.err.println("Cannot read InputStream " + stream + ". Correct N-TRIPLE format?");
+//		}
 		//comm.executeQuery(model, "select * where {?s ?p ?o} limit 10");
 	}
 
 	private static InputStream generateStreamFromFile(String fileLocation) {
-		InputStream is = null;
+		InputStream stream = null;
+		
 		try {
-			is = new FileInputStream(fileLocation);
+			stream = new FileInputStream(fileLocation);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		return is;
-	}
-
-	public void setPreferences(String fileLocation) {
-		prefs = Preferences.userNodeForPackage(this.getClass());
-		prefs.put("fileName", fileLocation);
-		prefs.put("subjectAttr", LinkingLodProperties.getString("DataGenerator.subjectAttribute")); //$NON-NLS-2$
-		prefs.put("objectAttr", LinkingLodProperties.getString("DataGenerator.objectAttribute")); //$NON-NLS-2$
-		prefs.put("linkType", LinkingLodProperties.getString("DataGenerator.linkType")); //$NON-NLS-2$
-		prefs.put("ns", LinkingLodProperties.getString("DataGenerator.ns")); //$NON-NLS-2$
+		
+		if (stream != null) {
+			log.debug("File " + fileLocation + " read sucessful.");
+		}
+		return stream;
 	}
 
 	/**
@@ -109,8 +106,10 @@ public class DataGenerator {
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException
 	 */
-	public Model processData(Model model, Preferences prefs) {
+	public Model processData(Model model) {
+		
 		StmtIterator iter = model.listStatements();
+		
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("MD5");
@@ -124,8 +123,7 @@ public class DataGenerator {
 		int resourceCount = 0;
 		int others = 0;
 
-		while (iter.hasNext()) {
-			Statement statement = iter.nextStatement();  
+		for (Statement statement: iter.toList()) {
 			Resource s = statement.getSubject();     
 			Property p = statement.getPredicate(); 
 			RDFNode o = statement.getObject();
@@ -144,27 +142,27 @@ public class DataGenerator {
 
 			String md5 = computeChecksum(md, buildMd5String(s, p, o));
 
-			convertedModel = convertStatement(s, p, o, md5, prefs, convertedModel);
+			convertedModel = convertStatement(s, p, o, md5, convertedModel);
 			//addStatementsToFile(convertedModel);
 		}
 		
 		log.debug("literalCount: " + literalCount);
-		log.debug("resourceCount: " + resourceCount);
+		System.out.println("resourceCount: " + resourceCount);
 		log.debug("others: " + others);
 		//convertedModel.write(System.out, "N-TRIPLE");
 		return convertedModel;
 	}
 
 	private Model convertStatement(Resource s, Property p, RDFNode o,
-			String md5, Preferences prefs, Model convertedModel) {
+			String md5, Model convertedModel) {
 		
 		// TODO if ns ends with /, dont add / again
-		String ns = prefs.get("ns", "");
+		String ns = LinkingLodProperties.getString("DataGenerator.ns");
 
 		Resource resource = ResourceFactory.createResource(ns + "/" + md5);
-		Property propS = ResourceFactory.createProperty(ns + "/" + prefs.get("subjectAttr", ""));
-		Property propP = ResourceFactory.createProperty(ns + "/" + prefs.get("linkType", ""));
-		Property propO = ResourceFactory.createProperty(ns + "/" + prefs.get("objectAttr", ""));
+		Property propS = ResourceFactory.createProperty(ns + "/" + LinkingLodProperties.getString("DataGenerator.subjectAttribute"));
+		Property propP = ResourceFactory.createProperty(ns + "/" + LinkingLodProperties.getString("DataGenerator.linkType"));
+		Property propO = ResourceFactory.createProperty(ns + "/" + LinkingLodProperties.getString("DataGenerator.objectAttribute"));
 		
 		convertedModel.add(resource, propS, s)
 				.add(resource, propP, p)
@@ -173,11 +171,11 @@ public class DataGenerator {
 		return convertedModel;
 	}
 
-	private static void addStatementsToFile(Model model) {
+	private void addStatementsToFile(Model model) {
 		// check check
 		// convertedModel.write(System.out, "N-TRIPLE");
 		// TODO check if file is empty at start
-		String outFileString = prefs.get("fileName", "") + ".out";
+		String outFileString = fileLocation + ".out";
 		File outFile = new File(outFileString);
 
 		boolean doAppend = false;
@@ -203,7 +201,7 @@ public class DataGenerator {
 	 * @param o object
 	 * @return 
 	 */
-	private static String buildMd5String(Resource s, Property p, RDFNode o) {
+	private String buildMd5String(Resource s, Property p, RDFNode o) {
 		String statement = s.toString() + p.toString();
 		// TODO should literal be modified with quotes?
 		if (o instanceof Resource) {
@@ -216,7 +214,7 @@ public class DataGenerator {
 		return statement;
 	}
 
-	private static String computeChecksum(MessageDigest md, String spo) {
+	private String computeChecksum(MessageDigest md, String spo) {
 		byte[] stringToUTF8byte = spo.getBytes(Charset.forName("UTF8"));
 		md.update(stringToUTF8byte);
 
@@ -233,22 +231,9 @@ public class DataGenerator {
 	 */
 	public Model generateModelFromStream(InputStream stream) {
 		Model model = ModelFactory.createDefaultModel();
-
-		if (stream != null) {
-			model.read(stream, null, LinkingLodProperties.getString("DataGenerator.tripleInputFormat")); //$NON-NLS-1$
-		} else {
-			System.err.println("Cannot read " + stream + ". Correct N-TRIPLE format?");;
-		}
+		model.read(stream, null, LinkingLodProperties.getString("DataGenerator.tripleInputFormat")); //$NON-NLS-1$
+		System.out.println("Read " + model.size() + " elements.");
 
 		return model;
 	}
-
-	public Preferences getPrefs() {
-		return prefs;
-	}
-
-	public void setPrefs(Preferences prefs) {
-		DataGenerator.prefs = prefs;
-	}
-
 }
