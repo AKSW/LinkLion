@@ -30,6 +30,10 @@ public class Mapping implements Serializable {
 		this.idOwner = idOwner;
 		this.idUploader = idUploader;
 	}
+	
+	public Mapping() {
+	}
+	
 	private static final long serialVersionUID = 1L;
 	private String hashMapping;
 	private Timestamp timeGenerated;

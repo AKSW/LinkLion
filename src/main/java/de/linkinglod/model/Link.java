@@ -23,6 +23,9 @@ public class Link implements Serializable {
 		this.hashMapping = hashMapping;
 	}
 
+	public Link() {
+	}
+
 	private static final long serialVersionUID = 1L;
 	private String hashLink;
 	private long o1Id;
