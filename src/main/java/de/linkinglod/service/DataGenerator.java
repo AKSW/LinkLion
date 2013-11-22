@@ -1,4 +1,4 @@
-package de.linkinglod.db;
+package de.linkinglod.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,8 +15,6 @@ import java.nio.file.Paths;
 import com.hp.hpl.jena.rdf.model.*;
 
 import de.linkinglod.rdf.TripleStoreCommunication;
-import de.linkinglod.service.DBCommunication;
-import de.linkinglod.service.LLProp;
 
 import java.security.*;
 import java.util.List;
@@ -44,34 +42,17 @@ public class DataGenerator {
     private Model transformedModel = null;
     private static String hashMapping = null;
 	
-	/**
-	 * TODO Do not work in the constructor!
-	 * @param stream
-	 * @param fileLocation
-	 * @param log
-	 * @throws NoSuchAlgorithmException
-	 */
-	public DataGenerator(InputStream stream, String fileLocation, Logger log) throws NoSuchAlgorithmException {
+	public DataGenerator(Model model) throws NoSuchAlgorithmException {
+		originalModel = model;
+		transformedModel = processData(originalModel);
 		
-		this.log = log; 
 		tsComm = new TripleStoreCommunication(transformedModel);
 		dbComm = new DBCommunication();
-
-	    if (stream != null) {
-	    	originalModel = generateModelFromStream(stream);
-	    	System.out.println("generateModelFromStream().isEmpty(): " + originalModel.isEmpty());
-
-			transformedModel = processData(originalModel);
-			System.out.println("processData(model): done");
-
-			tsComm.saveModel(transformedModel);
-			dbComm.saveModel(transformedModel);
-			System.out.println("saveModel(): done");
-	    } else {
-			System.err.println("Cannot read InputStream " + stream + ". Correct N-TRIPLE format?");
-		}
+		
+		tsComm.saveModel(transformedModel);
+		dbComm.saveModel(transformedModel);
 	}
-	
+
 	/**
 	 * Temp main, will be removed later
 	 * @param args
@@ -80,10 +61,10 @@ public class DataGenerator {
 	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 
-		InputStream stream = generateStreamFromFile(fileLocation);
-		hashMapping = computeChecksum();
-		
-		DataGenerator dataGenerator = new DataGenerator(stream, fileLocation, log);	
+//		InputStream stream = generateStreamFromFile(fileLocation);
+//		hashMapping = computeChecksum();
+//		
+//		DataGenerator dataGenerator = new DataGenerator(stream, fileLocation, log);	
 		
 
 //	    if (stream != null) {
@@ -97,17 +78,6 @@ public class DataGenerator {
 //			System.err.println("Cannot read InputStream " + stream + ". Correct N-TRIPLE format?");
 //		}
 		//comm.executeQuery(model, "select * where {?s ?p ?o} limit 10");
-	}
-
-	private static InputStream generateStreamFromFile(String fileLocation) throws FileNotFoundException {
-		
-		InputStream stream = null;
-		stream = new FileInputStream(fileLocation);
-		
-		if (stream != null) {
-			log.debug("File " + fileLocation + " read.");
-		}
-		return stream;
 	}
 
 	/**
@@ -247,19 +217,5 @@ public class DataGenerator {
 		byte[] digest = md.digest();
 		
 		return new String(Hex.encodeHex(digest));
-	}
-
-	/**
-	 * Build a Jena model from (N-TRIPLE conform) file
-	 * @param stream
-	 * @return
-	 */
-	public Model generateModelFromStream(InputStream stream) {
-		
-		Model model = ModelFactory.createDefaultModel();
-		model.read(stream, null, LLProp.getString("tripleInputFormat")); //$NON-NLS-1$
-		System.out.println("Read " + model.size() + " elements.");
-
-		return model;
 	}
 }
