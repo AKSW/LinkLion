@@ -1,5 +1,6 @@
 package de.linkinglod.service;
 
+import java.awt.image.RescaleOp;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Connection;
@@ -78,33 +79,6 @@ public class DBCommunication {
 		// TODO set db properties
 	}
 
-	private static User createUser() {
-		User testUser = new User();
-		
-		long idUser = 4;
-		testUser.setName("forest honey");
-		testUser.setIdUser(idUser);
-
-		Session session = InitSessionFactory.getInstance().getCurrentSession();
-		Transaction tx = session.beginTransaction();
-		session.save(testUser);
-		tx.commit();
-		return testUser;
-	}
-	
-	/**
-	 * Create a new EntityObject with unique ID.
-	 * TODO Ensure unique ID.
-	 * @param uri
-	 * @return Unique ID of the newly generated EntityObject
-	 */
-	private static long createEntityObject(String uri) {
-		EntityObject object = new EntityObject();
-		object.setUri(uri);
-		
-		return object.getIdObject();
-	}
-
 	public void obtainConnection() throws SQLException {
 		Connection conn = dataSource.getConnection();
 		Statement stmt = conn.createStatement();
@@ -131,8 +105,13 @@ public class DBCommunication {
 		long linkSubject = 0;
 		long linkPredicate = 0; 
 		long linkObject = 0;
+		
+		String ns = LLProp.getString("ns");
+		String lim = LLProp.getString("delimiter");
+		String vocProp = LLProp.getString("vocabularyProperty");
+		String propString = ns + lim + vocProp + lim;
 
-		// iterate through all triples
+		// TODO adapt if there are not only link objects in here
 		for (com.hp.hpl.jena.rdf.model.Statement statement: listModel) {
 
 				// S, P, O of single triple
@@ -140,7 +119,8 @@ public class DBCommunication {
 				Property p = statement.getPredicate(); 
 				RDFNode o = statement.getObject();
 				
-				// if o is not ressource, it's maybe only metadata
+				// if o is not ressource, it's maybe only metadata, in the moment this is true for hashMapping
+				// better: check for #link
 				if (o.isResource()) {
 					//TODO how to check if object is already existent
 					//TODO o is not always EntityObject!
@@ -149,23 +129,24 @@ public class DBCommunication {
 					//TODO how to get name out of the URI?
 					
 					// which EntityObject is S, P, O in the new Link object
-					if (p.toString().equals(LLProp.getString("subjectAttribute"))) {
+					if (p.toString().equals(propString + LLProp.getString("subjectAttribute"))) {
 						linkSubject = objectId;
 					} else					
-					if (p.toString().equals(LLProp.getString("linkType"))) {
+					if (p.toString().equals(propString + LLProp.getString("linkType"))) {
 						linkPredicate = objectId;
 					} else					
-					if (p.toString().equals(LLProp.getString("objectAttribute"))) {
+					if (p.toString().equals(propString + LLProp.getString("objectAttribute"))) {
 						linkObject = objectId;
 					}
 				}
 				
-				// TODO only if s, p and o are filled
-				if (p.toString().equals(LLProp.getString("hashMapping"))) {
-					// TODO only create mapping once
-					createMapping(o.toString());
-					createLink(s.toString(), linkSubject, linkPredicate, linkObject);
-				}
+				//TODO 2. step, create mapping, links
+//				// TODO only if s, p and o are filled
+//				if (p.toString().equals(LLProp.getString("hashMapping"))) {
+//					// TODO only create mapping once
+//					createMapping(o.toString());
+//					createLink(s.toString(), linkSubject, linkPredicate, linkObject);
+//				}
 				
 //				hashLink;
 //				o1Id;
@@ -173,27 +154,73 @@ public class DBCommunication {
 //				linkType;
 //				similarity;
 //				hashMapping;
-			System.out.println("s.toString(): " + statement.toString());
 		}
 	}
 
+
+	/**
+	 * Create a new EntityObject with unique ID.
+	 * TODO Ensure unique ID.
+	 * @param uri
+	 * @return Unique ID of the newly generated EntityObject
+	 */
+	private static long createEntityObject(String uri) {
+		EntityObject eo = new EntityObject();
+		eo.setUri(uri);
+		
+		Session session = InitSessionFactory.getInstance().getCurrentSession();
+		Transaction tx = session.beginTransaction();
+		session.save(eo);
+		tx.commit();
+
+		return eo.getIdObject();
+	}
+	
+	/**
+	 * test
+	 * @return
+	 */
+	private static User createUser() {
+		User testUser = new User();
+		
+		long idUser = 4;
+		testUser.setName("forest honey");
+		testUser.setIdUser(idUser);
+
+		Session session = InitSessionFactory.getInstance().getCurrentSession();
+		Transaction tx = session.beginTransaction();
+		session.save(testUser);
+		tx.commit();
+		return testUser;
+	}
+
+	/**
+	 * @param hash
+	 * @param s
+	 * @param p
+	 * @param o
+	 */
 	private void createLink(String hash, long s, long p, long o) {
-		
+
 		Link link = new Link();
-		
+
 		link.setHashLink(hash);
 		link.setO1Id(s);
 		link.setO2Id(o);
 		link.setLinkType(p);
 	}
 
+	/**
+	 * @param hash
+	 * @return
+	 */
 	private String createMapping(String hash) {
-		
+
 		Mapping mapping = new Mapping();
-		
+
 		mapping.setHashMapping(hash);
-		
+
 		return hash;
 	}
-	
+
 }

@@ -18,6 +18,17 @@ import javax.persistence.Table;
 @Table(name="Object")
 public class EntityObject implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idObject", unique = true, nullable = false)
+    private long idObject;
+    @Column(name = "uri", unique = false, nullable = false, length = 100)
+    private String uri;
+    @Column(name = "name", unique = false, nullable = true, length = 100)
+    private String name;
+	
 	public EntityObject(long idObject, String uri, String name) {
 		super();
 		this.idObject = idObject;
@@ -28,15 +39,6 @@ public class EntityObject implements Serializable {
 	public EntityObject() {
 	}
 
-	private static final long serialVersionUID = 1L;
-	
-    private long idObject;
-    private String uri;
-    private String name;
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idObject", unique = true, nullable = false)
 	public long getIdObject() {
 		return idObject;
 	}

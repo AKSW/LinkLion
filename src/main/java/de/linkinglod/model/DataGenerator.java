@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author markus
  * TODO look for objects which are a literal and not URI
  * TODO testing
+ * TODO where do we need to differentiate between literals/resources for objects?
  */
 public class DataGenerator {
 
@@ -64,8 +65,8 @@ public class DataGenerator {
 			System.out.println("processData(model): done");
 
 			tsComm.saveModel(transformedModel);
-			//dbComm.saveModel(transformedModel);
-			System.out.println("saveModel(): ");
+			dbComm.saveModel(transformedModel);
+			System.out.println("saveModel(): done");
 	    } else {
 			System.err.println("Cannot read InputStream " + stream + ". Correct N-TRIPLE format?");
 		}
@@ -110,12 +111,10 @@ public class DataGenerator {
 	}
 
 	/**
-	 * Reification process. Each statements gets converted and submitted as a single _model_. Better would be single statements.
+	 * Reification process. Each statements gets converted and added to a new model.
 	 * TODO How are large amounts of statements performing?
 	 * @param model
-	 * @param prefs
 	 * @throws NoSuchAlgorithmException
-	 * @throws UnsupportedEncodingException
 	 */
 	public Model processData(Model model) throws NoSuchAlgorithmException {
 		
@@ -125,37 +124,18 @@ public class DataGenerator {
 		
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		md.reset();;
-		
-		int literalCount = 0;
-		int resourceCount = 0;
-		int others = 0;
 
 		for (Statement statement: listModel) {
 			Resource s = statement.getSubject();     
 			Property p = statement.getPredicate(); 
 			RDFNode o = statement.getObject();
-			
-			// TODO do we need to differentiate between literals/resources for objects?
-			// if it's a literal, it can be no link to another real world entity
-			if (o.isLiteral()) {
-				//System.out.println("isLiteral: " + o.toString());
-				++literalCount;
-			} else if (o.isResource()) {
-				//System.out.println("isResource: " + o.toString());
-				++resourceCount;
-			} else {
-				++others;
-			}
 
 			String md5 = computeChecksum(md, buildMd5String(s, p, o));
 
 			convertedModel = convertStatement(s, p, o, md5, convertedModel);
 		}
 		
-		log.debug("literalCount: " + literalCount);
-		System.out.println("resourceCount: " + resourceCount);
-		log.debug("others: " + others);
-		convertedModel.write(System.out, "N-TRIPLE");
+		//convertedModel.write(System.out, "N-TRIPLE");
 		return convertedModel;
 	}
 

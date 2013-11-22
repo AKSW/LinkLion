@@ -19,7 +19,7 @@
 		<mapping class="de.linkinglod.model.Mapping" />
 		<mapping class="de.linkinglod.model.MappingHasSource" />
 		<mapping class="de.linkinglod.model.MappingUsesMapping" />
-		<mapping class="de.linkinglod.model.Object" />
+		<mapping class="de.linkinglod.model.EntityObject" />
 		<mapping class="de.linkinglod.model.Source" />
 		<mapping class="de.linkinglod.model.User" />
 	</session-factory>
