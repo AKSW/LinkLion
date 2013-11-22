@@ -1,4 +1,4 @@
-package de.linkinglod.service;
+package de.linkinglod.rdf;
 
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;

@@ -21,10 +21,10 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
-import de.linkinglod.model.EntityObject;
-import de.linkinglod.model.Link;
-import de.linkinglod.model.Mapping;
-import de.linkinglod.model.User;
+import de.linkinglod.db.EntityObject;
+import de.linkinglod.db.Link;
+import de.linkinglod.db.Mapping;
+import de.linkinglod.db.User;
 
 /**
  * @author markus

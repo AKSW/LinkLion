@@ -1,4 +1,4 @@
-package de.linkinglod.model;
+package de.linkinglod.db;
 
 import java.io.Serializable;
 

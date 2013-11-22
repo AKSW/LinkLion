@@ -21,7 +21,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
-import de.linkinglod.model.DataGenerator;
+import de.linkinglod.db.DataGenerator;
 
  
 /**

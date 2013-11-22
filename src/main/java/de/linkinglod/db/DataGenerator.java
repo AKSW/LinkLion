@@ -1,4 +1,4 @@
-package de.linkinglod.model;
+package de.linkinglod.db;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,9 +14,9 @@ import java.nio.file.Paths;
 
 import com.hp.hpl.jena.rdf.model.*;
 
+import de.linkinglod.rdf.TripleStoreCommunication;
 import de.linkinglod.service.DBCommunication;
 import de.linkinglod.service.LLProp;
-import de.linkinglod.service.TripleStoreCommunication;
 
 import java.security.*;
 import java.util.List;
