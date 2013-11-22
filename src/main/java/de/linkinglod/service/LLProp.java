@@ -3,14 +3,14 @@ package de.linkinglod.service;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class LinkingLodProperties {
+public class LLProp {
 
 	// writes to linkinglod.properties in src
 	private static final String BUNDLE_NAME = "linkinglod"; //$NON-NLS-1$
 
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
-	private LinkingLodProperties() {
+	private LLProp() {
 
 	}
 

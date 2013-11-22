@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
@@ -34,10 +33,10 @@ import de.linkinglod.model.User;
 public class DBCommunication {
 	
 	private static Logger log = LoggerFactory.getLogger(DBCommunication.class);
-	private static String user = LinkingLodProperties.getString("DBCommunication.user");
-	private static String password = LinkingLodProperties.getString("DBCommunication.password");
-	private static String server = LinkingLodProperties.getString("DBCommunication.server");
-	private static String localServer = LinkingLodProperties.getString("DBCommunication.localServer");
+	private static String user = LLProp.getString("DBCommunication.user");
+	private static String password = LLProp.getString("DBCommunication.password");
+	private static String server = LLProp.getString("DBCommunication.server");
+	private static String localServer = LLProp.getString("DBCommunication.localServer");
 	
 	private MysqlDataSource dataSource = null;
 
@@ -93,6 +92,12 @@ public class DBCommunication {
 		return testUser;
 	}
 	
+	/**
+	 * Create a new EntityObject with unique ID.
+	 * TODO Ensure unique ID.
+	 * @param uri
+	 * @return Unique ID of the newly generated EntityObject
+	 */
 	private static long createEntityObject(String uri) {
 		EntityObject object = new EntityObject();
 		object.setUri(uri);
@@ -127,31 +132,37 @@ public class DBCommunication {
 		long linkPredicate = 0; 
 		long linkObject = 0;
 
+		// iterate through all triples
 		for (com.hp.hpl.jena.rdf.model.Statement statement: listModel) {
 
+				// S, P, O of single triple
 				Resource s = statement.getSubject();     
 				Property p = statement.getPredicate(); 
 				RDFNode o = statement.getObject();
 				
+				// if o is not ressource, it's maybe only metadata
 				if (o.isResource()) {
 					//TODO how to check if object is already existent
+					//TODO o is not always EntityObject!
 					long objectId = createEntityObject(o.toString());
 					
 					//TODO how to get name out of the URI?
 					
-					if (p.toString().equals(LinkingLodProperties.getString("DataGenerator.subjectAttribute"))) {
+					// which EntityObject is S, P, O in the new Link object
+					if (p.toString().equals(LLProp.getString("subjectAttribute"))) {
 						linkSubject = objectId;
 					} else					
-					if (p.toString().equals(LinkingLodProperties.getString("DataGenerator.linkType"))) {
+					if (p.toString().equals(LLProp.getString("linkType"))) {
 						linkPredicate = objectId;
 					} else					
-					if (p.toString().equals(LinkingLodProperties.getString("DataGenerator.objectAttribute"))) {
+					if (p.toString().equals(LLProp.getString("objectAttribute"))) {
 						linkObject = objectId;
 					}
 				}
 				
 				// TODO only if s, p and o are filled
-				if (p.toString().equals(LinkingLodProperties.getString("DataGenerator.hashMapping"))) {
+				if (p.toString().equals(LLProp.getString("hashMapping"))) {
+					// TODO only create mapping once
 					createMapping(o.toString());
 					createLink(s.toString(), linkSubject, linkPredicate, linkObject);
 				}
@@ -176,11 +187,13 @@ public class DBCommunication {
 		link.setLinkType(p);
 	}
 
-	private void createMapping(String hash) {
+	private String createMapping(String hash) {
 		
 		Mapping mapping = new Mapping();
 		
 		mapping.setHashMapping(hash);
+		
+		return hash;
 	}
 	
 }

@@ -15,17 +15,14 @@ import java.nio.file.Paths;
 import com.hp.hpl.jena.rdf.model.*;
 
 import de.linkinglod.service.DBCommunication;
-import de.linkinglod.service.LinkingLodProperties;
+import de.linkinglod.service.LLProp;
 import de.linkinglod.service.TripleStoreCommunication;
 
 import java.security.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.prefs.Preferences;
 
 
 import org.apache.commons.codec.binary.Hex;
-import org.junit.runner.Computer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class DataGenerator {
 
 	// only used in main, should be removed later. TODO its hard coded, change it!
-	private static String fileLocation = LinkingLodProperties.getString("DataGenerator.fileLocation"); //$NON-NLS-1$
+	private static String fileLocation = LLProp.getString("fileLocation"); //$NON-NLS-1$
 	private static Logger log = LoggerFactory.getLogger(DataGenerator.class);
 
     private DBCommunication dbComm = null;
@@ -153,7 +150,6 @@ public class DataGenerator {
 			String md5 = computeChecksum(md, buildMd5String(s, p, o));
 
 			convertedModel = convertStatement(s, p, o, md5, convertedModel);
-			//addStatementsToFile(convertedModel);
 		}
 		
 		log.debug("literalCount: " + literalCount);
@@ -163,29 +159,44 @@ public class DataGenerator {
 		return convertedModel;
 	}
 
-	private Model convertStatement(Resource s, Property p, RDFNode o,
-			String md5, Model convertedModel) {
+	/**
+	 * Convert a single triple line to the format which is needed in the TripleStore. Each triple gets splitted in at least 4 triples.
+	 * @param s subject of original triple
+	 * @param p predicate of original triple
+	 * @param o object of original triple
+	 * @param md5 MD5 hash of concatenated original triple
+	 * @param convertedModel this model is expanded by 4 triples with each line of the original triples
+	 * @return completed and fully converted model
+	 */
+	private Model convertStatement(Resource s, Property p, RDFNode o, String md5, Model convertedModel) {
 		
 		// TODO put / into preferences file
-		String ns = LinkingLodProperties.getString("DataGenerator.ns");
-		Resource resource = ResourceFactory.createResource(ns + "/" + md5);
-		Property propS = ResourceFactory.createProperty(ns + "/" + LinkingLodProperties.getString("DataGenerator.subjectAttribute"));
-		Property propP = ResourceFactory.createProperty(ns + "/" + LinkingLodProperties.getString("DataGenerator.linkType"));
-		Property propO = ResourceFactory.createProperty(ns + "/" + LinkingLodProperties.getString("DataGenerator.objectAttribute"));
-		Property propM = ResourceFactory.createProperty(ns + "/" + LinkingLodProperties.getString("DataGenerator.hashMapping"));
+		String ns = LLProp.getString("ns");
+		String lim = LLProp.getString("delimiter");
+		String vocProp = LLProp.getString("vocabularyProperty");
+		String propString = ns + lim + vocProp + lim;
+		
+		Resource resource = ResourceFactory.createResource(ns + lim + 
+														LLProp.getString("vocabularyLink") + 
+														LLProp.getString("fragmentIdentifier") + md5);
+		
+		Property propS = ResourceFactory.createProperty(propString + LLProp.getString("subjectAttribute"));
+		Property propP = ResourceFactory.createProperty(propString + LLProp.getString("linkType"));
+		Property propO = ResourceFactory.createProperty(propString + LLProp.getString("objectAttribute"));
+		Property propM = ResourceFactory.createProperty(propString + LLProp.getString("hashMapping"));
 
 		convertedModel.add(resource, propS, s)
 				.add(resource, propP, p)
 				.add(resource, propO, o)
 				.add(resource, propM, hashMapping);
 		
+		// TODO create mapping information
+		
 		return convertedModel;
 	}
 
 	private void addStatementsToFile(Model model) throws IOException {
-		// check check
 		// convertedModel.write(System.out, "N-TRIPLE");
-		// TODO check if file is empty at start
 		String outFileString = fileLocation + ".out";
 		File outFile = new File(outFileString);
 
@@ -197,7 +208,7 @@ public class DataGenerator {
 		FileWriter outFileWriter = new FileWriter(outFileString, doAppend);
 		BufferedWriter outBuffer = new BufferedWriter(outFileWriter);
 
-		model.write(outBuffer, LinkingLodProperties.getString("DataGenerator.tripleOutputFormat")); //$NON-NLS-1$
+		model.write(outBuffer, LLProp.getString("tripleOutputFormat")); //$NON-NLS-1$
 		outBuffer.close();
 	}
 
@@ -210,7 +221,8 @@ public class DataGenerator {
 	 */
 	private String buildMd5String(Resource s, Property p, RDFNode o) {
 		String statement = s.toString() + p.toString();
-		// TODO should literal be modified with quotes?
+		// TODO should literal be modified with quotes? 
+		// TODO Check if checksum is correct calculated!
 		if (o instanceof Resource) {
 			statement += o.toString();
 		} else {
@@ -221,6 +233,12 @@ public class DataGenerator {
 		return statement;
 	}
 
+	/**
+	 * Checksum is calculated, string is converted to UTF8 previously.
+	 * @param md
+	 * @param text
+	 * @return checksum as hexadecimal value
+	 */
 	private String computeChecksum(MessageDigest md, String text) {
 		
 		byte[] stringToUTF8byte = text.getBytes(Charset.forName("UTF8"));
@@ -259,7 +277,7 @@ public class DataGenerator {
 	public Model generateModelFromStream(InputStream stream) {
 		
 		Model model = ModelFactory.createDefaultModel();
-		model.read(stream, null, LinkingLodProperties.getString("DataGenerator.tripleInputFormat")); //$NON-NLS-1$
+		model.read(stream, null, LLProp.getString("tripleInputFormat")); //$NON-NLS-1$
 		System.out.println("Read " + model.size() + " elements.");
 
 		return model;
