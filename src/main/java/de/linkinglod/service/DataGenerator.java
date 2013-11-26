@@ -120,7 +120,6 @@ public class DataGenerator {
 	 */
 	private Model convertStatement(Resource s, Property p, RDFNode o, String md5, Model convertedModel) {
 		
-		// TODO put / into preferences file
 		String ns = LLProp.getString("ns");
 		String lim = LLProp.getString("delimiter");
 		String vocProp = LLProp.getString("vocabularyProperty");

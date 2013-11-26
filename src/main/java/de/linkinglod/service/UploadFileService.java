@@ -109,6 +109,7 @@ public class UploadFileService implements Reader {
 
 	@Override
 	public Model read(String pathToFile) throws FileNotFoundException {
+		
 		InputStream stream = generateStreamFromFile(pathToFile);
 		
 		return generateModelFromStream(stream);

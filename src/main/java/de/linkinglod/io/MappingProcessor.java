@@ -8,9 +8,9 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 
 public interface MappingProcessor {
-	Model transform (String owner, Date timeStamp);
 	Set<Property> getLinkTypes();
 	List<Set<String>> getNameSpaces();
 	Date getTimeStamp();
 	String getMappingURI();
+	Model transform(Model modelIn, String owner, Date timeStamp);
 }
