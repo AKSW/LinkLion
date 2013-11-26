@@ -1,6 +1,11 @@
 package de.linkinglod.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -9,6 +14,8 @@ import org.apache.commons.codec.binary.Hex;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+
+import de.linkinglod.service.LLProp;
 
 /**
  * @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>
@@ -62,7 +69,7 @@ public class MD5Utils {
 	 * @param s 
 	 * @param md
 	 * @param text
-	 * @return checksum as hexadecimal value
+	 * @return Hex representation of encoded MD5 hash
 	 */
 	public static String computeChecksum(Resource s, Property p, RDFNode o) {
 		
@@ -74,6 +81,24 @@ public class MD5Utils {
 		final byte[] resultDigest = md.digest();
 		final String result = new String(Hex.encodeHex(resultDigest));
 		return result;
+	}
+	
+	/**
+	 * Generates MD5 hash of the previously chosen file (mapping).
+	 * @param md
+	 * @return Hex representation of encoded MD5 hash
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException 
+	 */
+	public static String computeChecksum() throws IOException, NoSuchAlgorithmException {
+
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		InputStream is = Files.newInputStream(Paths.get(LLProp.getString("fileLocation")));
+			  DigestInputStream dis = new DigestInputStream(is, md);
+		byte[] digest = md.digest();
+		
+		//TODO Check, if this checksum is correct for the mapping, do we need to consider UTF8 stuff?
+		return new String(Hex.encodeHex(digest));
 	}
 	
 }

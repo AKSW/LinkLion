@@ -1,16 +1,20 @@
 package de.linkinglod.service;
 
 import java.awt.image.RescaleOp;
+import java.net.URI;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +27,7 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 import de.linkinglod.db.EntityObject;
 import de.linkinglod.db.Link;
+import de.linkinglod.db.Linktype;
 import de.linkinglod.db.Mapping;
 import de.linkinglod.db.User;
 
@@ -115,28 +120,36 @@ public class DBCommunication {
 		for (com.hp.hpl.jena.rdf.model.Statement statement: listModel) {
 
 				// S, P, O of single triple
-				Resource s = statement.getSubject();     
-				Property p = statement.getPredicate(); 
-				RDFNode o = statement.getObject();
+				Resource subject = statement.getSubject();     
+				Property predicate = statement.getPredicate(); 
+				RDFNode object = statement.getObject();
 				
 				// if o is not ressource, it's maybe only metadata, in the moment this is true for hashMapping
 				// better: check for #link
-				if (o.isResource()) {
+				if (object.isResource()) {
+					String o = object.toString();
+					String p = predicate.toString();
 					//TODO how to check if object is already existent
-					//TODO o is not always EntityObject!
-					long objectId = createEntityObject(o.toString());
-					
+					//TODO o is not always EntityObject!					
 					//TODO how to get name out of the URI?
 					
 					// which EntityObject is S, P, O in the new Link object
-					if (p.toString().equals(propString + LLProp.getString("subjectAttribute"))) {
-						linkSubject = objectId;
-					} else					
-					if (p.toString().equals(propString + LLProp.getString("linkType"))) {
-						linkPredicate = objectId;
-					} else					
-					if (p.toString().equals(propString + LLProp.getString("objectAttribute"))) {
-						linkObject = objectId;
+					// TODO extract to method?
+					if (p.equals(propString + LLProp.getString("subjectAttribute"))) {
+						if (!existsInDb(EntityObject.class, o)) {
+							linkSubject = createEntityObject(o);
+						}
+					} 
+					else if (p.equals(propString + LLProp.getString("linkType"))) {
+						//TODO performance issue: create local linktype array!?
+						if (!existsInDb(Linktype.class, o)) {
+							linkPredicate = createLinktype(o);
+						}
+					} 
+					else if (p.equals(propString + LLProp.getString("objectAttribute"))) {
+						if (!existsInDb(EntityObject.class, o)) {
+							linkObject = createEntityObject(o);
+						}
 					}
 				}
 				
@@ -157,10 +170,29 @@ public class DBCommunication {
 		}
 	}
 
+	/**
+	 * Get database session and search for string.
+	 * TODO Add (generic) search objects.
+	 * @param <T> only working for EntityObject and Linktype!!
+	 * @param o
+	 * @return
+	 */
+	private <T> boolean existsInDb(Class<T> myClass, String o) {
+
+		Session session = InitSessionFactory.getInstance().getCurrentSession();
+		Transaction tx = session.beginTransaction();
+		Criteria criteria = session.createCriteria(myClass);
+		
+		// restrict to column uri, search for the string o
+		criteria.add(Restrictions.eq("uri", o));
+		List<T> result = criteria.list();
+		//System.out.println("getSessionAndSearch(): result.size(): " + result.size());
+		
+		return !result.isEmpty();
+	}
 
 	/**
 	 * Create a new EntityObject with unique ID.
-	 * TODO Ensure unique ID.
 	 * @param uri
 	 * @return Unique ID of the newly generated EntityObject
 	 */
@@ -168,12 +200,35 @@ public class DBCommunication {
 		EntityObject eo = new EntityObject();
 		eo.setUri(uri);
 		
+		getSessionAndSave(eo);
+
+		//TODO is eo.getIdObjet already the correct value?
+		return eo.getIdObject();
+	}
+
+	/**
+	 * Establish a session to the database and save the (generic) hibernate object.
+	 * @param hibObject
+	 */
+	private static <T> void getSessionAndSave(T hibObject) {
 		Session session = InitSessionFactory.getInstance().getCurrentSession();
 		Transaction tx = session.beginTransaction();
-		session.save(eo);
+		session.save(hibObject);
 		tx.commit();
+	}
+	
+	/**
+	 * Create a new Linktype with unique ID.
+	 * @param uri
+	 * @return Unique ID of the newly generated Linktype
+	 */
+	private static long createLinktype(String uri) {
+		Linktype lt = new Linktype();
+		lt.setUri(uri);
+		
+		getSessionAndSave(lt);
 
-		return eo.getIdObject();
+		return lt.getIdLinktype();
 	}
 	
 	/**
@@ -195,6 +250,7 @@ public class DBCommunication {
 	}
 
 	/**
+	 * Create a Link object in the database.
 	 * @param hash
 	 * @param s
 	 * @param p
@@ -211,6 +267,7 @@ public class DBCommunication {
 	}
 
 	/**
+	 * Create a Mapping object in the database.
 	 * @param hash
 	 * @return
 	 */
