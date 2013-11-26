@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import java.sql.Statement;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -19,6 +18,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
+import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
@@ -82,15 +83,15 @@ public class DBCommunication {
 	}
 
 	public void obtainConnection() throws SQLException {
-		Connection conn = dataSource.getConnection();
-		Statement stmt = conn.createStatement();
+//		Connection conn = dataSource.getConnection();
+		//Statement stmt = conn.createStatement();
 		
 		
-		ResultSet rs = stmt.executeQuery("SELECT ID FROM USERS");
-		// 	TODO
-		rs.close();
-		stmt.close();
-		conn.close();
+//		ResultSet rs = stmt.executeQuery("SELECT ID FROM USERS");
+//		// 	TODO
+//		rs.close();
+//		stmt.close();
+//		conn.close();
 	}
 
 	/**
@@ -102,11 +103,13 @@ public class DBCommunication {
 		System.out.println("saveModel(): jenaModel.isEmpty(): " + jenaModel.isEmpty());
 		
 		StmtIterator modelIterator = jenaModel.listStatements();
-		List<com.hp.hpl.jena.rdf.model.Statement> listModel = modelIterator.toList();
+		List<Statement> listModel = modelIterator.toList();
 		
 		long linkSubject = 0;
 		long linkPredicate = 0; 
 		long linkObject = 0;
+		boolean isMappingCreated = false;
+
 		
 		String ns = LLProp.getString("ns");
 		String lim = LLProp.getString("delimiter");
@@ -114,18 +117,20 @@ public class DBCommunication {
 		String propString = ns + lim + vocProp + lim;
 
 		// TODO adapt if there are not only link objects in here
-		for (com.hp.hpl.jena.rdf.model.Statement statement: listModel) {
+		for (Statement statement: listModel) {
 
 				// S, P, O of single triple
 				Resource subject = statement.getSubject();     
 				Property predicate = statement.getPredicate(); 
 				RDFNode object = statement.getObject();
-				
+				String s = subject.toString();
+				String p = predicate.toString();
+				String o = object.toString();
+
 				// if o is not ressource, it's maybe only metadata, in the moment this is true for hashMapping
 				// better: check for #link
 				if (object.isResource()) {
-					String o = object.toString();
-					String p = predicate.toString();
+
 					//TODO how to check if object is already existent
 					//TODO o is not always EntityObject!					
 					//TODO how to get name out of the URI?
@@ -134,36 +139,46 @@ public class DBCommunication {
 					// TODO extract to method?
 					if (p.equals(propString + LLProp.getString("subjectAttribute"))) {
 						if (!existsInDb(EntityObject.class, o)) {
+							// o1Id;
 							linkSubject = createEntityObject(o);
 						}
 					} 
 					else if (p.equals(propString + LLProp.getString("linkType"))) {
 						//TODO performance issue: create local linktype array!?
 						if (!existsInDb(Linktype.class, o)) {
+							// linkType;
 							linkPredicate = createLinktype(o);
 						}
 					} 
 					else if (p.equals(propString + LLProp.getString("objectAttribute"))) {
 						if (!existsInDb(EntityObject.class, o)) {
+							// o2Id;
 							linkObject = createEntityObject(o);
 						}
 					}
 				}
 				
-				//TODO 2. step, create mapping, links
-//				// TODO only if s, p and o are filled
-//				if (p.toString().equals(LLProp.getString("hashMapping"))) {
-//					// TODO only create mapping once
-//					createMapping(o.toString());
-//					createLink(s.toString(), linkSubject, linkPredicate, linkObject);
-//				}
-				
+				// mapping needs to be created only once
+				// hashMapping;
+				//TODO not working here!!!
+
+				if (!isMappingCreated) {
+					if (p.equals(propString + LLProp.getString("hashMapping"))) {
+						//TODO extract hash
+						if (!existsInDb(Mapping.class, o)) {
+							createMapping(o);
+						}
+						isMappingCreated = true;
+					}
+				}
+
 //				hashLink;
-//				o1Id;
-//				o2Id;
-//				linkType;
-//				similarity;
-//				hashMapping;
+				if (linkSubject != 0 && linkPredicate != 0 && linkObject != 0) {
+					//TODO extract hash
+					if (!existsInDb(Link.class, o)) {
+						createLink(s, linkSubject, linkPredicate, linkObject);
+					}
+				}
 		}
 	}
 

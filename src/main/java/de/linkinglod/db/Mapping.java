@@ -3,6 +3,7 @@ package de.linkinglod.db;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -15,6 +16,14 @@ import javax.persistence.Table;
 @Entity
 @Table(name="Mapping")
 public class Mapping implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	@Id
+    @Column(name = "hashMapping", unique = true, nullable = false, length = 32)
+	private String hashMapping;
+	private Timestamp timeGenerated;
+	private long idOwner;
+	private long idUploader;
 	
 	/**
 	 * @param hashMapping
@@ -34,13 +43,6 @@ public class Mapping implements Serializable {
 	public Mapping() {
 	}
 	
-	private static final long serialVersionUID = 1L;
-	private String hashMapping;
-	private Timestamp timeGenerated;
-	private long idOwner;
-	private long idUploader;
-	
-	@Id
 	public String getHashMapping() {
 		return hashMapping;
 	}

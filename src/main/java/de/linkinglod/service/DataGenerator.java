@@ -2,8 +2,11 @@ package de.linkinglod.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.hp.hpl.jena.rdf.model.*;
 
@@ -54,11 +57,11 @@ public class DataGenerator {
 	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 
-//		InputStream stream = generateStreamFromFile(fileLocation);
-//		System.out.println("Stream generated: ");
-//		Model model = generateModelFromStream(stream);
-//		System.out.println("Model generated with " + model.size() + " elements.");
-//		DataGenerator dataGenerator = new DataGenerator(model);	
+		InputStream stream = generateStreamFromFile(fileLocation);
+		System.out.println("Stream generated: ");
+		Model model = generateModelFromStream(stream);
+		System.out.println("Model generated with " + model.size() + " elements.");
+		DataGenerator dataGenerator = new DataGenerator(model);	
 
 		//comm.executeQuery(model, "select * where {?s ?p ?o} limit 10");
 	}
@@ -115,6 +118,11 @@ public class DataGenerator {
 		Property propO = ResourceFactory.createProperty(propString + LLProp.getString("objectAttribute"));
 		Property propM = ResourceFactory.createProperty(propString + LLProp.getString("hashMapping"));
 
+		hashMapping = propString 
+				+ LLProp.getString("vocabularyMapping") 
+				+ LLProp.getString("fragmentIdentifier")
+				+ hashMapping;
+		
 		convertedModel.add(resource, propS, s)
 				.add(resource, propP, p)
 				.add(resource, propO, o)
@@ -140,6 +148,34 @@ public class DataGenerator {
 
 		model.write(outBuffer, LLProp.getString("tripleOutputFormat")); //$NON-NLS-1$
 		outBuffer.close();
+	}
+	
+	/**
+	 * Generate an InputStream from the file.
+	 * @param fileLocation
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	private static InputStream generateStreamFromFile(String fileLocation) throws FileNotFoundException {
+		InputStream stream = null;
+		stream = new FileInputStream(fileLocation);
+		log.debug("File " + fileLocation + " read.");
+		
+		return stream;
+	}
+	
+	/**
+	 * Build a Jena model from stream.
+	 * @param stream
+	 * @return
+	 */
+	public static Model generateModelFromStream(InputStream stream) {
+		
+		Model model = ModelFactory.createDefaultModel();
+		model.read(stream, null, LLProp.getString("tripleInputFormat"));
+		log.debug("Read " + model.size() + " elements.");
+
+		return model;
 	}
 
 }
