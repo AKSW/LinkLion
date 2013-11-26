@@ -1,14 +1,11 @@
 package de.linkinglod.service;
 
-import java.awt.image.RescaleOp;
-import java.net.URI;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -223,12 +220,12 @@ public class DBCommunication {
 	 * @return Unique ID of the newly generated Linktype
 	 */
 	private static long createLinktype(String uri) {
-		Linktype lt = new Linktype();
-		lt.setUri(uri);
+		Linktype linktype = new Linktype();
+		linktype.setUri(uri);
 		
-		getSessionAndSave(lt);
+		getSessionAndSave(linktype);
 
-		return lt.getIdLinktype();
+		return linktype.getIdLinktype();
 	}
 	
 	/**
