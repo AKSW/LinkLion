@@ -12,17 +12,17 @@
 		<property name="hibernate.connection.password">monskyho</property>
 		<property name="hibernate.current_session_context_class">org.hibernate.context.ThreadLocalSessionContext</property>
 
-		<mapping package="de.linkinglod.model" />
-		<mapping class="de.linkinglod.model.Configuration" />
-		<mapping class="de.linkinglod.model.Framework" />
-		<mapping class="de.linkinglod.model.Link" />
-		<mapping class="de.linkinglod.model.Mapping" />
-		<mapping class="de.linkinglod.model.MappingHasSource" />
-		<mapping class="de.linkinglod.model.MappingUsesMapping" />
-		<mapping class="de.linkinglod.model.EntityObject" />
-		<mapping class="de.linkinglod.model.Source" />
-		<mapping class="de.linkinglod.model.User" />
-		<mapping class="de.linkinglod.model.Linktype" />
+		<mapping package="de.linkinglod.db" />
+		<mapping class="de.linkinglod.db.Configuration" />
+		<mapping class="de.linkinglod.db.Framework" />
+		<mapping class="de.linkinglod.db.Link" />
+		<mapping class="de.linkinglod.db.Mapping" />
+		<mapping class="de.linkinglod.db.MappingHasSource" />
+		<mapping class="de.linkinglod.db.MappingUsesMapping" />
+		<mapping class="de.linkinglod.db.EntityObject" />
+		<mapping class="de.linkinglod.db.Source" />
+		<mapping class="de.linkinglod.db.User" />
+		<mapping class="de.linkinglod.db.Linktype" />
 		
 	</session-factory>
 </hibernate-configuration>

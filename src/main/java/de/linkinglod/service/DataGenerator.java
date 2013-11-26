@@ -7,20 +7,16 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import com.hp.hpl.jena.rdf.model.*;
 
 import de.linkinglod.rdf.TripleStoreCommunication;
+import de.linkinglod.util.MD5Utils;
 
 import java.security.*;
 import java.util.List;
 
 
-import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +38,9 @@ public class DataGenerator {
     private Model transformedModel = null;
     private static String hashMapping = null;
 	
-	public DataGenerator(Model model) throws NoSuchAlgorithmException {
+	public DataGenerator(Model model) throws NoSuchAlgorithmException, IOException {
 		originalModel = model;
+		hashMapping = MD5Utils.computeChecksum();
 		transformedModel = processData(originalModel);
 		
 		tsComm = new TripleStoreCommunication(transformedModel);
@@ -62,21 +59,11 @@ public class DataGenerator {
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 
 //		InputStream stream = generateStreamFromFile(fileLocation);
-//		hashMapping = computeChecksum();
-//		
-//		DataGenerator dataGenerator = new DataGenerator(stream, fileLocation, log);	
-		
+//		System.out.println("Stream generated: ");
+//		Model model = generateModelFromStream(stream);
+//		System.out.println("Model generated with " + model.size() + " elements.");
+//		DataGenerator dataGenerator = new DataGenerator(model);	
 
-//	    if (stream != null) {
-//	    	model = generateModelFromStream(stream);
-//	    	System.out.println("generateModelFromStream(): done!");
-//			processData(model);
-//			System.out.println("processData(model): done!");
-//			dbCommTest.saveModel(model);
-//			System.out.println("saveModel(): ");
-//		} else {
-//			System.err.println("Cannot read InputStream " + stream + ". Correct N-TRIPLE format?");
-//		}
 		//comm.executeQuery(model, "select * where {?s ?p ?o} limit 10");
 	}
 
@@ -86,21 +73,19 @@ public class DataGenerator {
 	 * @param model
 	 * @throws NoSuchAlgorithmException
 	 */
-	public Model processData(Model model) throws NoSuchAlgorithmException {
+	public static Model processData(Model model) throws NoSuchAlgorithmException {
 		
 		StmtIterator modelIterator = model.listStatements();
 		List<Statement> listModel = modelIterator.toList();
 		Model convertedModel = ModelFactory.createDefaultModel();
-		
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		md.reset();;
+		MD5Utils.reset();
 
 		for (Statement statement: listModel) {
 			Resource s = statement.getSubject();     
 			Property p = statement.getPredicate(); 
 			RDFNode o = statement.getObject();
 
-			String md5 = computeChecksum(md, buildMd5String(s, p, o));
+			String md5 = MD5Utils.computeChecksum(s, p, o);
 
 			convertedModel = convertStatement(s, p, o, md5, convertedModel);
 		}
@@ -118,7 +103,7 @@ public class DataGenerator {
 	 * @param convertedModel this model is expanded by 4 triples with each line of the original triples
 	 * @return completed and fully converted model
 	 */
-	private Model convertStatement(Resource s, Property p, RDFNode o, String md5, Model convertedModel) {
+	private static Model convertStatement(Resource s, Property p, RDFNode o, String md5, Model convertedModel) {
 		
 		String ns = LLProp.getString("ns");
 		String lim = LLProp.getString("delimiter");
@@ -161,60 +146,4 @@ public class DataGenerator {
 		outBuffer.close();
 	}
 
-	/**
-	 * Build String which is used for generating the MD5 hash, if object is not a resource, surround it with ".
-	 * @param s subject
-	 * @param p predicate
-	 * @param o object
-	 * @return 
-	 */
-	private String buildMd5String(Resource s, Property p, RDFNode o) {
-		String statement = s.toString() + p.toString();
-		// TODO should literal be modified with quotes? 
-		// TODO Check if checksum is correct calculated!
-		if (o instanceof Resource) {
-			statement += o.toString();
-		} else {
-			statement+= "\"" + o.toString() + "\"";
-		}
-		statement += " .";
-
-		return statement;
-	}
-
-	/**
-	 * Checksum is calculated, string is converted to UTF8 previously.
-	 * @param md
-	 * @param text
-	 * @return checksum as hexadecimal value
-	 */
-	private String computeChecksum(MessageDigest md, String text) {
-		
-		byte[] stringToUTF8byte = text.getBytes(Charset.forName("UTF8"));
-		md.update(stringToUTF8byte);
-
-		final byte[] resultDigest = md.digest();
-		final String result = new String(Hex.encodeHex(resultDigest));
-		return result;
-	}
-	
-	
-	/**
-	 * Generates MD5 hash of the previously chosen file (mapping).
-	 * @param md
-	 * @return
-	 * @throws IOException
-	 * TODO Check, if this checksum is correct for the mapping, do we need to consider UTF8 stuff?
-	 * @throws NoSuchAlgorithmException 
-	 */
-	private static String computeChecksum() throws IOException, NoSuchAlgorithmException {
-
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		try (InputStream is = Files.newInputStream(Paths.get(fileLocation))) {
-			  DigestInputStream dis = new DigestInputStream(is, md);
-			}
-		byte[] digest = md.digest();
-		
-		return new String(Hex.encodeHex(digest));
-	}
 }
