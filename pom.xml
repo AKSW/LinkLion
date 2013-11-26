@@ -12,8 +12,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
       </plugin>
       <plugin>
@@ -106,6 +106,16 @@
   		<groupId>junit</groupId>
   		<artifactId>junit</artifactId>
   		<version>4.11</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>virtuoso.jdbc3</groupId>
+  		<artifactId>virt-jdbc3</artifactId>
+  		<version>3.0</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>virtuoso.jena.driver</groupId>
+  		<artifactId>virt-jena</artifactId>
+  		<version>2.6.2</version>
   	</dependency>
   </dependencies>
   <packaging>war</packaging>
