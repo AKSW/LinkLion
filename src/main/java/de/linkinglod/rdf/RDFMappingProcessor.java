@@ -10,9 +10,11 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 
 import de.linkinglod.io.MappingProcessor;
+import de.linkinglod.service.LLProp;
 import de.linkinglod.util.MD5Utils;
 
 /**
@@ -31,6 +33,18 @@ public class RDFMappingProcessor implements MappingProcessor {
 		// prepare
 		Model modelOut = ModelFactory.createDefaultModel();
 		MD5Utils.reset();
+		String ns = LLProp.getString("ns");
+		String lim = LLProp.getString("delimiter");
+		String vocProp = LLProp.getString("vocabularyProperty");
+		String propString = ns + lim + vocProp + lim;
+		String preMd5 = ns + lim + LLProp.getString("vocabularyLink") + LLProp.getString("fragmentIdentifier");
+		Property propS = ResourceFactory.createProperty(propString + LLProp.getString("subjectAttribute"));
+		Property propP = ResourceFactory.createProperty(propString + LLProp.getString("linkType"));
+		Property propO = ResourceFactory.createProperty(propString + LLProp.getString("objectAttribute"));
+		Property propM = ResourceFactory.createProperty(propString + LLProp.getString("hashMapping"));
+		
+		Resource mapping = ResourceFactory.createResource(preMd5 + "");
+
 		
 		// iterate over statements
 		Iterator<Statement> it = modelIn.listStatements();
@@ -41,8 +55,14 @@ public class RDFMappingProcessor implements MappingProcessor {
 			RDFNode o = statement.getObject();
 
 			String md5 = MD5Utils.computeChecksum(s, p, o);
+			
+			Resource resource = ResourceFactory.createResource(preMd5 + md5);
 
-			// TODO Convert statement.
+			modelOut.add(resource, propS, s)
+				.add(resource, propP, p)
+				.add(resource, propO, o)
+				.add(resource, propM, mapping);
+			
 		}
 		
 		// converted model
