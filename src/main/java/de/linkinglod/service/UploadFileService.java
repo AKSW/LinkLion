@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -24,6 +25,7 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
 import de.linkinglod.io.Reader;
+import de.linkinglod.rdf.RDFMappingProcessor;
 
 
  
@@ -35,8 +37,8 @@ import de.linkinglod.io.Reader;
 public class UploadFileService implements Reader {
 	
 	private String fileLocation = "";
+	private Model modelOut;
 	private static Logger log = LoggerFactory.getLogger(UploadFileService.class);
-	private Model model = ModelFactory.createDefaultModel();
 
 	 
 	/**
@@ -55,7 +57,17 @@ public class UploadFileService implements Reader {
 
 		fileLocation = System.getProperty("java.io.tmpdir") + fileDetail.getFileName();
 		writeToFile(stream, fileLocation);
-		String output = "File written to " + fileLocation;
+		 
+		Model model = read(fileLocation);
+    	System.out.println("generateModelFromStream().isEmpty(): " + model.isEmpty());
+
+    	RDFMappingProcessor processor = new RDFMappingProcessor();
+    	modelOut = processor.transform(model, "owner", new Date());
+
+		String fileOutLocation = System.getProperty("java.io.tmpdir") + fileDetail.getFileName() + "_out";
+		writeOutput(fileOutLocation);
+		
+		String output = "File written to " + fileOutLocation;
  
 		return Response.status(200).entity(output).build();
 	}
@@ -75,15 +87,9 @@ public class UploadFileService implements Reader {
 							 @FormDataParam("file") FormDataContentDisposition fileDetail) 
 									   throws NoSuchAlgorithmException, FileNotFoundException {
 				
-		fileLocation = System.getProperty("java.io.tmpdir") + fileDetail.getFileName();
 		log.debug("File read service triggered!");
-		
-		model = read(fileLocation);
-    	System.out.println("generateModelFromStream().isEmpty(): " + model.isEmpty());
-
-		DataGenerator dataGenerator = new DataGenerator(model);
 		 
-		return Response.status(200).entity("done").build();
+		return Response.status(200).entity("File read service triggered").build();
 	}
  
 	/**
@@ -104,6 +110,13 @@ public class UploadFileService implements Reader {
 			out.write(bytes, 0, read);
 		}
 		out.flush();
+		out.close();
+	}
+
+	private void writeOutput(String fileLocation) throws IOException {
+
+		OutputStream out = new FileOutputStream(new File(fileLocation));
+		modelOut.write(out, LLProp.getString("tripleOutputFormat"));
 		out.close();
 	}
 
@@ -143,11 +156,8 @@ public class UploadFileService implements Reader {
 		return model;
 	}
 
-	public Model getModel() {
-		return model;
+	public Model getModelOut() {
+		return modelOut;
 	}
 
-	public void setModel(Model model) {
-		this.model = model;
-	}
 }
