@@ -39,7 +39,7 @@ public class DataGenerator {
 	
 	public DataGenerator(Model model) throws NoSuchAlgorithmException, IOException {
 		originalModel = model;
-		hashMapping = MD5Utils.computeChecksum();
+		hashMapping = MD5Utils.computeChecksum(LLProp.getString("fileLocation"));
 		transformedModel = processData(originalModel);
 		
 		tsComm = new TripleStoreCommunication(transformedModel);

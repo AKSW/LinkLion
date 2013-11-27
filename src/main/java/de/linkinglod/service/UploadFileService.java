@@ -26,7 +26,7 @@ import com.sun.jersey.multipart.FormDataParam;
 
 import de.linkinglod.io.Reader;
 import de.linkinglod.rdf.RDFMappingProcessor;
-
+import de.linkinglod.db.User;
 
  
 /**
@@ -61,8 +61,9 @@ public class UploadFileService implements Reader {
 		Model model = read(fileLocation);
     	System.out.println("generateModelFromStream().isEmpty(): " + model.isEmpty());
 
-    	RDFMappingProcessor processor = new RDFMappingProcessor();
-    	modelOut = processor.transform(model, "owner", new Date());
+    	RDFMappingProcessor processor = new RDFMappingProcessor(fileLocation);
+    	User demoUser = new User(1, "Demo User"); // TODO next: manage user login
+    	modelOut = processor.transform(model, demoUser, new Date());
 
 		String fileOutLocation = System.getProperty("java.io.tmpdir") + fileDetail.getFileName() + "_out";
 		writeOutput(fileOutLocation);

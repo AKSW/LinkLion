@@ -7,9 +7,11 @@ import java.util.Set;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 
+import de.linkinglod.db.User;
+
 public interface MappingProcessor {
 	
-	Model transform(Model modelIn, String owner, Date timeStamp);
+	Model transform(Model modelIn, User owner, Date timeStamp);
 	
 	Set<Property> getLinkTypes();
 	

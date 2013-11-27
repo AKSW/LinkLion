@@ -15,11 +15,11 @@ import javax.persistence.Table;
 @Table(name="User")
 public class User implements Serializable {
 
-//	public User(long idUser, String name) {
-//		super();
-//		this.idUser = idUser;
-//		this.name = name;
-//	}
+	public User(long idUser, String name) {
+		super();
+		this.idUser = idUser;
+		this.name = name;
+	}
 
 	public User() {
 	}
