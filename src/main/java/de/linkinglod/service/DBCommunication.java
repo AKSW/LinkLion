@@ -25,7 +25,7 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 import de.linkinglod.db.EntityObject;
 import de.linkinglod.db.Link;
-import de.linkinglod.db.Linktype;
+import de.linkinglod.db.LinkType;
 import de.linkinglod.db.Mapping;
 import de.linkinglod.db.User;
 
@@ -65,9 +65,6 @@ public class DBCommunication {
 	    	  //conn = DriverManager.getConnection(server, user, password);
 	    	  conn = DriverManager.getConnection(localServer, user, password);
 	    	  conn.close();
-
-	    	  // work:
-	    	  createUser();
 
 	      } catch (RuntimeException e) {
 	    	  Session session = InitSessionFactory.getInstance().getCurrentSession();
@@ -127,80 +124,99 @@ public class DBCommunication {
 				String p = predicate.toString();
 				String o = object.toString();
 
-				// if o is not ressource, it's maybe only metadata, in the moment this is true for hashMapping
+				// if o is not resource, it's maybe only meta data, in the moment this is true for hashMapping
 				// better: check for #link
 				if (object.isResource()) {
-
-					//TODO how to check if object is already existent
-					//TODO o is not always EntityObject!					
 					//TODO how to get name out of the URI?
 					
 					// which EntityObject is S, P, O in the new Link object
-					// TODO extract to method?
 					if (p.equals(propString + LLProp.getString("subjectAttribute"))) {
-						if (!existsInDb(EntityObject.class, o)) {
-							// o1Id;
+						
+						List<EntityObject> eList = getIdFromDb(EntityObject.class, o);		
+						if (eList.isEmpty()) {
 							linkSubject = createEntityObject(o);
 						}
-					} 
-					else if (p.equals(propString + LLProp.getString("linkType"))) {
-						//TODO performance issue: create local linktype array!?
-						if (!existsInDb(Linktype.class, o)) {
-							// linkType;
-							linkPredicate = createLinktype(o);
+						else {
+							linkSubject = eList.get(0).getIdObject();
 						}
-					} 
+						//System.out.println("DBCommunication.saveModel(): linkSubject: " + linkSubject);
+					}
+					else if (p.equals(propString + LLProp.getString("linkType"))) {
+						//TODO performance issue: create local linkType array!?
+						List<LinkType> ltList = getIdFromDb(LinkType.class, o);
+						if (ltList.isEmpty()) {
+							linkPredicate = createLinkType(o);
+						}
+						else {
+							linkPredicate = ltList.get(0).getIdLinkType();
+						}
+						//System.out.println("DBCommunication.saveModel(): linkPredicate: " + linkPredicate);
+					}
 					else if (p.equals(propString + LLProp.getString("objectAttribute"))) {
-						if (!existsInDb(EntityObject.class, o)) {
-							// o2Id;
+						List<EntityObject> eList = getIdFromDb(EntityObject.class, o);
+						if (eList.isEmpty()) {
 							linkObject = createEntityObject(o);
 						}
+						else {
+							linkObject = eList.get(0).getIdObject();
+						}
+						//System.out.println("DBCommunication.saveModel(): linkObject: " + linkObject);
 					}
 				}
 				
-				// mapping needs to be created only once
-				// hashMapping;
-				//TODO not working here!!!
-
+				// mapping needs to be created only once (per mapping)
 				if (!isMappingCreated) {
 					if (p.equals(propString + LLProp.getString("hashMapping"))) {
-						//TODO extract hash
-						if (!existsInDb(Mapping.class, o)) {
+						//TODO do we need something from the mapping object?
+						List<Mapping> mList = getIdFromDb(Mapping.class, o);
+						if (mList.isEmpty()) {
 							createMapping(o);
+							System.out.println("Mapping created");
 						}
 						isMappingCreated = true;
 					}
 				}
 
-//				hashLink;
 				if (linkSubject != 0 && linkPredicate != 0 && linkObject != 0) {
-					//TODO extract hash
-					if (!existsInDb(Link.class, o)) {
+					System.out.println("nearly created Link()");
+					System.out.println("S: " + linkSubject + " P: " + linkPredicate + " O: " + linkObject);
+
+					List<Link> lList = getIdFromDb(Link.class, s);
+					if (lList.isEmpty()) {
+						//TODO do we need something from the link object?
 						createLink(s, linkSubject, linkPredicate, linkObject);
 					}
+					linkSubject = 0;
+					linkPredicate = 0;
+					linkObject = 0;
 				}
 		}
 	}
 
 	/**
 	 * Get database session and search for string.
-	 * TODO Add (generic) search objects.
-	 * @param <T> only working for EntityObject and Linktype!!
-	 * @param o
+	 * @param <T>
+	 * @param target
 	 * @return
 	 */
-	private <T> boolean existsInDb(Class<T> myClass, String o) {
+	private <T> List<T> getIdFromDb(Class<T> myClass, String target) {
 
 		Session session = InitSessionFactory.getInstance().getCurrentSession();
 		Transaction tx = session.beginTransaction();
 		Criteria criteria = session.createCriteria(myClass);
 		
-		// restrict to column uri, search for the string o
-		criteria.add(Restrictions.eq("uri", o));
-		List<T> result = criteria.list();
-		//System.out.println("getSessionAndSearch(): result.size(): " + result.size());
+		// restrict to column, search for the string target
+		if (myClass.equals(EntityObject.class) || myClass.equals(LinkType.class)) {
+			criteria.add(Restrictions.eq("uri", target));
+		} 
+		else if (myClass.equals(Mapping.class)) {
+			criteria.add(Restrictions.eq("hashMapping", target));
+		}
+		else if (myClass.equals(Link.class)) {
+			criteria.add(Restrictions.eq("hashLink", target));
+		}
 		
-		return !result.isEmpty();
+		return criteria.list();
 	}
 
 	/**
@@ -208,7 +224,7 @@ public class DBCommunication {
 	 * @param uri
 	 * @return Unique ID of the newly generated EntityObject
 	 */
-	private static long createEntityObject(String uri) {
+	private long createEntityObject(String uri) {
 		EntityObject eo = new EntityObject();
 		eo.setUri(uri);
 		
@@ -222,7 +238,7 @@ public class DBCommunication {
 	 * Establish a session to the database and save the (generic) hibernate object.
 	 * @param hibObject
 	 */
-	private static <T> void getSessionAndSave(T hibObject) {
+	private <T> void getSessionAndSave(T hibObject) {
 		Session session = InitSessionFactory.getInstance().getCurrentSession();
 		Transaction tx = session.beginTransaction();
 		session.save(hibObject);
@@ -230,34 +246,31 @@ public class DBCommunication {
 	}
 	
 	/**
-	 * Create a new Linktype with unique ID.
+	 * Create a new LinkType with unique ID.
 	 * @param uri
-	 * @return Unique ID of the newly generated Linktype
+	 * @return Unique ID of the newly generated LinkType
 	 */
-	private static long createLinktype(String uri) {
-		Linktype linktype = new Linktype();
-		linktype.setUri(uri);
+	private long createLinkType(String uri) {
+		LinkType linkType = new LinkType();
+		linkType.setUri(uri);
 		
-		getSessionAndSave(linktype);
+		getSessionAndSave(linkType);
 
-		return linktype.getIdLinktype();
+		return linkType.getIdLinkType();
 	}
 	
 	/**
 	 * test
 	 * @return
 	 */
-	private static User createUser() {
+	private User createUser() {
 		User testUser = new User();
 		
 		long idUser = 4;
 		testUser.setName("forest honey");
 		testUser.setIdUser(idUser);
+		getSessionAndSave(testUser);
 
-		Session session = InitSessionFactory.getInstance().getCurrentSession();
-		Transaction tx = session.beginTransaction();
-		session.save(testUser);
-		tx.commit();
 		return testUser;
 	}
 
@@ -267,8 +280,9 @@ public class DBCommunication {
 	 * @param s
 	 * @param p
 	 * @param o
+	 * @return 
 	 */
-	private void createLink(String hash, long s, long p, long o) {
+	private String createLink(String hash, long s, long p, long o) {
 
 		Link link = new Link();
 
@@ -276,20 +290,28 @@ public class DBCommunication {
 		link.setO1Id(s);
 		link.setO2Id(o);
 		link.setLinkType(p);
+		
+		getSessionAndSave(link);
+		
+		return link.getHashLink();
 	}
 
 	/**
 	 * Create a Mapping object in the database.
-	 * @param hash
+	 * @param hashUrl
+	 * @return 
 	 * @return
 	 */
-	private String createMapping(String hash) {
+	private String createMapping(String hashUrl) {
+		//Jena getLocalName() not working correct with hash
+		//String hash  = hashUrl.substring(hashUrl.lastIndexOf(LLProp.getString("fragmentIdentifier")) + 1);
 
 		Mapping mapping = new Mapping();
-
-		mapping.setHashMapping(hash);
-
-		return hash;
+		mapping.setHashMapping(hashUrl);
+		
+		getSessionAndSave(mapping);
+		
+		return mapping.getHashMapping();
 	}
 
 }

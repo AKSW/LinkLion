@@ -22,7 +22,7 @@
 		<mapping class="de.linkinglod.db.EntityObject" />
 		<mapping class="de.linkinglod.db.Source" />
 		<mapping class="de.linkinglod.db.User" />
-		<mapping class="de.linkinglod.db.Linktype" />
+		<mapping class="de.linkinglod.db.LinkType" />
 		
 	</session-factory>
 </hibernate-configuration>

@@ -10,38 +10,38 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Hibernate class Linktype.
+ * Hibernate class LinkType.
  * @author markus
  *
  */
 @Entity
-@Table(name="Linktype")
-public class Linktype implements Serializable {
+@Table(name="LinkType")
+public class LinkType implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idLinktype", unique = true, nullable = false)
-    private long idLinktype;
+    @Column(name = "idLinkType", unique = true, nullable = false)
+    private long idLinkType;
     @Column(name = "uri", unique = false, nullable = false, length = 100)
     private String uri;
 	
-	public Linktype(long idLinktype, String uri) {
+	public LinkType(long idLinkType, String uri) {
 		super();
-		this.idLinktype = idLinktype;
+		this.idLinkType = idLinkType;
 		this.uri = uri;
 	}
 
-	public Linktype() {
+	public LinkType() {
 	}
 
-	public long getIdLinktype() {
-		return idLinktype;
+	public long getIdLinkType() {
+		return idLinkType;
 	}
 	
-	public void setIdObject(long idLinktype) {
-		this.idLinktype = idLinktype;
+	public void setIdObject(long idLinkType) {
+		this.idLinkType = idLinkType;
 	}
 	
 	public String getUri() {
@@ -51,5 +51,4 @@ public class Linktype implements Serializable {
 	public void setUri(String uri) {
 		this.uri = uri;
 	}
-
 }

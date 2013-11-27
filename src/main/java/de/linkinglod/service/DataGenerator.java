@@ -35,13 +35,16 @@ public class DataGenerator {
     private TripleStoreCommunication tsComm = null;
 	private Model originalModel = null;
     private Model transformedModel = null;
-    private static String hashMapping = null;
+    
+	private static String ns = LLProp.getString("ns");
+	private static String lim = LLProp.getString("delimiter");
+	private static String vocProp = LLProp.getString("vocabularyProperty");
+	private static String propString = ns + lim + vocProp + lim;
 	
 	public DataGenerator(Model model) throws NoSuchAlgorithmException, IOException {
 		originalModel = model;
-		hashMapping = MD5Utils.computeChecksum();
 		transformedModel = processData(originalModel);
-		
+				
 		tsComm = new TripleStoreCommunication(transformedModel);
 		dbComm = new DBCommunication();
 		
@@ -71,13 +74,16 @@ public class DataGenerator {
 	 * TODO How are large amounts of statements performing?
 	 * @param model
 	 * @throws NoSuchAlgorithmException
+	 * @throws IOException 
 	 */
-	public static Model processData(Model model) throws NoSuchAlgorithmException {
+	public static Model processData(Model model) throws NoSuchAlgorithmException, IOException {
 		
 		StmtIterator modelIterator = model.listStatements();
 		List<Statement> listModel = modelIterator.toList();
 		Model convertedModel = ModelFactory.createDefaultModel();
 		MD5Utils.reset();
+		String fileHash = MD5Utils.computeChecksum();
+
 
 		for (Statement statement: listModel) {
 			Resource s = statement.getSubject();     
@@ -86,7 +92,7 @@ public class DataGenerator {
 
 			String md5 = MD5Utils.computeChecksum(s, p, o);
 
-			convertedModel = convertStatement(s, p, o, md5, convertedModel);
+			convertedModel = convertStatement(s, p, o, md5, convertedModel, fileHash);
 		}
 		
 		//convertedModel.write(System.out, "N-TRIPLE");
@@ -100,14 +106,10 @@ public class DataGenerator {
 	 * @param o object of original triple
 	 * @param md5 MD5 hash of concatenated original triple
 	 * @param convertedModel this model is expanded by 4 triples with each line of the original triples
+	 * @param fileHash 
 	 * @return completed and fully converted model
 	 */
-	private static Model convertStatement(Resource s, Property p, RDFNode o, String md5, Model convertedModel) {
-		
-		String ns = LLProp.getString("ns");
-		String lim = LLProp.getString("delimiter");
-		String vocProp = LLProp.getString("vocabularyProperty");
-		String propString = ns + lim + vocProp + lim;
+	private static Model convertStatement(Resource s, Property p, RDFNode o, String md5, Model convertedModel, String fileHash) {
 		
 		Resource resource = ResourceFactory.createResource(ns + lim + 
 														LLProp.getString("vocabularyLink") + 
@@ -117,12 +119,11 @@ public class DataGenerator {
 		Property propP = ResourceFactory.createProperty(propString + LLProp.getString("linkType"));
 		Property propO = ResourceFactory.createProperty(propString + LLProp.getString("objectAttribute"));
 		Property propM = ResourceFactory.createProperty(propString + LLProp.getString("hashMapping"));
-
-		hashMapping = propString 
-				+ LLProp.getString("vocabularyMapping") 
-				+ LLProp.getString("fragmentIdentifier")
-				+ hashMapping;
 		
+		// TODO do this only once!?
+//		System.out.println("hashMapping: " + propString + LLProp.getString("vocabularyMapping") 
+//				+ LLProp.getString("fragmentIdentifier") + fileHash);
+		String hashMapping = propString + LLProp.getString("vocabularyMapping") + LLProp.getString("fragmentIdentifier") + fileHash;
 		convertedModel.add(resource, propS, s)
 				.add(resource, propP, p)
 				.add(resource, propO, o)

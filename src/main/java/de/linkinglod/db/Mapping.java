@@ -31,8 +31,7 @@ public class Mapping implements Serializable {
 	 * @param idOwner
 	 * @param idUploader
 	 */
-	public Mapping(String hashMapping, Timestamp timeGenerated, long idOwner,
-			long idUploader) {
+	public Mapping(String hashMapping, Timestamp timeGenerated, long idOwner, long idUploader) {
 		super();
 		this.hashMapping = hashMapping;
 		this.timeGenerated = timeGenerated;
