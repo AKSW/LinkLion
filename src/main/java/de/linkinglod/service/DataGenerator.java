@@ -60,7 +60,7 @@ public class DataGenerator {
 	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 
-		InputStream stream = generateStreamFromFile(fileLocation);
+		InputStream stream = generateStreamFromFile(LLProp.getString("fileLocation"));
 		System.out.println("Stream generated: ");
 		Model model = generateModelFromStream(stream);
 		System.out.println("Model generated with " + model.size() + " elements.");
@@ -82,7 +82,7 @@ public class DataGenerator {
 		List<Statement> listModel = modelIterator.toList();
 		Model convertedModel = ModelFactory.createDefaultModel();
 		MD5Utils.reset();
-		String fileHash = MD5Utils.computeChecksum();
+		String fileHash = MD5Utils.computeChecksum(fileLocation);
 
 
 		for (Statement statement: listModel) {
@@ -119,7 +119,7 @@ public class DataGenerator {
 		Property propP = ResourceFactory.createProperty(propString + LLProp.getString("linkType"));
 		Property propO = ResourceFactory.createProperty(propString + LLProp.getString("objectAttribute"));
 		Property propM = ResourceFactory.createProperty(propString + LLProp.getString("hashMapping"));
-		
+
 		// TODO do this only once!?
 //		System.out.println("hashMapping: " + propString + LLProp.getString("vocabularyMapping") 
 //				+ LLProp.getString("fragmentIdentifier") + fileHash);
