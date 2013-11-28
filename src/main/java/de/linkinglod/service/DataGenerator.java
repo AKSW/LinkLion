@@ -10,10 +10,13 @@ import java.io.InputStream;
 
 import com.hp.hpl.jena.rdf.model.*;
 
+import de.linkinglod.db.User;
+import de.linkinglod.rdf.RDFMappingProcessor;
 import de.linkinglod.rdf.TripleStoreCommunication;
 import de.linkinglod.util.MD5Utils;
 
 import java.security.*;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -62,8 +65,14 @@ public class DataGenerator {
 
 		InputStream stream = generateStreamFromFile(LLProp.getString("fileLocation"));
 		System.out.println("Stream generated: ");
+		
 		Model model = generateModelFromStream(stream);
 		System.out.println("Model generated with " + model.size() + " elements.");
+		
+//		RDFMappingProcessor mp = new RDFMappingProcessor(LLProp.getString("fileLocation"));
+//    	User demoUser = new User(1, "Demo User"); // TODO next: manage user login
+//    	model = mp.transform(model, demoUser, new Date());
+//    	model.write(System.out, "N-TRIPLE");
 		DataGenerator dataGenerator = new DataGenerator(model);	
 
 		//comm.executeQuery(model, "select * where {?s ?p ?o} limit 10");
@@ -83,54 +92,29 @@ public class DataGenerator {
 		Model convertedModel = ModelFactory.createDefaultModel();
 		MD5Utils.reset();
 		String fileHash = MD5Utils.computeChecksum(fileLocation);
-
-
-		for (Statement statement: listModel) {
-			Resource s = statement.getSubject();     
-			Property p = statement.getPredicate(); 
-			RDFNode o = statement.getObject();
-
-			String md5 = MD5Utils.computeChecksum(s, p, o);
-
-			convertedModel = convertStatement(s, p, o, md5, convertedModel, fileHash);
-		}
-		
-		//convertedModel.write(System.out, "N-TRIPLE");
-		return convertedModel;
-	}
-
-	/**
-	 * Convert a single triple line to the format which is needed in the TripleStore. Each triple gets splitted in at least 4 triples.
-	 * @param s subject of original triple
-	 * @param p predicate of original triple
-	 * @param o object of original triple
-	 * @param md5 MD5 hash of concatenated original triple
-	 * @param convertedModel this model is expanded by 4 triples with each line of the original triples
-	 * @param fileHash 
-	 * @return completed and fully converted model
-	 */
-	private static Model convertStatement(Resource s, Property p, RDFNode o, String md5, Model convertedModel, String fileHash) {
-		
-		Resource resource = ResourceFactory.createResource(ns + lim + 
-														LLProp.getString("vocabularyLink") + 
-														LLProp.getString("fragmentIdentifier") + md5);
+		String hashMapping = propString + LLProp.getString("vocabularyMapping") + LLProp.getString("fragmentIdentifier") + fileHash;
 		
 		Property propS = ResourceFactory.createProperty(propString + LLProp.getString("subjectAttribute"));
 		Property propP = ResourceFactory.createProperty(propString + LLProp.getString("linkType"));
 		Property propO = ResourceFactory.createProperty(propString + LLProp.getString("objectAttribute"));
 		Property propM = ResourceFactory.createProperty(propString + LLProp.getString("hashMapping"));
 
-		// TODO do this only once!?
-//		System.out.println("hashMapping: " + propString + LLProp.getString("vocabularyMapping") 
-//				+ LLProp.getString("fragmentIdentifier") + fileHash);
-		String hashMapping = propString + LLProp.getString("vocabularyMapping") + LLProp.getString("fragmentIdentifier") + fileHash;
-		convertedModel.add(resource, propS, s)
+		for (Statement statement: listModel) {
+			Resource s = statement.getSubject();     
+			Property p = statement.getPredicate(); 
+			RDFNode o = statement.getObject();
+			String md5 = MD5Utils.computeChecksum(s, p, o);
+			Resource resource = ResourceFactory.createResource(ns + lim + 
+					LLProp.getString("vocabularyLink") + 
+					LLProp.getString("fragmentIdentifier") + md5);
+
+			convertedModel.add(resource, propS, s)
 				.add(resource, propP, p)
 				.add(resource, propO, o)
 				.add(resource, propM, hashMapping);
+		}
 		
-		// TODO create mapping information
-		
+		//convertedModel.write(System.out, "N-TRIPLE");
 		return convertedModel;
 	}
 

@@ -42,8 +42,6 @@ public class DBCommunication {
 	private static String server = LLProp.getString("DBCommunication.server");
 	private static String localServer = LLProp.getString("DBCommunication.localServer");
 	
-	private MysqlDataSource dataSource = null;
-
 	/**
 	 * Creates, maintains a database connection to MySQL database.
 	 * TODO support local/remote db connection
@@ -73,47 +71,28 @@ public class DBCommunication {
 	      }
 	}
 
-	private void loadJDBCDriver() {
-		// http://stackoverflow.com/questions/2839321/java-connectivity-with-mysql
-		dataSource = new MysqlDataSource();
-		// TODO set db properties
-	}
-
-	public void obtainConnection() throws SQLException {
-//		Connection conn = dataSource.getConnection();
-		//Statement stmt = conn.createStatement();
-		
-		
-//		ResultSet rs = stmt.executeQuery("SELECT ID FROM USERS");
-//		// 	TODO
-//		rs.close();
-//		stmt.close();
-//		conn.close();
-	}
-
 	/**
-	 * TODO Is Jena Model good to work with here?
 	 * @param dbModel
 	 */
 	public void saveModel(Model jenaModel) {
 		
-		System.out.println("saveModel(): jenaModel.isEmpty(): " + jenaModel.isEmpty());
-		
-		StmtIterator modelIterator = jenaModel.listStatements();
-		List<Statement> listModel = modelIterator.toList();
+		if (jenaModel.isEmpty()) {
+			System.out.println("saveModel(): jenaModel.isEmpty(): " + jenaModel.isEmpty());
+		}
 		
 		long linkSubject = 0;
 		long linkPredicate = 0; 
 		long linkObject = 0;
 		boolean isMappingCreated = false;
-
 		
 		String ns = LLProp.getString("ns");
 		String lim = LLProp.getString("delimiter");
 		String vocProp = LLProp.getString("vocabularyProperty");
 		String propString = ns + lim + vocProp + lim;
+		
+		StmtIterator modelIterator = jenaModel.listStatements();
+		List<Statement> listModel = modelIterator.toList();
 
-		// TODO adapt if there are not only link objects in here
 		for (Statement statement: listModel) {
 
 				// S, P, O of single triple
