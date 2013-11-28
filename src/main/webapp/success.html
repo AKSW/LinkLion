@@ -33,49 +33,8 @@
     </div>
 <div style="padding-top: 100px;">
     <div class="container">
-	<div class="container">
-		<ul class="nav nav-tabs">
-		  <li class="active"><a href="#">Upload mapping</a></li>
-		  <!-- <li><a href="#">View</a></li> -->
-		</ul>
-	  </div>
-	<div class="container" style="padding-top: 20px;">
-	<div class="panel panel-default">
-	  <div class="panel-heading">
-	    <h3 class="panel-title sintony">Configuration</h3>
-	  </div>
-	  <div class="panel-body">
-	  	<form action="rest/file/upload" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-	  
-		<div class="config-item" style="position:relative;">
-			<a class="btn btn-default" href="javascript:;">
-			    Choose N-Triples file...
-			    <input type="file" style='position:absolute;z-index:2;top:0;left:0;filter: alpha(opacity=0);-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";opacity:0;background-color:transparent;color:transparent;' name="file" size="40"  onchange='$("#upload-file-info").html($(this).val()); check();'>
-			</a>
-			&nbsp;
-			<span class='label label-info' id="upload-file-info"></span>
-		</div>
-
-		<div class="config-item btn-group">
-		  <button type="button" class="btn btn-default" id="framework">Select framework</button>
-		  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-		    <span class="caret"></span>
-		    <span class="sr-only">Toggle Dropdown</span>
-		  </button>
-		  <ul class="dropdown-menu" role="menu">
-		    <li><a href="#" onclick='$("#selected-framework").html($(this).html()); check();'>Generic Framework</a></li>
-		  </ul>
-			&nbsp;
-			<span class='label label-info' id="selected-framework"></span>
-		</div>
-		
-		<div class="config-item" style="position:relative;">
-		  <input id="submit-button" disabled="disabled" type="submit" value="Upload mapping" class="btn btn-primary"/>
-		</div>
-		</form>
-	  </div>
-	</div>
-	</div>
+    <h2>Success!</h2>
+    Your mapping file has been uploaded on the triple store. Go back to the <a href="index.html">home page</a> or <a href="http://localhost:8890/sparql">query the triple store</a>.
       <hr>
       <footer>
         <p>Created and maintained by Database Group Leipzig &amp; AKSW, 2013</p>

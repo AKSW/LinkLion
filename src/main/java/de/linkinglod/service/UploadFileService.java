@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
@@ -24,9 +25,10 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
+import de.linkinglod.db.User;
 import de.linkinglod.io.Reader;
 import de.linkinglod.rdf.RDFMappingProcessor;
-import de.linkinglod.db.User;
+import de.linkinglod.rdf.TripleStoreWriter;
 
  
 /**
@@ -47,12 +49,13 @@ public class UploadFileService implements Reader {
 	 * @param fileDetail
 	 * @return
 	 * @throws IOException 
+	 * @throws URISyntaxException 
 	 */
 	@POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadFile(@FormDataParam("file") InputStream stream,
-							   @FormDataParam("file") FormDataContentDisposition fileDetail) throws IOException {
+							   @FormDataParam("file") FormDataContentDisposition fileDetail) throws IOException, URISyntaxException {
 		log.debug("File upload service triggered!");
 
 		fileLocation = System.getProperty("java.io.tmpdir") + fileDetail.getFileName();
@@ -64,13 +67,21 @@ public class UploadFileService implements Reader {
     	RDFMappingProcessor processor = new RDFMappingProcessor(fileLocation);
     	User demoUser = new User(1, "Demo User"); // TODO next: manage user login
     	modelOut = processor.transform(model, demoUser, new Date());
-
+    	
+    	TripleStoreWriter tsw = new TripleStoreWriter();
+    	tsw.write(LLProp.getString("TripleStore.graph"), modelOut);
+    	
 		String fileOutLocation = System.getProperty("java.io.tmpdir") + fileDetail.getFileName() + "_out";
 		writeOutput(fileOutLocation);
 		
-		String output = "File written to " + fileOutLocation;
- 
-		return Response.status(200).entity(output).build();
+		// FIXME Adding this throws an exception, but on line 162. Investigate why.
+//		File f = new File(fileOutLocation);
+//		String fileName = new SimpleDateFormat("yyyy-MM-dd_hhmmss").format(new Date()) + ".ttl";
+//		f.renameTo(new File(System.getProperty("catalina.base") + "/webapps/LinkingLOD-0.0.1-SNAPSHOT/" + fileName));
+//		String output = "<a href='" + fileName + "'>Download turtle file</a>";
+			
+		// TODO change this hack with something else
+		return Response.status(200).entity("<html><head><meta http-equiv='refresh' content='0;url=../../success.html'></head></html>").build();
 	}
 	
 	/**

@@ -1,7 +1,5 @@
 package de.linkinglod.io;
 
-import java.util.Map;
-
 import com.hp.hpl.jena.rdf.model.Model;
 
 /**
@@ -15,5 +13,5 @@ public interface Writer {
 	 * @param m Jena model
 	 * @param parameters Parameters
 	 */
-	void write(String graph, Model m, Map<String, String> parameters);
+	void write(String graph, Model m);
 }

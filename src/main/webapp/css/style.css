@@ -6,3 +6,7 @@
 	font-family: 'Sintony', sans-serif;
 	font-weight: bold;
 }
+
+.config-item {
+	margin: 5px;
+}

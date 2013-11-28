@@ -1,21 +1,13 @@
 package de.linkinglod.rdf;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.datatype.DatatypeFactory;
-
-import org.apache.log4j.helpers.DateTimeDateFormat;
-
-import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -25,11 +17,10 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 
+import de.linkinglod.db.User;
 import de.linkinglod.io.MappingProcessor;
 import de.linkinglod.service.LLProp;
 import de.linkinglod.util.MD5Utils;
-import de.linkinglod.db.Mapping;
-import de.linkinglod.db.User;
 
 /**
  * @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>
