@@ -69,6 +69,7 @@ public class UploadFileService implements Reader {
     	
     	TripleStoreWriter tsw = new TripleStoreWriter();
     	tsw.write(LLProp.getString("TripleStore.graph"), modelOut);
+    	tsw.write(LLProp.getString("TripleStore.graph"), OntologyLoader.getOntModel());
     	
 		String fileOutLocation = System.getProperty("java.io.tmpdir") + fileDetail.getFileName() + "_out";
 		writeOutput(fileOutLocation);

@@ -7,9 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -40,6 +37,7 @@ import de.linkinglod.util.MD5Utils;
  * llalg	http://www.linklion.org/algorithm/				<br/>
  * lldat	http://www.linklion.org/dataset/				<br/>
  * llfw		http://www.linklion.org/framework/				<br/>
+ * llmap	http://www.linklion.org/mapping/				<br/>
  * llver	http://www.linklion.org/version/				<br/>
  * 
  * @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>
@@ -48,20 +46,7 @@ import de.linkinglod.util.MD5Utils;
  */
 public class RDFMappingProcessor implements MappingProcessor {
 	
-	private static Model ontoModel;
-	private static Logger log = LoggerFactory.getLogger(RDFMappingProcessor.class);
-	
 	private String mappingURI;
-
-	static {
-		try {
-			ontoModel = OntologyLoader.load();
-		} catch (IOException e) {
-			log.debug("Missing OWL Ontology!");
-			e.printStackTrace();
-		}
-	}
-	 
 	
 	public RDFMappingProcessor(String file) throws IOException {
 		// TODO: for now, mapping hash is MD5(file_content)
@@ -76,6 +61,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 	public Model transform(Model modelIn, User owner, Date timeStamp) {
 		
 		// prepare
+		Model ontoModel = OntologyLoader.getOntModel();
 		Model modelOut = ModelFactory.createDefaultModel();
 		MD5Utils.reset();
 		String ns = LLProp.getString("ns");
@@ -84,25 +70,32 @@ public class RDFMappingProcessor implements MappingProcessor {
 		// copy prefixes (see class Javadoc above)
 		modelOut.setNsPrefixes(ontoModel.getNsPrefixMap());
 		
+		// load namespaces
+		String rdf = ontoModel.getNsPrefixURI("rdf");
+		String prov = ontoModel.getNsPrefixURI("prov");
+		String llont = ontoModel.getNsPrefixURI("llont");
+		String llalg = ontoModel.getNsPrefixURI("llalg");
+		String lldat = ontoModel.getNsPrefixURI("lldat");
+		
 		// load properties
-		Property propS = ontoModel.getProperty("rdf:subject");
-		Property propP = ontoModel.getProperty("rdf:predicate");
-		Property propO = ontoModel.getProperty("rdf:object");
-		Property propM = ontoModel.getProperty("prov:wasDerivedFrom");
-		Property genAt = ontoModel.getProperty("prov:generatedAtTime");
-		Property wasGenBy = ontoModel.getProperty("prov:wasGeneratedBy");
-		Property hasSource = ontoModel.getProperty("llont:hasSource");
-		Property hasTarget = ontoModel.getProperty("llont:hasTarget");
+		Property propS = ontoModel.getProperty(rdf + "subject");
+		Property propP = ontoModel.getProperty(rdf + "predicate");
+		Property propO = ontoModel.getProperty(rdf + "object");
+		Property propM = ontoModel.getProperty(prov + "wasDerivedFrom");
+		Property genAt = ontoModel.getProperty(prov + "generatedAtTime");
+		Property wasGenBy = ontoModel.getProperty(prov + "wasGeneratedBy");
+		Property hasSource = ontoModel.getProperty(llont + "hasSource");
+		Property hasTarget = ontoModel.getProperty(llont + "hasTarget");
 		
 		// load individuals/literals (for demo only)
-		Resource algorithm = ontoModel.getResource("llalg:GenericAlgorithm");
-		Resource dataset1 = ontoModel.getResource("lldat:GenericDataset-1");
-		Resource dataset2 = ontoModel.getResource("lldat:GenericDataset-2");
+		Resource algorithm = ontoModel.getResource(llalg + "GenericAlgorithm");
+		Resource dataset1 = ontoModel.getResource(lldat + "GenericDataset-1");
+		Resource dataset2 = ontoModel.getResource(lldat + "GenericDataset-2");
 		Literal dateLiteral = modelOut.createTypedLiteral(toXSD(timeStamp), XSDDatatype.XSDdateTime);
 		
 		// load classes
-		Resource mapClass = ontoModel.getResource("llont:Mapping");
-		Resource lnkClass = ontoModel.getResource("llont:Link");
+		Resource mapClass = ontoModel.getResource(llont + "Mapping");
+		Resource lnkClass = ontoModel.getResource(llont + "Link");
 		
 		// create mapping instance of type Mapping
 		Resource mapping = modelOut.createResource(getMappingURI(), mapClass);

@@ -28,6 +28,7 @@
     <Prefix name="void" IRI="http://rdfs.org/ns/void#"/>
     <Prefix name="llalg" IRI="http://www.linklion.org/algorithm/"/>
     <Prefix name="lldat" IRI="http://www.linklion.org/dataset/"/>
+    <Prefix name="llmap" IRI="http://www.linklion.org/mapping/"/>
     <Prefix name="llont" IRI="http://www.linklion.org/ontology#"/>
     <Prefix name="llver" IRI="http://www.linklion.org/version/"/>
     <Prefix name="dcterms" IRI="http://purl.org/dc/terms/"/>

@@ -1,0 +1,23 @@
+/*
+	LOAD PREFIXES FOR VIRTUOSO
+	
+	/path/to/virtuoso-opensource/bin/isql port user password
+	SQL> LOAD /path/to/load-prefixes.isql
+
+*/
+
+DB.DBA.XML_SET_NS_DECL ('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#', 2);
+DB.DBA.XML_SET_NS_DECL ('rdfs', 'http://www.w3.org/2000/01/rdf-schema#', 2);
+DB.DBA.XML_SET_NS_DECL ('owl', 'http://www.w3.org/2002/07/owl#', 2);
+DB.DBA.XML_SET_NS_DECL ('xsd', 'http://www.w3.org/2001/XMLSchema#', 2);
+DB.DBA.XML_SET_NS_DECL ('foaf', 'http://xmlns.com/foaf/0.1/', 2);
+DB.DBA.XML_SET_NS_DECL ('prov', 'http://www.w3.org/ns/prov#', 2);
+DB.DBA.XML_SET_NS_DECL ('void', 'http://rdfs.org/ns/void#', 2);
+DB.DBA.XML_SET_NS_DECL ('doap', 'http://usefulinc.com/ns/doap#', 2);
+DB.DBA.XML_SET_NS_DECL ('dcterms', 'http://purl.org/dc/terms/', 2);
+DB.DBA.XML_SET_NS_DECL ('llont', 'http://www.linklion.org/ontology#', 2);
+DB.DBA.XML_SET_NS_DECL ('lldat', 'http://www.linklion.org/dataset/', 2);
+DB.DBA.XML_SET_NS_DECL ('llfw', 'http://www.linklion.org/framework/', 2);
+DB.DBA.XML_SET_NS_DECL ('llmap', 'http://www.linklion.org/mapping/', 2);
+DB.DBA.XML_SET_NS_DECL ('llver', 'http://www.linklion.org/version/', 2);
+DB.DBA.XML_SET_NS_DECL ('llalg', 'http://www.linklion.org/algorithm/', 2);

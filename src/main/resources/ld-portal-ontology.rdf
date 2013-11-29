@@ -8,6 +8,7 @@
     <!ENTITY foaf "http://xmlns.com/foaf/0.1/" >
     <!ENTITY doap "http://usefulinc.com/ns/doap#" >
     <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY llmap "http://www.linklion.org/mapping/" >
     <!ENTITY lldat "http://www.linklion.org/dataset/" >
     <!ENTITY llver "http://www.linklion.org/version/" >
     <!ENTITY llont "http://www.linklion.org/ontology#" >
@@ -21,6 +22,7 @@
 
 <rdf:RDF xmlns="http://www.w3.org/2002/07/owl#"
      xml:base="http://www.w3.org/2002/07/owl"
+     xmlns:llmap="http://www.linklion.org/mapping/"
      xmlns:prov="http://www.w3.org/ns/prov#"
      xmlns:foaf="http://xmlns.com/foaf/0.1/"
      xmlns:llalg="http://www.linklion.org/algorithm/"
@@ -217,6 +219,13 @@
         <rdfs:subClassOf rdf:resource="&prov;Activity"/>
         <rdfs:subClassOf>
             <Restriction>
+                <onProperty rdf:resource="&prov;wasAssociatedWith"/>
+                <onClass rdf:resource="&llont;LDFrameworkVersion"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
                 <onProperty rdf:resource="&llont;parameters"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
                 <onDataRange rdf:resource="&xsd;string"/>
@@ -234,13 +243,6 @@
                 <onProperty rdf:resource="&prov;generatedAtTime"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
                 <onDataRange rdf:resource="&xsd;dateTime"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&prov;wasAssociatedWith"/>
-                <onClass rdf:resource="&llont;LDFrameworkVersion"/>
-                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
             </Restriction>
         </rdfs:subClassOf>
     </Class>
@@ -302,13 +304,6 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&prov;wasDerivedFrom"/>
-                <onClass rdf:resource="&llont;Mapping"/>
-                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
                 <onProperty rdf:resource="&rdf;subject"/>
                 <onClass rdf:resource="&rdfs;Resource"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
@@ -318,6 +313,13 @@
             <Restriction>
                 <onProperty rdf:resource="&rdf;object"/>
                 <onClass rdf:resource="&rdfs;Resource"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&prov;wasDerivedFrom"/>
+                <onClass rdf:resource="&llont;Mapping"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
             </Restriction>
         </rdfs:subClassOf>
@@ -339,13 +341,6 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&prov;generatedAtTime"/>
-                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
-                <onDataRange rdf:resource="&xsd;dateTime"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
                 <onProperty rdf:resource="&llont;hasTarget"/>
                 <onClass rdf:resource="&void;Dataset"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
@@ -356,6 +351,13 @@
                 <onProperty rdf:resource="&llont;storedAt"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
                 <onDataRange rdf:resource="&xsd;anyURI"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&prov;generatedAtTime"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;dateTime"/>
             </Restriction>
         </rdfs:subClassOf>
     </Class>
