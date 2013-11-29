@@ -1,0 +1,449 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY void "http://rdfs.org/ns/void#" >
+    <!ENTITY dcterms "http://purl.org/dc/terms/" >
+    <!ENTITY prov "http://www.w3.org/ns/prov#" >
+    <!ENTITY foaf "http://xmlns.com/foaf/0.1/" >
+    <!ENTITY doap "http://usefulinc.com/ns/doap#" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY lldat "http://www.linklion.org/dataset/" >
+    <!ENTITY llver "http://www.linklion.org/version/" >
+    <!ENTITY llont "http://www.linklion.org/ontology#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY llalg "http://www.linklion.org/algorithm/" >
+    <!ENTITY llfw "http://www.linklion.org/framework/" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.w3.org/2002/07/owl"
+     xmlns:prov="http://www.w3.org/ns/prov#"
+     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:llalg="http://www.linklion.org/algorithm/"
+     xmlns:void="http://rdfs.org/ns/void#"
+     xmlns:dcterms="http://purl.org/dc/terms/"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:llont="http://www.linklion.org/ontology#"
+     xmlns:lldat="http://www.linklion.org/dataset/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:doap="http://usefulinc.com/ns/doap#"
+     xmlns:llfw="http://www.linklion.org/framework/"
+     xmlns:llver="http://www.linklion.org/version/">
+    <Ontology rdf:about="http://www.linklion.org/ontology">
+        <rdfs:label xml:lang="en">LinkLion - the Link Discovery Portal</rdfs:label>
+        <versionInfo xml:lang="en">0.1</versionInfo>
+        <rdfs:isDefinedBy>http://www.linklion.org/ontology#</rdfs:isDefinedBy>
+    </Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://usefulinc.com/ns/doap#release -->
+
+    <ObjectProperty rdf:about="&doap;release">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+    </ObjectProperty>
+    
+
+
+    <!-- http://www.linklion.org/ontology#hasSource -->
+
+    <ObjectProperty rdf:about="&llont;hasSource">
+        <rdfs:range rdf:resource="&void;Dataset"/>
+        <rdfs:domain rdf:resource="&llont;Mapping"/>
+    </ObjectProperty>
+    
+
+
+    <!-- http://www.linklion.org/ontology#hasTarget -->
+
+    <ObjectProperty rdf:about="&llont;hasTarget">
+        <rdfs:range rdf:resource="&void;Dataset"/>
+        <rdfs:domain rdf:resource="&llont;Mapping"/>
+    </ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/1999/02/22-rdf-syntax-ns#object -->
+
+    <ObjectProperty rdf:about="&rdf;object"/>
+    
+
+
+    <!-- http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate -->
+
+    <ObjectProperty rdf:about="&rdf;predicate"/>
+    
+
+
+    <!-- http://www.w3.org/1999/02/22-rdf-syntax-ns#subject -->
+
+    <ObjectProperty rdf:about="&rdf;subject"/>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#wasAssociatedWith -->
+
+    <ObjectProperty rdf:about="&prov;wasAssociatedWith"/>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#wasDerivedFrom -->
+
+    <ObjectProperty rdf:about="&prov;wasDerivedFrom"/>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#wasGeneratedBy -->
+
+    <ObjectProperty rdf:about="&prov;wasGeneratedBy"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://purl.org/dc/terms/license -->
+
+    <DatatypeProperty rdf:about="&dcterms;license"/>
+    
+
+
+    <!-- http://usefulinc.com/ns/doap#revision -->
+
+    <DatatypeProperty rdf:about="&doap;revision"/>
+    
+
+
+    <!-- http://www.linklion.org/ontology#parameters -->
+
+    <DatatypeProperty rdf:about="&llont;parameters">
+        <rdfs:domain rdf:resource="&llont;Algorithm"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </DatatypeProperty>
+    
+
+
+    <!-- http://www.linklion.org/ontology#storedAt -->
+
+    <DatatypeProperty rdf:about="&llont;storedAt">
+        <rdfs:domain rdf:resource="&llont;Mapping"/>
+        <rdfs:range rdf:resource="&xsd;anyURI"/>
+    </DatatypeProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#generatedAtTime -->
+
+    <DatatypeProperty rdf:about="&prov;generatedAtTime">
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+        <rdfs:domain>
+            <Class>
+                <unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&llont;Algorithm"/>
+                    <rdf:Description rdf:about="&llont;Mapping"/>
+                </unionOf>
+            </Class>
+        </rdfs:domain>
+    </DatatypeProperty>
+    
+
+
+    <!-- http://xmlns.com/foaf/0.1/name -->
+
+    <DatatypeProperty rdf:about="&foaf;name"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://rdfs.org/ns/void#Dataset -->
+
+    <Class rdf:about="&void;Dataset">
+        <rdfs:subClassOf rdf:resource="&prov;Entity"/>
+    </Class>
+    
+
+
+    <!-- http://usefulinc.com/ns/doap#Project -->
+
+    <Class rdf:about="&doap;Project"/>
+    
+
+
+    <!-- http://usefulinc.com/ns/doap#Version -->
+
+    <Class rdf:about="&doap;Version"/>
+    
+
+
+    <!-- http://www.linklion.org/ontology#Algorithm -->
+
+    <Class rdf:about="&llont;Algorithm">
+        <rdfs:label xml:lang="en">Algorithm</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&prov;Activity"/>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&llont;parameters"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;string"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&foaf;name"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;string"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&prov;generatedAtTime"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;dateTime"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&prov;wasAssociatedWith"/>
+                <onClass rdf:resource="&llont;LDFrameworkVersion"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+            </Restriction>
+        </rdfs:subClassOf>
+    </Class>
+    
+
+
+    <!-- http://www.linklion.org/ontology#LDFramework -->
+
+    <Class rdf:about="&llont;LDFramework">
+        <rdfs:label xml:lang="en">Link Discovery Framework</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&doap;Project"/>
+        <rdfs:subClassOf rdf:resource="&prov;Agent"/>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&foaf;name"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;string"/>
+            </Restriction>
+        </rdfs:subClassOf>
+    </Class>
+    
+
+
+    <!-- http://www.linklion.org/ontology#LDFrameworkVersion -->
+
+    <Class rdf:about="&llont;LDFrameworkVersion">
+        <rdfs:label xml:lang="en">Link Discovery Framework Version</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&doap;Version"/>
+        <rdfs:subClassOf rdf:resource="&prov;Agent"/>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&foaf;name"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;string"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&dcterms;license"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;anyURI"/>
+            </Restriction>
+        </rdfs:subClassOf>
+    </Class>
+    
+
+
+    <!-- http://www.linklion.org/ontology#Link -->
+
+    <Class rdf:about="&llont;Link">
+        <rdfs:label xml:lang="en">Link</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&prov;Entity"/>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&rdf;predicate"/>
+                <onClass rdf:resource="&rdfs;Resource"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&prov;wasDerivedFrom"/>
+                <onClass rdf:resource="&llont;Mapping"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&rdf;subject"/>
+                <onClass rdf:resource="&rdfs;Resource"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&rdf;object"/>
+                <onClass rdf:resource="&rdfs;Resource"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+            </Restriction>
+        </rdfs:subClassOf>
+    </Class>
+    
+
+
+    <!-- http://www.linklion.org/ontology#Mapping -->
+
+    <Class rdf:about="&llont;Mapping">
+        <rdfs:label xml:lang="en">Mapping</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&prov;Entity"/>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&llont;hasSource"/>
+                <onClass rdf:resource="&void;Dataset"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&prov;generatedAtTime"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;dateTime"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&llont;hasTarget"/>
+                <onClass rdf:resource="&void;Dataset"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&llont;storedAt"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;anyURI"/>
+            </Restriction>
+        </rdfs:subClassOf>
+    </Class>
+    
+
+
+    <!-- http://www.w3.org/2000/01/rdf-schema#Resource -->
+
+    <Class rdf:about="&rdfs;Resource"/>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Activity -->
+
+    <Class rdf:about="&prov;Activity"/>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Agent -->
+
+    <Class rdf:about="&prov;Agent"/>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Entity -->
+
+    <Class rdf:about="&prov;Entity"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.linklion.org/algorithm/GenericAlgorithm -->
+
+    <NamedIndividual rdf:about="&llalg;GenericAlgorithm">
+        <rdf:type rdf:resource="&llont;Algorithm"/>
+        <prov:generatedAtTime rdf:datatype="&xsd;dateTime">2013-11-29T10:34:44+01:00</prov:generatedAtTime>
+        <foaf:name>Generic Algorithm</foaf:name>
+        <prov:wasAssociatedWith rdf:resource="&llont;GenericFramework-1-0"/>
+    </NamedIndividual>
+    
+
+
+    <!-- http://www.linklion.org/dataset/GenericDataset-1 -->
+
+    <NamedIndividual rdf:about="&lldat;GenericDataset-1">
+        <rdf:type rdf:resource="&void;Dataset"/>
+    </NamedIndividual>
+    
+
+
+    <!-- http://www.linklion.org/dataset/GenericDataset-2 -->
+
+    <NamedIndividual rdf:about="&lldat;GenericDataset-2">
+        <rdf:type rdf:resource="&void;Dataset"/>
+    </NamedIndividual>
+    
+
+
+    <!-- http://www.linklion.org/framework/GenericFramework -->
+
+    <NamedIndividual rdf:about="&llfw;GenericFramework">
+        <rdf:type rdf:resource="&llont;LDFramework"/>
+        <foaf:name>Generic Framework</foaf:name>
+        <doap:release rdf:resource="&llont;GenericFramework-1-0"/>
+    </NamedIndividual>
+    
+
+
+    <!-- http://www.linklion.org/ontology#GenericFramework-1-0 -->
+
+    <NamedIndividual rdf:about="&llont;GenericFramework-1-0">
+        <rdf:type rdf:resource="&llont;LDFrameworkVersion"/>
+        <doap:revision rdf:datatype="&xsd;string">1.0</doap:revision>
+        <dcterms:license rdf:datatype="&xsd;anyURI">http://www.gnu.org/licenses/gpl.html</dcterms:license>
+    </NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+

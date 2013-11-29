@@ -42,7 +42,6 @@ public class UploadFileService implements Reader {
 	private Model modelOut;
 	private static Logger log = LoggerFactory.getLogger(UploadFileService.class);
 
-	 
 	/**
 	 * Upload MULTIPART_FORM_DATA file, save to Java temp directory.
 	 * @param stream

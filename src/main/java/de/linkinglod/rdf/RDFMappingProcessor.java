@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -14,30 +17,59 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 
 import de.linkinglod.db.User;
 import de.linkinglod.io.MappingProcessor;
 import de.linkinglod.service.LLProp;
+import de.linkinglod.service.OntologyLoader;
 import de.linkinglod.util.MD5Utils;
 
 /**
+ * Prefixes are:<br/>
+ * rdf		http://www.w3.org/1999/02/22-rdf-syntax-ns#		<br/>
+ * rdfs		http://www.w3.org/2000/01/rdf-schema#			<br/>
+ * owl		http://www.w3.org/2002/07/owl#					<br/>
+ * xsd		http://www.w3.org/2001/XMLSchema#				<br/>
+ * foaf		http://xmlns.com/foaf/0.1/						<br/>
+ * prov		http://www.w3.org/ns/prov#						<br/>
+ * void		http://rdfs.org/ns/void#						<br/>
+ * doap		http://usefulinc.com/ns/doap#					<br/>
+ * dcterms	http://purl.org/dc/terms/						<br/>
+ * llont	http://www.linklion.org/ontology#				<br/>
+ * llalg	http://www.linklion.org/algorithm/				<br/>
+ * lldat	http://www.linklion.org/dataset/				<br/>
+ * llfw		http://www.linklion.org/framework/				<br/>
+ * llver	http://www.linklion.org/version/				<br/>
+ * 
  * @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>
  * @author Markus Nentwig
  *
  */
 public class RDFMappingProcessor implements MappingProcessor {
 	
-	String mappingURI;
+	private static Model ontoModel;
+	private static Logger log = LoggerFactory.getLogger(RDFMappingProcessor.class);
+	
+	private String mappingURI;
+
+	static {
+		try {
+			ontoModel = OntologyLoader.load();
+		} catch (IOException e) {
+			log.debug("Missing OWL Ontology!");
+			e.printStackTrace();
+		}
+	}
+	 
 	
 	public RDFMappingProcessor(String file) throws IOException {
 		// TODO: for now, mapping hash is MD5(file_content)
 		String hash = MD5Utils.computeChecksum(file);
 		String ns = LLProp.getString("ns");
 		String lim = LLProp.getString("delimiter");
-		String vocProp = LLProp.getString("vocabularyLink");
-		mappingURI = ns + lim + vocProp + lim + hash;
+		String vocMap = LLProp.getString("vocabularyMapping");
+		mappingURI = ns + lim + vocMap + lim + hash;
 	}
 
 	@Override
@@ -48,50 +80,43 @@ public class RDFMappingProcessor implements MappingProcessor {
 		MD5Utils.reset();
 		String ns = LLProp.getString("ns");
 		String lim = LLProp.getString("delimiter");
-		String fi = LLProp.getString("fragmentIdentifier");
-		String vocOnt = LLProp.getString("vocabularyOntology");
-		String vocProp = LLProp.getString("vocabularyProperty");
-		String vocAlg = LLProp.getString("vocabularyOntology");
-		String vocFw = LLProp.getString("vocabularyFramework");
-		String vocVer = LLProp.getString("vocabularyVersion");
-		String ontString = ns + lim + vocOnt + fi;
-		String propString = ns + lim + vocProp + lim;
-		String algString = ns + lim + vocAlg + lim;
-		String fwString = ns + lim + vocFw + lim;
-		String verString = ns + lim + vocVer + lim;
-		String preMd5 = ns + lim + LLProp.getString("vocabularyLink") + fi;
-		Property propS = ResourceFactory.createProperty(propString + LLProp.getString("subjectAttribute"));
-		Property propP = ResourceFactory.createProperty(propString + LLProp.getString("linkType"));
-		Property propO = ResourceFactory.createProperty(propString + LLProp.getString("objectAttribute"));
-		Property propM = ResourceFactory.createProperty(propString + LLProp.getString("hashMapping"));
 		
-		// TODO load OWL ontology
-		Resource mapping = modelOut.createResource(getMappingURI(), ResourceFactory.createResource(ontString + "Mapping"));
-		Resource algorithm = modelOut.createResource(algString + "GenericAlgorithm", ResourceFactory.createResource(ontString + "Algorithm"));
-		Resource versionedLDF = modelOut.createResource(fwString + "GenericFramework1-0", ResourceFactory.createResource(ontString + "VersionedLinkDiscoveryFramework"));
-		Resource version = modelOut.createResource(verString + "GenericFrameworkVersion1-0", ResourceFactory.createResource("http://usefulinc.com/ns/doap#Version"));
-		Resource theLDF = modelOut.createResource(fwString + "GenericFramework", ResourceFactory.createResource(ontString + "LinkDiscoveryFramework"));
+		// copy prefixes (see class Javadoc above)
+		modelOut.setNsPrefixes(ontoModel.getNsPrefixMap());
 		
-		Property genAt = ResourceFactory.createProperty("http://www.w3.org/ns/prov#generatedAtTime");
+		// load properties
+		Property propS = ontoModel.getProperty("rdf:subject");
+		Property propP = ontoModel.getProperty("rdf:predicate");
+		Property propO = ontoModel.getProperty("rdf:object");
+		Property propM = ontoModel.getProperty("prov:wasDerivedFrom");
+		Property genAt = ontoModel.getProperty("prov:generatedAtTime");
+		Property wasGenBy = ontoModel.getProperty("prov:wasGeneratedBy");
+		Property hasSource = ontoModel.getProperty("llont:hasSource");
+		Property hasTarget = ontoModel.getProperty("llont:hasTarget");
+		
+		// load individuals/literals (for demo only)
+		Resource algorithm = ontoModel.getResource("llalg:GenericAlgorithm");
+		Resource dataset1 = ontoModel.getResource("lldat:GenericDataset-1");
+		Resource dataset2 = ontoModel.getResource("lldat:GenericDataset-2");
 		Literal dateLiteral = modelOut.createTypedLiteral(toXSD(timeStamp), XSDDatatype.XSDdateTime);
-		Property wasGenBy = ResourceFactory.createProperty(propString + "wasGeneratedBy");
-		Property wasAssoc = ResourceFactory.createProperty(propString + "wasAssociatedWith");
-		Property isVers = ResourceFactory.createProperty(propString + "isVersionOf");
-		Property name = ResourceFactory.createProperty("http://xmlns.com/foaf/0.1/name");
-		Property release = ResourceFactory.createProperty("http://usefulinc.com/ns/doap#release");
-		Property revision = ResourceFactory.createProperty("http://usefulinc.com/ns/doap#revision");
 		
+		// load classes
+		Resource mapClass = ontoModel.getResource("llont:Mapping");
+		Resource lnkClass = ontoModel.getResource("llont:Link");
+		
+		// create mapping instance of type Mapping
+		Resource mapping = modelOut.createResource(getMappingURI(), mapClass);
+
+		// add mapping properties
 		modelOut.add(mapping, genAt, dateLiteral)
 			.add(mapping, wasGenBy, algorithm)
-			.add(algorithm, name, "Generic Algorithm")
-			.add(algorithm, genAt, dateLiteral)
-			.add(algorithm, wasAssoc, versionedLDF)
-			.add(versionedLDF, isVers, theLDF)
-			.add(versionedLDF, release, version)
-			.add(theLDF, name, "Generic Framework 1.0")
-			.add(version, revision, "1.0");
-		
-		// iterate over statements
+			.add(mapping, hasSource, dataset1)
+			.add(mapping, hasTarget, dataset2);
+
+		// link namespace
+		String lnkString = ns + lim + LLProp.getString("vocabularyLink") + lim;
+
+		// iterate over statements, reify and add to model
 		Iterator<Statement> it = modelIn.listStatements();
 		while(it.hasNext()) {
 			Statement statement = it.next();
@@ -99,15 +124,14 @@ public class RDFMappingProcessor implements MappingProcessor {
 			Property p = statement.getPredicate(); 
 			RDFNode o = statement.getObject();
 
-			String md5 = MD5Utils.computeChecksum(s, p, o);
+			String linkMD5 = MD5Utils.computeChecksum(s, p, o);
 			
-			Resource resource = ResourceFactory.createResource(preMd5 + md5);
+			Resource link = modelOut.createResource(lnkString + linkMD5, lnkClass);
 
-			modelOut.add(resource, propS, s)
-				.add(resource, propP, p)
-				.add(resource, propO, o)
-				.add(resource, propM, mapping);
-			
+			modelOut.add(link, propS, s)
+				.add(link, propP, p)
+				.add(link, propO, o)
+				.add(link, propM, mapping);
 		}
 		
 		// converted model
@@ -144,8 +168,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 
 	@Override
 	public String getMappingURI() {
-		// TODO Auto-generated method stub
-		return null;
+		return mappingURI;
 	}
 
 }
