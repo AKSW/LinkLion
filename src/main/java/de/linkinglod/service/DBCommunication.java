@@ -27,14 +27,16 @@ import de.linkinglod.db.EntityObject;
 import de.linkinglod.db.Link;
 import de.linkinglod.db.LinkType;
 import de.linkinglod.db.Mapping;
+import de.linkinglod.db.Source;
 import de.linkinglod.db.User;
+import de.linkinglod.io.Writer;
 
 /**
  * @author markus
  * Connection to remote mysql database needs access for the machine from where access is requested! 
  * Better seems: Only localhost access to database! --> testing on localhost
  */
-public class DBCommunication {
+public class DBCommunication implements Writer {
 	
 	private static Logger log = LoggerFactory.getLogger(DBCommunication.class);
 	private static String user = LLProp.getString("DBCommunication.user");
@@ -74,78 +76,93 @@ public class DBCommunication {
 	/**
 	 * @param dbModel
 	 */
-	public void saveModel(Model jenaModel) {
+	@Override
+	public void write(String graph, Model jenaModel) {
 		
 		if (jenaModel.isEmpty()) {
 			System.out.println("saveModel(): jenaModel.isEmpty(): " + jenaModel.isEmpty());
+			return;
 		}
 		
 		long linkSubject = 0;
 		long linkPredicate = 0; 
 		long linkObject = 0;
 		boolean isMappingCreated = false;
+				
+		Model ontoModel = OntologyLoader.getOntModel();
 		
-		String ns = LLProp.getString("ns");
-		String lim = LLProp.getString("delimiter");
-		String vocProp = LLProp.getString("vocabularyProperty");
-		String propString = ns + lim + vocProp + lim;
+		// load namespaces
+		String rdf = ontoModel.getNsPrefixURI("rdf");
+		String prov = ontoModel.getNsPrefixURI("prov");
+		String llont = ontoModel.getNsPrefixURI("llont");
+		String llalg = ontoModel.getNsPrefixURI("llalg");
+		String lldat = ontoModel.getNsPrefixURI("lldat");
+		
+		// load properties
+		Property propSubject = ontoModel.getProperty(rdf + "subject");
+		Property propPredicate = ontoModel.getProperty(rdf + "predicate");
+		Property propObject = ontoModel.getProperty(rdf + "object");
+		Property propMapping = ontoModel.getProperty(prov + "wasDerivedFrom");
+		Property genAt = ontoModel.getProperty(prov + "generatedAtTime");
+		Property wasGenBy = ontoModel.getProperty(prov + "wasGeneratedBy");
+		Property hasSource = ontoModel.getProperty(llont + "hasSource");
+		Property hasTarget = ontoModel.getProperty(llont + "hasTarget");
 		
 		StmtIterator modelIterator = jenaModel.listStatements();
 		List<Statement> listModel = modelIterator.toList();
 
 		for (Statement statement: listModel) {
 
-				// S, P, O of single triple
-				Resource subject = statement.getSubject();     
-				Property predicate = statement.getPredicate(); 
-				RDFNode object = statement.getObject();
-				String s = subject.toString();
-				String p = predicate.toString();
-				String o = object.toString();
+			// S, P, O of single triple
+			Resource subject = statement.getSubject();     
+			Property predicate = statement.getPredicate(); 
+			RDFNode object = statement.getObject();
+			String s = subject.toString();
+			String p = predicate.toString();
+			String o = object.toString();
 
-				// if o is not resource, it's maybe only meta data, in the moment this is true for hashMapping
-				// better: check for #link
-				if (object.isResource()) {
-					//TODO how to get name out of the URI?
-					
-					// which EntityObject is S, P, O in the new Link object
-					if (p.equals(propString + LLProp.getString("subjectAttribute"))) {
-						
-						List<EntityObject> eList = getIdFromDb(EntityObject.class, o);		
-						if (eList.isEmpty()) {
-							linkSubject = createEntityObject(o);
-						}
-						else {
-							linkSubject = eList.get(0).getIdObject();
-						}
-						//System.out.println("DBCommunication.saveModel(): linkSubject: " + linkSubject);
+			// if o is not resource, it's maybe only meta data, in the moment this is true for hashMapping
+			// better: check for #link
+			if (object.isResource()) {
+				//TODO how to get name out of the URI?
+
+				// which EntityObject is S, P, O in the new Link object
+				if (p.equals(propSubject.toString())) {
+
+					List<EntityObject> eList = getIdFromDb(EntityObject.class, o);		
+					if (eList.isEmpty()) {
+						linkSubject = createEntityObject(o);
 					}
-					else if (p.equals(propString + LLProp.getString("linkType"))) {
-						//TODO performance issue: create local linkType array!?
-						List<LinkType> ltList = getIdFromDb(LinkType.class, o);
-						if (ltList.isEmpty()) {
-							linkPredicate = createLinkType(o);
-						}
-						else {
-							linkPredicate = ltList.get(0).getIdLinkType();
-						}
-						//System.out.println("DBCommunication.saveModel(): linkPredicate: " + linkPredicate);
+					else {
+						linkSubject = eList.get(0).getIdObject();
 					}
-					else if (p.equals(propString + LLProp.getString("objectAttribute"))) {
-						List<EntityObject> eList = getIdFromDb(EntityObject.class, o);
-						if (eList.isEmpty()) {
-							linkObject = createEntityObject(o);
-						}
-						else {
-							linkObject = eList.get(0).getIdObject();
-						}
-						//System.out.println("DBCommunication.saveModel(): linkObject: " + linkObject);
-					}
+					//System.out.println("DBCommunication.saveModel(): linkSubject: " + linkSubject);
 				}
-				
+				else if (p.equals(propPredicate.toString())) {
+					//TODO performance issue: create local linkType array!?
+					List<LinkType> ltList = getIdFromDb(LinkType.class, o);
+					if (ltList.isEmpty()) {
+						linkPredicate = createLinkType(o);
+					}
+					else {
+						linkPredicate = ltList.get(0).getIdLinkType();
+					}
+					//System.out.println("DBCommunication.saveModel(): linkPredicate: " + linkPredicate);
+				}
+				else if (p.equals(propObject.toString())) {
+					List<EntityObject> eList = getIdFromDb(EntityObject.class, o);
+					if (eList.isEmpty()) {
+						linkObject = createEntityObject(o);
+					}
+					else {
+						linkObject = eList.get(0).getIdObject();
+					}
+					//System.out.println("DBCommunication.saveModel(): linkObject: " + linkObject);
+				}
+
 				// mapping needs to be created only once (per mapping)
 				if (!isMappingCreated) {
-					if (p.equals(propString + LLProp.getString("hashMapping"))) {
+					if (p.equals(propMapping.toString())) {
 						//TODO do we need something from the mapping object?
 						List<Mapping> mList = getIdFromDb(Mapping.class, o);
 						if (mList.isEmpty()) {
@@ -169,7 +186,25 @@ public class DBCommunication {
 					linkPredicate = 0;
 					linkObject = 0;
 				}
+				
+				if (p.equals(hasSource.toString()) || p.equals(hasTarget.toString())) {
+					List<Source> sList = getIdFromDb(Source.class, o);
+					if (sList.isEmpty()) {
+						createSource(o);
+						// TODO create MappingHasSource?
+					}
+				}
+				// TODO User
+				// TODO Framework
+			}
 		}
+	}
+
+	private void createSource(String uri) {
+		Source source = new Source();
+		source.setUri(uri);
+		
+		getSessionAndSave(source);	
 	}
 
 	/**
@@ -185,7 +220,7 @@ public class DBCommunication {
 		Criteria criteria = session.createCriteria(myClass);
 		
 		// restrict to column, search for the string target
-		if (myClass.equals(EntityObject.class) || myClass.equals(LinkType.class)) {
+		if (myClass.equals(EntityObject.class) || myClass.equals(LinkType.class) || myClass.equals(Source.class)) {
 			criteria.add(Restrictions.eq("uri", target));
 		} 
 		else if (myClass.equals(Mapping.class)) {
@@ -245,8 +280,8 @@ public class DBCommunication {
 	private User createUser() {
 		User testUser = new User();
 		
-		long idUser = 4;
-		testUser.setName("forest honey");
+		long idUser = 3;
+		testUser.setName("foo bar");
 		testUser.setIdUser(idUser);
 		getSessionAndSave(testUser);
 
@@ -292,5 +327,4 @@ public class DBCommunication {
 		
 		return mapping.getHashMapping();
 	}
-
 }

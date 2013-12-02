@@ -62,14 +62,19 @@ public class UploadFileService implements Reader {
 		 
 		Model model = read(fileLocation);
     	System.out.println("generateModelFromStream().isEmpty(): " + model.isEmpty());
-
+    	
     	RDFMappingProcessor processor = new RDFMappingProcessor(fileLocation);
+    	
     	User demoUser = new User(1, "Demo User"); // TODO next: manage user login
     	modelOut = processor.transform(model, demoUser, new Date());
     	
     	TripleStoreWriter tsw = new TripleStoreWriter();
     	tsw.write(LLProp.getString("TripleStore.graph"), modelOut);
     	tsw.write(LLProp.getString("TripleStore.graph"), OntologyLoader.getOntModel());
+    	
+    	DBCommunication dbComm = new DBCommunication();
+    	dbComm.write("TripleStore.graph", modelOut);
+    	dbComm.write("TripleStore.graph", OntologyLoader.getOntModel());
     	
 		String fileOutLocation = System.getProperty("java.io.tmpdir") + fileDetail.getFileName() + "_out";
 		writeOutput(fileOutLocation);

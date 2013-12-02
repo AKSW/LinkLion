@@ -1,10 +1,7 @@
 package de.linkinglod.service;
 
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -35,7 +32,6 @@ public class DataGenerator {
 	private static Logger log = LoggerFactory.getLogger(DataGenerator.class);
 
     private DBCommunication dbComm = null;
-    private TripleStoreCommunication tsComm = null;
 	private Model originalModel = null;
     private Model transformedModel = null;
     
@@ -45,14 +41,12 @@ public class DataGenerator {
 	private static String propString = ns + lim + vocProp + lim;
 	
 	public DataGenerator(Model model) throws NoSuchAlgorithmException, IOException {
-		originalModel = model;
-		transformedModel = processData(originalModel);
-				
-		tsComm = new TripleStoreCommunication(transformedModel);
-		dbComm = new DBCommunication();
-		
-		tsComm.saveModel(transformedModel);
-		dbComm.saveModel(transformedModel);
+//		originalModel = model;
+//		transformedModel = processData(originalModel);
+//				
+//		dbComm = new DBCommunication();
+//		
+//		dbComm.write("foo", transformedModel);
 	}
 
 	/**
@@ -69,13 +63,10 @@ public class DataGenerator {
 		Model model = generateModelFromStream(stream);
 		System.out.println("Model generated with " + model.size() + " elements.");
 		
-//		RDFMappingProcessor mp = new RDFMappingProcessor(LLProp.getString("fileLocation"));
-//    	User demoUser = new User(1, "Demo User"); // TODO next: manage user login
-//    	model = mp.transform(model, demoUser, new Date());
-//    	model.write(System.out, "N-TRIPLE");
-		DataGenerator dataGenerator = new DataGenerator(model);	
-
-		//comm.executeQuery(model, "select * where {?s ?p ?o} limit 10");
+		RDFMappingProcessor mappingProcessor = new RDFMappingProcessor(LLProp.getString("fileLocation"));
+    	User demoUser = new User(1, "Demo User"); // TODO next: manage user login
+    	model = mappingProcessor.transform(model, demoUser, new Date());
+    	model.write(System.out, "N-TRIPLE");
 	}
 
 	/**
@@ -85,55 +76,38 @@ public class DataGenerator {
 	 * @throws NoSuchAlgorithmException
 	 * @throws IOException 
 	 */
-	public static Model processData(Model model) throws NoSuchAlgorithmException, IOException {
-		
-		StmtIterator modelIterator = model.listStatements();
-		List<Statement> listModel = modelIterator.toList();
-		Model convertedModel = ModelFactory.createDefaultModel();
-		MD5Utils.reset();
-		String fileHash = MD5Utils.computeChecksum(fileLocation);
-		String hashMapping = propString + LLProp.getString("vocabularyMapping") + LLProp.getString("fragmentIdentifier") + fileHash;
-		
-		Property propS = ResourceFactory.createProperty(propString + LLProp.getString("subjectAttribute"));
-		Property propP = ResourceFactory.createProperty(propString + LLProp.getString("linkType"));
-		Property propO = ResourceFactory.createProperty(propString + LLProp.getString("objectAttribute"));
-		Property propM = ResourceFactory.createProperty(propString + LLProp.getString("hashMapping"));
-
-		for (Statement statement: listModel) {
-			Resource s = statement.getSubject();     
-			Property p = statement.getPredicate(); 
-			RDFNode o = statement.getObject();
-			String md5 = MD5Utils.computeChecksum(s, p, o);
-			Resource resource = ResourceFactory.createResource(ns + lim + 
-					LLProp.getString("vocabularyLink") + 
-					LLProp.getString("fragmentIdentifier") + md5);
-
-			convertedModel.add(resource, propS, s)
-				.add(resource, propP, p)
-				.add(resource, propO, o)
-				.add(resource, propM, hashMapping);
-		}
-		
-		//convertedModel.write(System.out, "N-TRIPLE");
-		return convertedModel;
-	}
-
-	private void addStatementsToFile(Model model) throws IOException {
-		// convertedModel.write(System.out, "N-TRIPLE");
-		String outFileString = fileLocation + ".out";
-		File outFile = new File(outFileString);
-
-		boolean doAppend = false;
-		if (outFile.exists()) {
-			doAppend = true;
-		}
-		
-		FileWriter outFileWriter = new FileWriter(outFileString, doAppend);
-		BufferedWriter outBuffer = new BufferedWriter(outFileWriter);
-
-		model.write(outBuffer, LLProp.getString("tripleOutputFormat")); //$NON-NLS-1$
-		outBuffer.close();
-	}
+//	public static Model processData(Model model) throws NoSuchAlgorithmException, IOException {
+//		
+//		StmtIterator modelIterator = model.listStatements();
+//		List<Statement> listModel = modelIterator.toList();
+//		Model convertedModel = ModelFactory.createDefaultModel();
+//		MD5Utils.reset();
+//		String fileHash = MD5Utils.computeChecksum(fileLocation);
+//		String hashMapping = propString + LLProp.getString("vocabularyMapping") + LLProp.getString("fragmentIdentifier") + fileHash;
+//		
+//		Property propS = ResourceFactory.createProperty(propString + LLProp.getString("subjectAttribute"));
+//		Property propP = ResourceFactory.createProperty(propString + LLProp.getString("linkType"));
+//		Property propO = ResourceFactory.createProperty(propString + LLProp.getString("objectAttribute"));
+//		Property propM = ResourceFactory.createProperty(propString + LLProp.getString("hashMapping"));
+//
+//		for (Statement statement: listModel) {
+//			Resource s = statement.getSubject();     
+//			Property p = statement.getPredicate(); 
+//			RDFNode o = statement.getObject();
+//			String md5 = MD5Utils.computeChecksum(s, p, o);
+//			Resource resource = ResourceFactory.createResource(ns + lim + 
+//					LLProp.getString("vocabularyLink") + 
+//					LLProp.getString("fragmentIdentifier") + md5);
+//
+//			convertedModel.add(resource, propS, s)
+//				.add(resource, propP, p)
+//				.add(resource, propO, o)
+//				.add(resource, propM, hashMapping);
+//		}
+//		
+//		//convertedModel.write(System.out, "N-TRIPLE");
+//		return convertedModel;
+//	}
 	
 	/**
 	 * Generate an InputStream from the file.

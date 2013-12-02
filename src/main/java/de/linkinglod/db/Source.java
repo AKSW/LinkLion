@@ -2,7 +2,10 @@ package de.linkinglod.db;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -15,6 +18,18 @@ import javax.persistence.Table;
 @Table(name="Source")
 public class Source implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idSource", unique = true, nullable = false)
+	private long idSource;
+	private String name;
+	// TODO change if source gets more complex than uri
+    @Column(name = "uri", unique = true, nullable = false, length = 100)
+	private String uri;
+	private String domain;
+	private String lastVersion;
+	
 	public Source(long idSource, String name, String uri, String domain,
 			String lastVersion) {
 		super();
@@ -24,15 +39,11 @@ public class Source implements Serializable {
 		this.domain = domain;
 		this.lastVersion = lastVersion;
 	}
-
-	private static final long serialVersionUID = 1L;
-	private long idSource;
-	private String name;
-	private String uri;
-	private String domain;
-	private String lastVersion;
 	
-	@Id
+	public Source() {
+		
+	}
+	
 	public long getIdSource() {
 		return idSource;
 	}
