@@ -19,26 +19,15 @@ public class Mapping implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	@Id
-    @Column(name = "hashMapping", unique = true, nullable = false, length = 32)
+    @Column(name = "hashMapping", unique = true, nullable = false, length = 132)
 	private String hashMapping;
 	private Timestamp timeGenerated;
 	private long idOwner;
 	private long idUploader;
 	
 	/**
-	 * @param hashMapping
-	 * @param timeGenerated
-	 * @param idOwner
-	 * @param idUploader
+	 *  Create a Mapping hibernate object.
 	 */
-	public Mapping(String hashMapping, Timestamp timeGenerated, long idOwner, long idUploader) {
-		super();
-		this.hashMapping = hashMapping;
-		this.timeGenerated = timeGenerated;
-		this.idOwner = idOwner;
-		this.idUploader = idUploader;
-	}
-	
 	public Mapping() {
 	}
 	
@@ -72,12 +61,4 @@ public class Mapping implements Serializable {
 	public void setIdUploader(long idUploader) {
 		this.idUploader = idUploader;
 	}
-	
-	// interesting?
-//	java.util.Date dt = new java.util.Date();
-//
-//	java.text.SimpleDateFormat sdf = 
-//	     new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//
-//	String currentTime = sdf.format(dt);	
 }

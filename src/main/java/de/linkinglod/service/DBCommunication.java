@@ -4,6 +4,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
+import de.linkinglod.db.Algorithm;
 import de.linkinglod.db.EntityObject;
 import de.linkinglod.db.Link;
 import de.linkinglod.db.LinkType;
@@ -44,11 +46,31 @@ public class DBCommunication implements Writer {
 	private static String server = LLProp.getString("DBCommunication.server");
 	private static String localServer = LLProp.getString("DBCommunication.localServer");
 	
+	private Model ontoModel = OntologyLoader.getOntModel();
+
+	// load namespaces
+	private String rdf = ontoModel.getNsPrefixURI("rdf");
+	private String prov = ontoModel.getNsPrefixURI("prov");
+	private String llont = ontoModel.getNsPrefixURI("llont");
+	private String llalg = ontoModel.getNsPrefixURI("llalg");
+	private String lldat = ontoModel.getNsPrefixURI("lldat");
+
+	// load properties
+	private Property propSubject = ontoModel.getProperty(rdf + "subject");
+	private Property propPredicate = ontoModel.getProperty(rdf + "predicate");
+	private Property propObject = ontoModel.getProperty(rdf + "object");
+	private Property wasDerivedFrom = ontoModel.getProperty(prov + "wasDerivedFrom");
+	private Property generatedAtTime = ontoModel.getProperty(prov + "generatedAtTime");
+	private Property wasGeneratedBy = ontoModel.getProperty(prov + "wasGeneratedBy");
+	private Property hasSource = ontoModel.getProperty(llont + "hasSource");
+	private Property hasTarget = ontoModel.getProperty(llont + "hasTarget");
+	
 	/**
 	 * Creates, maintains a database connection to MySQL database.
 	 * TODO support local/remote db connection
 	 */
 	public DBCommunication() {
+
 	}
 	
 	/**
@@ -78,36 +100,18 @@ public class DBCommunication implements Writer {
 	 */
 	@Override
 	public void write(String graph, Model jenaModel) {
-		
+
 		if (jenaModel.isEmpty()) {
 			System.out.println("saveModel(): jenaModel.isEmpty(): " + jenaModel.isEmpty());
 			return;
 		}
-		
+
 		long linkSubject = 0;
 		long linkPredicate = 0; 
 		long linkObject = 0;
 		boolean isMappingCreated = false;
-				
-		Model ontoModel = OntologyLoader.getOntModel();
-		
-		// load namespaces
-		String rdf = ontoModel.getNsPrefixURI("rdf");
-		String prov = ontoModel.getNsPrefixURI("prov");
-		String llont = ontoModel.getNsPrefixURI("llont");
-		String llalg = ontoModel.getNsPrefixURI("llalg");
-		String lldat = ontoModel.getNsPrefixURI("lldat");
-		
-		// load properties
-		Property propSubject = ontoModel.getProperty(rdf + "subject");
-		Property propPredicate = ontoModel.getProperty(rdf + "predicate");
-		Property propObject = ontoModel.getProperty(rdf + "object");
-		Property propMapping = ontoModel.getProperty(prov + "wasDerivedFrom");
-		Property genAt = ontoModel.getProperty(prov + "generatedAtTime");
-		Property wasGenBy = ontoModel.getProperty(prov + "wasGeneratedBy");
-		Property hasSource = ontoModel.getProperty(llont + "hasSource");
-		Property hasTarget = ontoModel.getProperty(llont + "hasTarget");
-		
+		String hashMappingUrl = "";
+
 		StmtIterator modelIterator = jenaModel.listStatements();
 		List<Statement> listModel = modelIterator.toList();
 
@@ -121,83 +125,123 @@ public class DBCommunication implements Writer {
 			String p = predicate.toString();
 			String o = object.toString();
 
-			// if o is not resource, it's maybe only meta data, in the moment this is true for hashMapping
-			// better: check for #link
-			if (object.isResource()) {
-				//TODO how to get name out of the URI?
-
-				// which EntityObject is S, P, O in the new Link object
-				if (p.equals(propSubject.toString())) {
-
-					List<EntityObject> eList = getIdFromDb(EntityObject.class, o);		
-					if (eList.isEmpty()) {
-						linkSubject = createEntityObject(o);
+			// isMappingCreated ensures no unneeded DB query at this point
+			if (!isMappingCreated) {
+				if (p.equals(wasDerivedFrom.toString())) {
+					List<Mapping> mList = getIdFromDb(Mapping.class, o);
+					
+					if (mList.isEmpty()) {
+						hashMappingUrl = createMapping(o);
 					}
-					else {
-						linkSubject = eList.get(0).getIdObject();
-					}
-					//System.out.println("DBCommunication.saveModel(): linkSubject: " + linkSubject);
+					isMappingCreated = true;
 				}
-				else if (p.equals(propPredicate.toString())) {
-					//TODO performance issue: create local linkType array!?
-					List<LinkType> ltList = getIdFromDb(LinkType.class, o);
-					if (ltList.isEmpty()) {
-						linkPredicate = createLinkType(o);
-					}
-					else {
-						linkPredicate = ltList.get(0).getIdLinkType();
-					}
-					//System.out.println("DBCommunication.saveModel(): linkPredicate: " + linkPredicate);
-				}
-				else if (p.equals(propObject.toString())) {
-					List<EntityObject> eList = getIdFromDb(EntityObject.class, o);
-					if (eList.isEmpty()) {
-						linkObject = createEntityObject(o);
-					}
-					else {
-						linkObject = eList.get(0).getIdObject();
-					}
-					//System.out.println("DBCommunication.saveModel(): linkObject: " + linkObject);
-				}
+			}
 
-				// mapping needs to be created only once (per mapping)
-				if (!isMappingCreated) {
-					if (p.equals(propMapping.toString())) {
-						//TODO do we need something from the mapping object?
-						List<Mapping> mList = getIdFromDb(Mapping.class, o);
-						if (mList.isEmpty()) {
-							createMapping(o);
-							System.out.println("Mapping created");
-						}
-						isMappingCreated = true;
-					}
+			// which EntityObject is S, P, O in the new Link object
+			if (p.equals(propSubject.toString())) {
+				List<EntityObject> eList = getIdFromDb(EntityObject.class, o);	
+				
+				if (eList.isEmpty()) {
+					linkSubject = createEntityObject(o);
 				}
+				else {
+					linkSubject = eList.get(0).getIdObject();
+				}
+				//System.out.println("DBCommunication.saveModel(): linkSubject: " + linkSubject);
+			}
+			else if (p.equals(propPredicate.toString())) {
+				//TODO performance issue: create local linkType array!?
+				List<LinkType> ltList = getIdFromDb(LinkType.class, o);
+				
+				if (ltList.isEmpty()) {
+					linkPredicate = createLinkType(o);
+				}
+				else {
+					linkPredicate = ltList.get(0).getIdLinkType();
+				}
+				//System.out.println("DBCommunication.saveModel(): linkPredicate: " + linkPredicate);
+			}
+			else if (p.equals(propObject.toString())) {
+				List<EntityObject> eList = getIdFromDb(EntityObject.class, o);
+				
+				if (eList.isEmpty()) {
+					linkObject = createEntityObject(o);
+				}
+				else {
+					linkObject = eList.get(0).getIdObject();
+				}
+				//System.out.println("DBCommunication.saveModel(): linkObject: " + linkObject);
+			}
 
-				if (linkSubject != 0 && linkPredicate != 0 && linkObject != 0) {
-					System.out.println("nearly created Link()");
-					System.out.println("S: " + linkSubject + " P: " + linkPredicate + " O: " + linkObject);
 
-					List<Link> lList = getIdFromDb(Link.class, s);
-					if (lList.isEmpty()) {
-						//TODO do we need something from the link object?
-						createLink(s, linkSubject, linkPredicate, linkObject);
-					}
-					linkSubject = 0;
-					linkPredicate = 0;
-					linkObject = 0;
+			if (linkSubject != 0 && linkPredicate != 0 && linkObject != 0) {
+				List<Link> lList = getIdFromDb(Link.class, s);
+				
+				if (lList.isEmpty()) {
+					createLink(s, linkSubject, linkPredicate, linkObject, hashMappingUrl);
 				}
 				
-				if (p.equals(hasSource.toString()) || p.equals(hasTarget.toString())) {
-					List<Source> sList = getIdFromDb(Source.class, o);
-					if (sList.isEmpty()) {
-						createSource(o);
-						// TODO create MappingHasSource?
-					}
+				linkSubject = 0;
+				linkPredicate = 0;
+				linkObject = 0;
+			}
+
+			if (p.equals(hasSource.toString()) || p.equals(hasTarget.toString())) {
+				List<Source> sList = getIdFromDb(Source.class, o);
+				
+				if (sList.isEmpty()) {
+					createSource(o);
+					// TODO create MappingHasSource?
 				}
-				// TODO User
-				// TODO Framework
+			}
+			// TODO User
+			// TODO Framework
+			if (p.equals(wasGeneratedBy.toString())) {
+				List<Algorithm> aList = getIdFromDb(Algorithm.class, o);
+				
+				if (aList.isEmpty()) {
+					createAlgorithm(o, hashMappingUrl);
+					System.out.println("Algorithm added");
+					// TODO create MappingHasSource?
+				}
+			}
+			
+			// TODO not working in test, enable later, not EVERY generatedAtTime is valid for the mapping
+			if (p.equals(generatedAtTime.toString()) ) { //&& s.equals(hashMappingUrl)) { 
+				Session session = InitSessionFactory.getInstance().getCurrentSession();
+				Mapping mapping = (Mapping) session.load(Mapping.class, new String(s));	
+
+				String time = convertSeparators(o.substring(0, o.lastIndexOf("^") - 1));
+				Timestamp value = Timestamp.valueOf(time);
+				
+				mapping.setTimeGenerated(value);
+				
+				getSessionAndSave(mapping);
+				System.out.println("Date added");
 			}
 		}
+	}
+	
+	static String convertSeparators(String input) {
+	    char[] chars = input.toCharArray();
+	    chars[10] = ' ';
+	    chars[13] = ':';
+	    chars[16] = ':';
+	    return new String(chars);
+	}
+
+	/**
+	 * Creates an algorithm, url needs to be unique, is NOT good implemented for now!
+	 * @param algoUri
+	 * @param hashMappingUrl
+	 */
+	private void createAlgorithm(String algoUri, String hashMappingUrl) {
+		// TODO not really unique
+		Algorithm algorithm = new Algorithm();
+		algorithm.setUri(algoUri);
+		algorithm.setHashMapping(hashMappingUrl);
+		
+		getSessionAndSave(algorithm);
 	}
 
 	private void createSource(String uri) {
@@ -220,7 +264,8 @@ public class DBCommunication implements Writer {
 		Criteria criteria = session.createCriteria(myClass);
 		
 		// restrict to column, search for the string target
-		if (myClass.equals(EntityObject.class) || myClass.equals(LinkType.class) || myClass.equals(Source.class)) {
+		if (myClass.equals(EntityObject.class) || myClass.equals(LinkType.class) 
+				|| myClass.equals(Source.class) || myClass.equals(Algorithm.class)) {
 			criteria.add(Restrictions.eq("uri", target));
 		} 
 		else if (myClass.equals(Mapping.class)) {
@@ -229,6 +274,7 @@ public class DBCommunication implements Writer {
 		else if (myClass.equals(Link.class)) {
 			criteria.add(Restrictions.eq("hashLink", target));
 		}
+		// TODO close session here?
 		
 		return criteria.list();
 	}
@@ -244,7 +290,6 @@ public class DBCommunication implements Writer {
 		
 		getSessionAndSave(eo);
 
-		//TODO is eo.getIdObjet already the correct value?
 		return eo.getIdObject();
 	}
 
@@ -289,21 +334,23 @@ public class DBCommunication implements Writer {
 	}
 
 	/**
-	 * Create a Link object in the database.
-	 * @param hash
-	 * @param s
-	 * @param p
-	 * @param o
-	 * @return 
+	 * Create a Link object in the database and return the hashLink of the already saved link.
+	 * @param hashLink
+	 * @param subject subject
+	 * @param predicate predicate
+	 * @param object object
+	 * @param hashMappingUrl 
+	 * @return hashLink
 	 */
-	private String createLink(String hash, long s, long p, long o) {
+	private String createLink(String hashLink, long subject, long predicate, long object, String hashMappingUrl) {
 
 		Link link = new Link();
 
-		link.setHashLink(hash);
-		link.setO1Id(s);
-		link.setO2Id(o);
-		link.setLinkType(p);
+		link.setHashLink(hashLink);
+		link.setO1Id(subject);
+		link.setO2Id(object);
+		link.setLinkType(predicate);
+		link.setHashMapping(hashMappingUrl);
 		
 		getSessionAndSave(link);
 		
@@ -314,7 +361,6 @@ public class DBCommunication implements Writer {
 	 * Create a Mapping object in the database.
 	 * @param hashUrl
 	 * @return 
-	 * @return
 	 */
 	private String createMapping(String hashUrl) {
 		//Jena getLocalName() not working correct with hash

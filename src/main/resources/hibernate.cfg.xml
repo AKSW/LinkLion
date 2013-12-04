@@ -13,7 +13,7 @@
 		<property name="hibernate.current_session_context_class">org.hibernate.context.ThreadLocalSessionContext</property>
 
 		<mapping package="de.linkinglod.db" />
-		<mapping class="de.linkinglod.db.Configuration" />
+		<mapping class="de.linkinglod.db.Algorithm" />
 		<mapping class="de.linkinglod.db.Framework" />
 		<mapping class="de.linkinglod.db.Link" />
 		<mapping class="de.linkinglod.db.Mapping" />

@@ -12,21 +12,12 @@ import javax.persistence.*;
 @Table(name="Link")
 public class Link implements Serializable {
 
-	public Link(String hashLink, long o1Id, long o2Id, long linkType,
-			double similarity, String hashMapping) {
-		super();
-		this.hashLink = hashLink;
-		this.o1Id = o1Id;
-		this.o2Id = o2Id;
-		this.linkType = linkType;
-		this.similarity = similarity;
-		this.hashMapping = hashMapping;
-	}
-
 	public Link() {
 	}
 
 	private static final long serialVersionUID = 1L;
+    @Id
+    @Column(name = "hashLink", unique = true, nullable = false, length = 132)
 	private String hashLink;
 	private long o1Id;
 	private long o2Id;
@@ -34,7 +25,7 @@ public class Link implements Serializable {
 	private double similarity;
 	private String hashMapping;
 	
-    @Id
+
     public String getHashLink() { 
     	return hashLink; 
     }

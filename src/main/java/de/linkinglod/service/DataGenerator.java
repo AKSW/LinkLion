@@ -10,6 +10,7 @@ import com.hp.hpl.jena.rdf.model.*;
 import de.linkinglod.db.User;
 import de.linkinglod.rdf.RDFMappingProcessor;
 import de.linkinglod.rdf.TripleStoreCommunication;
+import de.linkinglod.rdf.TripleStoreWriter;
 import de.linkinglod.util.MD5Utils;
 
 import java.security.*;
@@ -31,7 +32,7 @@ public class DataGenerator {
 	private static String fileLocation = LLProp.getString("fileLocation"); //$NON-NLS-1$
 	private static Logger log = LoggerFactory.getLogger(DataGenerator.class);
 
-    private DBCommunication dbComm = null;
+    private static DBCommunication dbComm = null;
 	private Model originalModel = null;
     private Model transformedModel = null;
     
@@ -66,7 +67,12 @@ public class DataGenerator {
 		RDFMappingProcessor mappingProcessor = new RDFMappingProcessor(LLProp.getString("fileLocation"));
     	User demoUser = new User(1, "Demo User"); // TODO next: manage user login
     	model = mappingProcessor.transform(model, demoUser, new Date());
-    	model.write(System.out, "N-TRIPLE");
+    	//model.write(System.out, "N-TRIPLE");
+    	
+    	dbComm = new DBCommunication();
+
+		dbComm.write(LLProp.getString("TripleStore.graph"), model);
+    	
 	}
 
 	/**
