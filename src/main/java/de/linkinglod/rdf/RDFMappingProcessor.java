@@ -3,7 +3,6 @@ package de.linkinglod.rdf;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -15,6 +14,7 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import de.linkinglod.db.User;
 import de.linkinglod.io.MappingProcessor;
@@ -110,9 +110,9 @@ public class RDFMappingProcessor implements MappingProcessor {
 		String lnkString = ns + lim + LLProp.getString("vocabularyLink") + lim;
 
 		// iterate over statements, reify and add to model
-		Iterator<Statement> it = modelIn.listStatements();
-		while(it.hasNext()) {
-			Statement statement = it.next();
+		StmtIterator modelIterator = modelIn.listStatements();
+		List<Statement> listModel = modelIterator.toList();
+		for (Statement statement: listModel) {
 			Resource s = statement.getSubject();     
 			Property p = statement.getPredicate(); 
 			RDFNode o = statement.getObject();

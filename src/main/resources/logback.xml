@@ -12,7 +12,16 @@
 	</appender>
 
 	<logger name="de.linkinglod" level="TRACE" />
+	
+	<logger name="org.hibernate.SQL" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="STDOUT" />
+	</logger>
 
+	<logger name="org.hibernate.type" additivity="false">
+		<level value="TRACE" />
+		<appender-ref ref="STDOUT" />
+	</logger>
 
 	<root level="debug">
 		<appender-ref ref="STDOUT" />

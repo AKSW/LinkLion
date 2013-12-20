@@ -35,7 +35,7 @@ public class EntityObject implements Serializable {
 		this.uri = uri;
 		this.name = name;
 	}
-
+	
 	public EntityObject() {
 	}
 

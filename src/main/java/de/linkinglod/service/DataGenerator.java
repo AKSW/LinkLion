@@ -9,13 +9,9 @@ import com.hp.hpl.jena.rdf.model.*;
 
 import de.linkinglod.db.User;
 import de.linkinglod.rdf.RDFMappingProcessor;
-import de.linkinglod.rdf.TripleStoreCommunication;
-import de.linkinglod.rdf.TripleStoreWriter;
-import de.linkinglod.util.MD5Utils;
 
 import java.security.*;
 import java.util.Date;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,18 +24,13 @@ import org.slf4j.LoggerFactory;
  */
 public class DataGenerator {
 
-	// only used in main, should be removed later. TODO its hard coded, change it!
-	private static String fileLocation = LLProp.getString("fileLocation"); //$NON-NLS-1$
+	// only used in main, should be removed later.
+	private static String fileLocation = LLProp.getString("fileLocation");
 	private static Logger log = LoggerFactory.getLogger(DataGenerator.class);
 
     private static DBCommunication dbComm = null;
 	private Model originalModel = null;
     private Model transformedModel = null;
-    
-	private static String ns = LLProp.getString("ns");
-	private static String lim = LLProp.getString("delimiter");
-	private static String vocProp = LLProp.getString("vocabularyProperty");
-	private static String propString = ns + lim + vocProp + lim;
 	
 	public DataGenerator(Model model) throws NoSuchAlgorithmException, IOException {
 //		originalModel = model;
@@ -57,7 +48,6 @@ public class DataGenerator {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
-
 		InputStream stream = generateStreamFromFile(LLProp.getString("fileLocation"));
 		System.out.println("Stream generated: ");
 		
@@ -74,46 +64,6 @@ public class DataGenerator {
 		dbComm.write(LLProp.getString("TripleStore.graph"), model);
     	
 	}
-
-	/**
-	 * Reification process. Each statements gets converted and added to a new model.
-	 * TODO How are large amounts of statements performing?
-	 * @param model
-	 * @throws NoSuchAlgorithmException
-	 * @throws IOException 
-	 */
-//	public static Model processData(Model model) throws NoSuchAlgorithmException, IOException {
-//		
-//		StmtIterator modelIterator = model.listStatements();
-//		List<Statement> listModel = modelIterator.toList();
-//		Model convertedModel = ModelFactory.createDefaultModel();
-//		MD5Utils.reset();
-//		String fileHash = MD5Utils.computeChecksum(fileLocation);
-//		String hashMapping = propString + LLProp.getString("vocabularyMapping") + LLProp.getString("fragmentIdentifier") + fileHash;
-//		
-//		Property propS = ResourceFactory.createProperty(propString + LLProp.getString("subjectAttribute"));
-//		Property propP = ResourceFactory.createProperty(propString + LLProp.getString("linkType"));
-//		Property propO = ResourceFactory.createProperty(propString + LLProp.getString("objectAttribute"));
-//		Property propM = ResourceFactory.createProperty(propString + LLProp.getString("hashMapping"));
-//
-//		for (Statement statement: listModel) {
-//			Resource s = statement.getSubject();     
-//			Property p = statement.getPredicate(); 
-//			RDFNode o = statement.getObject();
-//			String md5 = MD5Utils.computeChecksum(s, p, o);
-//			Resource resource = ResourceFactory.createResource(ns + lim + 
-//					LLProp.getString("vocabularyLink") + 
-//					LLProp.getString("fragmentIdentifier") + md5);
-//
-//			convertedModel.add(resource, propS, s)
-//				.add(resource, propP, p)
-//				.add(resource, propO, o)
-//				.add(resource, propM, hashMapping);
-//		}
-//		
-//		//convertedModel.write(System.out, "N-TRIPLE");
-//		return convertedModel;
-//	}
 	
 	/**
 	 * Generate an InputStream from the file.

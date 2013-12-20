@@ -1,7 +1,6 @@
 package de.linkinglod.service;
 
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -12,6 +11,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +19,9 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import de.linkinglod.db.Algorithm;
 import de.linkinglod.db.EntityObject;
@@ -114,6 +113,11 @@ public class DBCommunication implements Writer {
 
 		StmtIterator modelIterator = jenaModel.listStatements();
 		List<Statement> listModel = modelIterator.toList();
+		long objOverall = 0;
+		long objAlreadyExisting = 0;
+		boolean isSameAs = false;
+		long sameAs = 0;
+		
 
 		for (Statement statement: listModel) {
 
@@ -124,61 +128,74 @@ public class DBCommunication implements Writer {
 			String s = subject.toString();
 			String p = predicate.toString();
 			String o = object.toString();
-
+			
 			// isMappingCreated ensures no unneeded DB query at this point
 			if (!isMappingCreated) {
-				if (p.equals(wasDerivedFrom.toString())) {
-					List<Mapping> mList = getIdFromDb(Mapping.class, o);
-					
-					if (mList.isEmpty()) {
+				if (p.equals(wasDerivedFrom.toString())) {					
+					try {
 						hashMappingUrl = createMapping(o);
+						isMappingCreated = true;
 					}
-					isMappingCreated = true;
+					catch (ConstraintViolationException e) {
+					}
 				}
 			}
 
 			// which EntityObject is S, P, O in the new Link object
 			if (p.equals(propSubject.toString())) {
-				List<EntityObject> eList = getIdFromDb(EntityObject.class, o);	
-				
-				if (eList.isEmpty()) {
+				++objOverall;
+				try {
 					linkSubject = createEntityObject(o);
 				}
-				else {
-					linkSubject = eList.get(0).getIdObject();
-				}
-				//System.out.println("DBCommunication.saveModel(): linkSubject: " + linkSubject);
+				catch (ConstraintViolationException e) {
+					++objAlreadyExisting;
+					
+					// object is already in DB: get object from DB, return id
+					List<EntityObject> eoList = getIdFromDb(EntityObject.class, o, "uri");
+					linkSubject = eoList.get(0).getIdObject();
+
+				} // TODO finally block? check if linkObject is still 0?
 			}
 			else if (p.equals(propPredicate.toString())) {
-				//TODO performance issue: create local linkType array!?
-				List<LinkType> ltList = getIdFromDb(LinkType.class, o);
-				
-				if (ltList.isEmpty()) {
-					linkPredicate = createLinkType(o);
+
+				if (isSameAs) {
+					linkPredicate = sameAs;
 				}
 				else {
-					linkPredicate = ltList.get(0).getIdLinkType();
+					try {
+						linkPredicate = createLinkType(o);
+						if (p.equals("http://www.w3.org/2002/07/owl#sameAs")) {
+							sameAs = linkPredicate;
+							isSameAs = true;
+						}
+					}
+					catch (ConstraintViolationException e) {
+						LinkType lt = (LinkType) getDbObject(LinkType.class, o);
+						linkPredicate = lt.getIdLinkType();
+					}
 				}
-				//System.out.println("DBCommunication.saveModel(): linkPredicate: " + linkPredicate);
 			}
 			else if (p.equals(propObject.toString())) {
-				List<EntityObject> eList = getIdFromDb(EntityObject.class, o);
-				
-				if (eList.isEmpty()) {
+				++objOverall;
+				try {
 					linkObject = createEntityObject(o);
 				}
-				else {
-					linkObject = eList.get(0).getIdObject();
-				}
-				//System.out.println("DBCommunication.saveModel(): linkObject: " + linkObject);
+				catch (ConstraintViolationException e) {
+					++objAlreadyExisting;
+					
+					// object is already in DB: get object from DB, return id
+					List<EntityObject> eoList = getIdFromDb(EntityObject.class, o, "uri");
+					linkObject = eoList.get(0).getIdObject();
+				} // TODO finally block? check if linkObject is still 0?
 			}
 
 
 			if (linkSubject != 0 && linkPredicate != 0 && linkObject != 0) {
-				List<Link> lList = getIdFromDb(Link.class, s);
-				
-				if (lList.isEmpty()) {
+				try {
 					createLink(s, linkSubject, linkPredicate, linkObject, hashMappingUrl);
+				}
+				catch (ConstraintViolationException e) {
+					System.out.println("Link already existing: " + s);
 				}
 				
 				linkSubject = 0;
@@ -187,46 +204,68 @@ public class DBCommunication implements Writer {
 			}
 
 			if (p.equals(hasSource.toString()) || p.equals(hasTarget.toString())) {
-				List<Source> sList = getIdFromDb(Source.class, o);
-				
-				if (sList.isEmpty()) {
+				try {
 					createSource(o);
-					// TODO create MappingHasSource?
+				}
+				catch (ConstraintViolationException e) {
+					System.out.println("Source already existing: " + o);
 				}
 			}
+			
 			// TODO User
 			// TODO Framework
 			if (p.equals(wasGeneratedBy.toString())) {
-				List<Algorithm> aList = getIdFromDb(Algorithm.class, o);
-				
-				if (aList.isEmpty()) {
+				try {
 					createAlgorithm(o, hashMappingUrl);
 					System.out.println("Algorithm added");
-					// TODO create MappingHasSource?
+				}
+				catch (ConstraintViolationException e) {
+					
 				}
 			}
 			
 			// TODO not working in test, enable later, not EVERY generatedAtTime is valid for the mapping
 			if (p.equals(generatedAtTime.toString()) ) { //&& s.equals(hashMappingUrl)) { 
-				Session session = InitSessionFactory.getInstance().getCurrentSession();
-				Mapping mapping = (Mapping) session.load(Mapping.class, new String(s));	
+				Mapping mapping = (Mapping) getDbObject(Mapping.class, s);	
 
-				String time = convertSeparators(o.substring(0, o.lastIndexOf("^") - 1));
+				// discard ^^xsd:date at the end
+				String time = convertDateSeparators(o.substring(0, o.lastIndexOf("^") - 1));
 				Timestamp value = Timestamp.valueOf(time);
 				
 				mapping.setTimeGenerated(value);
 				
-				getSessionAndSave(mapping);
+				try {
+					getSessionAndSave(mapping);
+				} catch (ConstraintViolationException e) {
+					e.printStackTrace();
+				}
 				System.out.println("Date added");
 			}
 		}
+		
+		System.out.println(objAlreadyExisting + "objects already existing out of " + objOverall + " objects overall.");
+	}
+
+	/**
+	 * Get a specific DB object, only working if primary key is String
+	 * @param myClass table to search in
+	 * @param searchTerm name of object to fetch
+	 * @return resulting object of class myClass
+	 */
+	private <T> Object getDbObject(Class<T> myClass, String searchTerm) {
+		Session session = InitSessionFactory.getInstance().getCurrentSession();
+		@SuppressWarnings("unused")
+		Transaction tx = session.beginTransaction();
+		
+		return session.load(myClass, new String(searchTerm));
 	}
 	
-	static String convertSeparators(String input) {
+	static String convertDateSeparators(String input) {
 	    char[] chars = input.toCharArray();
 	    chars[10] = ' ';
 	    chars[13] = ':';
 	    chars[16] = ':';
+	    
 	    return new String(chars);
 	}
 
@@ -234,8 +273,9 @@ public class DBCommunication implements Writer {
 	 * Creates an algorithm, url needs to be unique, is NOT good implemented for now!
 	 * @param algoUri
 	 * @param hashMappingUrl
+	 * @throws MySQLIntegrityConstraintViolationException 
 	 */
-	private void createAlgorithm(String algoUri, String hashMappingUrl) {
+	private void createAlgorithm(String algoUri, String hashMappingUrl) throws ConstraintViolationException {
 		// TODO not really unique
 		Algorithm algorithm = new Algorithm();
 		algorithm.setUri(algoUri);
@@ -244,47 +284,66 @@ public class DBCommunication implements Writer {
 		getSessionAndSave(algorithm);
 	}
 
-	private void createSource(String uri) {
+	private void createSource(String uri) throws ConstraintViolationException {
 		Source source = new Source();
 		source.setUri(uri);
 		
 		getSessionAndSave(source);	
 	}
-
+	
 	/**
-	 * Get database session and search for string.
-	 * @param <T>
-	 * @param target
-	 * @return
+	 * Get db session and search for string in specific column (based on parameter targetCol) of table.
+	 * 
+	 * Likely to be not needed for all classes. Primary Key and other indexed structures can return error code if object is already created.
+	 * @param <T> table to be searched in
+	 * @param targetString search criterion
+	 * @param targetCol search in this column
+	 * @return list of instances applying to criterion
 	 */
-	private <T> List<T> getIdFromDb(Class<T> myClass, String target) {
-
+	private <T> List<T> getIdFromDb(Class<T> myClass, String targetString, String targetCol) {
 		Session session = InitSessionFactory.getInstance().getCurrentSession();
+		@SuppressWarnings("unused")
 		Transaction tx = session.beginTransaction();
 		Criteria criteria = session.createCriteria(myClass);
 		
-		// restrict to column, search for the string target
-		if (myClass.equals(EntityObject.class) || myClass.equals(LinkType.class) 
-				|| myClass.equals(Source.class) || myClass.equals(Algorithm.class)) {
-			criteria.add(Restrictions.eq("uri", target));
-		} 
-		else if (myClass.equals(Mapping.class)) {
-			criteria.add(Restrictions.eq("hashMapping", target));
-		}
-		else if (myClass.equals(Link.class)) {
-			criteria.add(Restrictions.eq("hashLink", target));
-		}
-		// TODO close session here?
+		criteria = createRestrictions(myClass, targetString, targetCol, criteria);
 		
 		return criteria.list();
+	}
+
+	/**
+	 * @param myClass
+	 * @param targetString
+	 * @param criteria
+	 */
+	private <T> Criteria createRestrictions(Class<T> myClass, String targetString, String targetCol,
+			Criteria criteria) {
+		// restrict to column, search for the string target
+		if (targetCol.equals("")) {
+			if (myClass.equals(EntityObject.class) || myClass.equals(LinkType.class) 
+					|| myClass.equals(Source.class) || myClass.equals(Algorithm.class)) {
+				criteria.add(Restrictions.eq("uri", targetString));
+			} 
+			else if (myClass.equals(Mapping.class)) {
+				criteria.add(Restrictions.eq("hashMapping", targetString));
+			}
+			else if (myClass.equals(Link.class)) {
+				criteria.add(Restrictions.eq("hashLink", targetString));
+			}
+		}
+		else {
+			criteria.add(Restrictions.eq(targetCol, targetString));
+		}
+		return criteria;
 	}
 
 	/**
 	 * Create a new EntityObject with unique ID.
 	 * @param uri
 	 * @return Unique ID of the newly generated EntityObject
+	 * @throws MySQLIntegrityConstraintViolationException 
 	 */
-	private long createEntityObject(String uri) {
+	private long createEntityObject(String uri) throws ConstraintViolationException {
 		EntityObject eo = new EntityObject();
 		eo.setUri(uri);
 		
@@ -292,24 +351,32 @@ public class DBCommunication implements Writer {
 
 		return eo.getIdObject();
 	}
-
+	
 	/**
 	 * Establish a session to the database and save the (generic) hibernate object.
 	 * @param hibObject
 	 */
-	private <T> void getSessionAndSave(T hibObject) {
+	private <T> void getSessionAndSave(T hibObject) throws ConstraintViolationException {
+		
 		Session session = InitSessionFactory.getInstance().getCurrentSession();
 		Transaction tx = session.beginTransaction();
-		session.save(hibObject);
-		tx.commit();
+		try {
+			session.save(hibObject);
+			tx.commit();
+		}
+		catch (ConstraintViolationException e) {
+	        tx.rollback();
+	        throw e;
+		}
 	}
 	
 	/**
 	 * Create a new LinkType with unique ID.
 	 * @param uri
 	 * @return Unique ID of the newly generated LinkType
+	 * @throws MySQLIntegrityConstraintViolationException 
 	 */
-	private long createLinkType(String uri) {
+	private long createLinkType(String uri) throws ConstraintViolationException {
 		LinkType linkType = new LinkType();
 		linkType.setUri(uri);
 		
@@ -321,8 +388,9 @@ public class DBCommunication implements Writer {
 	/**
 	 * test
 	 * @return
+	 * @throws MySQLIntegrityConstraintViolationException 
 	 */
-	private User createUser() {
+	private User createUser() throws ConstraintViolationException {
 		User testUser = new User();
 		
 		long idUser = 3;
@@ -341,8 +409,9 @@ public class DBCommunication implements Writer {
 	 * @param object object
 	 * @param hashMappingUrl 
 	 * @return hashLink
+	 * @throws MySQLIntegrityConstraintViolationException 
 	 */
-	private String createLink(String hashLink, long subject, long predicate, long object, String hashMappingUrl) {
+	private String createLink(String hashLink, long subject, long predicate, long object, String hashMappingUrl) throws ConstraintViolationException {
 
 		Link link = new Link();
 
@@ -361,8 +430,9 @@ public class DBCommunication implements Writer {
 	 * Create a Mapping object in the database.
 	 * @param hashUrl
 	 * @return 
+	 * @throws MySQLIntegrityConstraintViolationException 
 	 */
-	private String createMapping(String hashUrl) {
+	private String createMapping(String hashUrl) throws ConstraintViolationException {
 		//Jena getLocalName() not working correct with hash
 		//String hash  = hashUrl.substring(hashUrl.lastIndexOf(LLProp.getString("fragmentIdentifier")) + 1);
 
