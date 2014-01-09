@@ -19,7 +19,7 @@
 		<mapping class="de.linkinglod.db.Mapping" />
 		<mapping class="de.linkinglod.db.MappingHasSource" />
 		<mapping class="de.linkinglod.db.MappingUsesMapping" />
-		<mapping class="de.linkinglod.db.EntityObject" />
+		<mapping class="de.linkinglod.db.RDFSResource" />
 		<mapping class="de.linkinglod.db.Source" />
 		<mapping class="de.linkinglod.db.User" />
 		<mapping class="de.linkinglod.db.LinkType" />

@@ -1,7 +1,6 @@
 package de.linkinglod.rdf;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +20,7 @@ import de.linkinglod.io.MappingProcessor;
 import de.linkinglod.service.LLProp;
 import de.linkinglod.service.OntologyLoader;
 import de.linkinglod.util.MD5Utils;
+import de.linkinglod.util.XMLUtils;
 
 /**
  * Prefixes are:<br/>
@@ -91,7 +91,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 		Resource algorithm = ontoModel.getResource(llalg + "GenericAlgorithm");
 		Resource dataset1 = ontoModel.getResource(lldat + "GenericDataset-1");
 		Resource dataset2 = ontoModel.getResource(lldat + "GenericDataset-2");
-		Literal dateLiteral = modelOut.createTypedLiteral(toXSD(timeStamp), XSDDatatype.XSDdateTime);
+		Literal dateLiteral = modelOut.createTypedLiteral(XMLUtils.toXSD(timeStamp), XSDDatatype.XSDdateTime);
 		
 		// load classes
 		Resource mapClass = ontoModel.getResource(llont + "Mapping");
@@ -129,16 +129,6 @@ public class RDFMappingProcessor implements MappingProcessor {
 		
 		// converted model
 		return modelOut;
-	}
-
-	/**
-	 * Converts java Date class into XSDdateTime format.
-	 * @param timeStamp
-	 * @return
-	 */
-	private String toXSD(Date timeStamp) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-		return sdf.format(timeStamp);
 	}
 
 	@Override

@@ -10,41 +10,41 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Hibernate class EntityObject. Care for table name Object.
+ * Hibernate class RDFSResource.
  * @author markus
  *
  */
 @Entity
-@Table(name="Object")
-public class EntityObject implements Serializable {
-
+@Table(name="RDFSResource")
+public class RDFSResource implements Serializable {
+	
 	private static final long serialVersionUID = 1L;
 	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idObject", unique = true, nullable = false)
-    private long idObject;
-    @Column(name = "uri", unique = false, nullable = false, length = 100)
+    @Column(name = "idResource", unique = true, nullable = false)
+    private long idResource;
+    @Column(name = "uri", unique = false, nullable = false, length = 512)
     private String uri;
-    @Column(name = "name", unique = false, nullable = true, length = 100)
+    @Column(name = "name", unique = false, nullable = true, length = 512)
     private String name;
 	
-	public EntityObject(long idObject, String uri, String name) {
+	public RDFSResource(long idResource, String uri, String name) {
 		super();
-		this.idObject = idObject;
+		this.idResource = idResource;
 		this.uri = uri;
 		this.name = name;
 	}
 	
-	public EntityObject() {
+	public RDFSResource() {
 	}
 
-	public long getIdObject() {
-		return idObject;
+	public long getIdResource() {
+		return idResource;
 	}
 	
-	public void setIdObject(long idObject) {
-		this.idObject = idObject;
+	public void setIdResource(long idResource) {
+		this.idResource = idResource;
 	}
 	
 	public String getUri() {

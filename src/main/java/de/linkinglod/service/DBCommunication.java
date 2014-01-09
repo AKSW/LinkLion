@@ -24,13 +24,14 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import de.linkinglod.db.Algorithm;
-import de.linkinglod.db.EntityObject;
+import de.linkinglod.db.RDFSResource;
 import de.linkinglod.db.Link;
 import de.linkinglod.db.LinkType;
 import de.linkinglod.db.Mapping;
 import de.linkinglod.db.Source;
 import de.linkinglod.db.User;
 import de.linkinglod.io.Writer;
+import de.linkinglod.util.SQLUtils;
 
 /**
  * @author markus
@@ -118,7 +119,6 @@ public class DBCommunication implements Writer {
 		boolean isSameAs = false;
 		long sameAs = 0;
 		
-
 		for (Statement statement: listModel) {
 
 			// S, P, O of single triple
@@ -141,18 +141,18 @@ public class DBCommunication implements Writer {
 				}
 			}
 
-			// which EntityObject is S, P, O in the new Link object
+			// which RDFSResource is S, P, O in the new Link object
 			if (p.equals(propSubject.toString())) {
 				++objOverall;
 				try {
-					linkSubject = createEntityObject(o);
+					linkSubject = createRDFSResource(o);
 				}
 				catch (ConstraintViolationException e) {
 					++objAlreadyExisting;
 					
 					// object is already in DB: get object from DB, return id
-					List<EntityObject> eoList = getIdFromDb(EntityObject.class, o, "uri");
-					linkSubject = eoList.get(0).getIdObject();
+					List<RDFSResource> resList = getIdFromDb(RDFSResource.class, o, "uri");
+					linkSubject = resList.get(0).getIdResource();
 
 				} // TODO finally block? check if linkObject is still 0?
 			}
@@ -178,14 +178,14 @@ public class DBCommunication implements Writer {
 			else if (p.equals(propObject.toString())) {
 				++objOverall;
 				try {
-					linkObject = createEntityObject(o);
+					linkObject = createRDFSResource(o);
 				}
 				catch (ConstraintViolationException e) {
 					++objAlreadyExisting;
 					
 					// object is already in DB: get object from DB, return id
-					List<EntityObject> eoList = getIdFromDb(EntityObject.class, o, "uri");
-					linkObject = eoList.get(0).getIdObject();
+					List<RDFSResource> resList = getIdFromDb(RDFSResource.class, o, "uri");
+					linkObject = resList.get(0).getIdResource();
 				} // TODO finally block? check if linkObject is still 0?
 			}
 
@@ -205,7 +205,7 @@ public class DBCommunication implements Writer {
 
 			if (p.equals(hasSource.toString()) || p.equals(hasTarget.toString())) {
 				try {
-					createSource(o);
+					createSource(o, hashMappingUrl);
 				}
 				catch (ConstraintViolationException e) {
 					System.out.println("Source already existing: " + o);
@@ -229,7 +229,7 @@ public class DBCommunication implements Writer {
 				Mapping mapping = (Mapping) getDbObject(Mapping.class, s);	
 
 				// discard ^^xsd:date at the end
-				String time = convertDateSeparators(o.substring(0, o.lastIndexOf("^") - 1));
+				String time = SQLUtils.convertDateSeparators(o.substring(0, o.lastIndexOf("^") - 1));
 				Timestamp value = Timestamp.valueOf(time);
 				
 				mapping.setTimeGenerated(value);
@@ -259,15 +259,6 @@ public class DBCommunication implements Writer {
 		
 		return session.load(myClass, new String(searchTerm));
 	}
-	
-	static String convertDateSeparators(String input) {
-	    char[] chars = input.toCharArray();
-	    chars[10] = ' ';
-	    chars[13] = ':';
-	    chars[16] = ':';
-	    
-	    return new String(chars);
-	}
 
 	/**
 	 * Creates an algorithm, url needs to be unique, is NOT good implemented for now!
@@ -284,11 +275,13 @@ public class DBCommunication implements Writer {
 		getSessionAndSave(algorithm);
 	}
 
-	private void createSource(String uri) throws ConstraintViolationException {
+	private long createSource(String uri, String hashMappingUrl) throws ConstraintViolationException {
 		Source source = new Source();
 		source.setUri(uri);
 		
-		getSessionAndSave(source);	
+		getSessionAndSave(source);
+		
+		return source.getIdSource();
 	}
 	
 	/**
@@ -320,7 +313,7 @@ public class DBCommunication implements Writer {
 			Criteria criteria) {
 		// restrict to column, search for the string target
 		if (targetCol.equals("")) {
-			if (myClass.equals(EntityObject.class) || myClass.equals(LinkType.class) 
+			if (myClass.equals(RDFSResource.class) || myClass.equals(LinkType.class) 
 					|| myClass.equals(Source.class) || myClass.equals(Algorithm.class)) {
 				criteria.add(Restrictions.eq("uri", targetString));
 			} 
@@ -338,18 +331,18 @@ public class DBCommunication implements Writer {
 	}
 
 	/**
-	 * Create a new EntityObject with unique ID.
+	 * Create a new RDFSResource with unique ID.
 	 * @param uri
-	 * @return Unique ID of the newly generated EntityObject
+	 * @return Unique ID of the newly generated RDFSResource
 	 * @throws MySQLIntegrityConstraintViolationException 
 	 */
-	private long createEntityObject(String uri) throws ConstraintViolationException {
-		EntityObject eo = new EntityObject();
-		eo.setUri(uri);
+	private long createRDFSResource(String uri) throws ConstraintViolationException {
+		RDFSResource res = new RDFSResource();
+		res.setUri(uri);
 		
-		getSessionAndSave(eo);
+		getSessionAndSave(res);
 
-		return eo.getIdObject();
+		return res.getIdResource();
 	}
 	
 	/**
