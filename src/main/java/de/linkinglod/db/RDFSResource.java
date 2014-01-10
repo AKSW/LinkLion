@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 /**
  * Hibernate class RDFSResource.
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  *
  */
 @Entity
@@ -28,13 +28,6 @@ public class RDFSResource implements Serializable {
     private String uri;
     @Column(name = "name", unique = false, nullable = true, length = 512)
     private String name;
-	
-	public RDFSResource(long idResource, String uri, String name) {
-		super();
-		this.idResource = idResource;
-		this.uri = uri;
-		this.name = name;
-	}
 	
 	public RDFSResource() {
 	}

@@ -5,7 +5,7 @@ import javax.persistence.*;
 
 /**
  * Hibernate object Link describing a single link which is contained in a mapping.
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  *
  */
 @Entity

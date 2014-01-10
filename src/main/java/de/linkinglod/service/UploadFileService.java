@@ -32,7 +32,8 @@ import de.linkinglod.rdf.TripleStoreWriter;
 
  
 /**
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
+ * @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>
  *
  */
 @Path("/file")
@@ -65,7 +66,9 @@ public class UploadFileService implements Reader {
     	
     	RDFMappingProcessor processor = new RDFMappingProcessor(fileLocation);
     	
-    	User demoUser = new User(1, "Demo User"); // TODO next: manage user login
+    	User demoUser = new User(); // TODO next: manage user login
+    	demoUser.setIdUser(1);
+    	demoUser.setName("Demo User");
     	modelOut = processor.transform(model, demoUser, new Date());
     	
 //    	TripleStoreWriter tsw = new TripleStoreWriter();

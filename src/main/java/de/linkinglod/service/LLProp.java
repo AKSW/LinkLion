@@ -3,6 +3,10 @@ package de.linkinglod.service;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+/**
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
+ *
+ */
 public class LLProp {
 
 	// writes to linkinglod.properties in src

@@ -3,6 +3,9 @@ package de.linkinglod.util;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ *  @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>
+ */
 public class XMLUtils {
 
 	/**

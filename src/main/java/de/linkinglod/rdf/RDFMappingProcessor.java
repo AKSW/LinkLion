@@ -41,7 +41,7 @@ import de.linkinglod.util.XMLUtils;
  * llver	http://www.linklion.org/version/				<br/>
  * 
  * @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>
- * @author Markus Nentwig
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  *
  */
 public class RDFMappingProcessor implements MappingProcessor {

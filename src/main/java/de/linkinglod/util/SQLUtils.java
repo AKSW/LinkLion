@@ -1,5 +1,8 @@
 package de.linkinglod.util;
 
+/**
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
+ */
 public class SQLUtils {
 
 	public static String convertDateSeparators(String input) {

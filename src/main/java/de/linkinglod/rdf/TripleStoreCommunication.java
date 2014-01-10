@@ -19,7 +19,7 @@ import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
 
 /**
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  *
  */
 public class TripleStoreCommunication {

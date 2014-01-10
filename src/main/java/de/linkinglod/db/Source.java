@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 /**
  * Hibernate class Source.
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  *
  */
 @Entity
@@ -30,18 +30,10 @@ public class Source implements Serializable {
 	private String domain;
 	private String lastVersion;
 	
-	public Source(long idSource, String name, String uri, String domain,
-			String lastVersion) {
-		super();
-		this.idSource = idSource;
-		this.name = name;
-		this.uri = uri;
-		this.domain = domain;
-		this.lastVersion = lastVersion;
-	}
-	
-	public Source() {
-		
+	/*
+	 * Constructor
+	 */
+	public Source() {	
 	}
 	
 	public long getIdSource() {

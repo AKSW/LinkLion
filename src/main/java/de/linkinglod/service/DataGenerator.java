@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  * TODO look for objects which are a literal and not URI
  * TODO testing
  * TODO where do we need to differentiate between literals/resources for objects?
@@ -55,7 +55,11 @@ public class DataGenerator {
 		System.out.println("Model generated with " + model.size() + " elements.");
 		
 		RDFMappingProcessor mappingProcessor = new RDFMappingProcessor(LLProp.getString("fileLocation"));
-    	User demoUser = new User(1, "Demo User"); // TODO next: manage user login
+		
+    	User demoUser = new User(); // TODO next: manage user login
+    	demoUser.setIdUser(1);
+    	demoUser.setName("Demo User");
+    	
     	model = mappingProcessor.transform(model, demoUser, new Date());
     	//model.write(System.out, "N-TRIPLE");
     	

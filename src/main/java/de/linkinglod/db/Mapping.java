@@ -10,7 +10,7 @@ import javax.persistence.Table;
 
 /**
  * Hibernate class mapping.
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  * 
  */
 @Entity

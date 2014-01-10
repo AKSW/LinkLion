@@ -24,6 +24,7 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import de.linkinglod.db.Algorithm;
+import de.linkinglod.db.MappingHasSource;
 import de.linkinglod.db.RDFSResource;
 import de.linkinglod.db.Link;
 import de.linkinglod.db.LinkType;
@@ -34,7 +35,7 @@ import de.linkinglod.io.Writer;
 import de.linkinglod.util.SQLUtils;
 
 /**
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  * Connection to remote mysql database needs access for the machine from where access is requested! 
  * Better seems: Only localhost access to database! --> testing on localhost
  */
@@ -189,7 +190,6 @@ public class DBCommunication implements Writer {
 				} // TODO finally block? check if linkObject is still 0?
 			}
 
-
 			if (linkSubject != 0 && linkPredicate != 0 && linkObject != 0) {
 				try {
 					createLink(s, linkSubject, linkPredicate, linkObject, hashMappingUrl);
@@ -205,10 +205,11 @@ public class DBCommunication implements Writer {
 
 			if (p.equals(hasSource.toString()) || p.equals(hasTarget.toString())) {
 				try {
-					createSource(o, hashMappingUrl);
+					long idSource = createSource(o);
+					createMappingHasSource(idSource, hashMappingUrl);
 				}
 				catch (ConstraintViolationException e) {
-					System.out.println("Source already existing: " + o);
+					System.out.println("Source or source/mapping relation already existing: " + o);
 				}
 			}
 			
@@ -246,6 +247,14 @@ public class DBCommunication implements Writer {
 		System.out.println(objAlreadyExisting + "objects already existing out of " + objOverall + " objects overall.");
 	}
 
+	private void createMappingHasSource(long idSource, String hashMappingUrl) throws ConstraintViolationException {
+		MappingHasSource mhs = new MappingHasSource();
+		mhs.setIdSource(idSource);
+		mhs.setHashMapping(hashMappingUrl);
+		
+		getSessionAndSave(mhs);	
+	}
+
 	/**
 	 * Get a specific DB object, only working if primary key is String
 	 * @param myClass table to search in
@@ -275,7 +284,7 @@ public class DBCommunication implements Writer {
 		getSessionAndSave(algorithm);
 	}
 
-	private long createSource(String uri, String hashMappingUrl) throws ConstraintViolationException {
+	private long createSource(String uri) throws ConstraintViolationException {
 		Source source = new Source();
 		source.setUri(uri);
 		

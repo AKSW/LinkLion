@@ -12,7 +12,7 @@ import javax.persistence.Table;
 
 /**
  * Hibernate object Algorithm.
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  *
  */
 @Entity
@@ -33,18 +33,18 @@ public class Algorithm implements Serializable {
 	private String parameters;
     private Timestamp creationDate;
 
+	/**
+	 * New Algorithm hibernate object, uri needs to be configured.
+	 */
+	public Algorithm() {
+	}
+	
 	public Timestamp getCreationDate() {
 		return creationDate;
 	}
 
 	public void setCreationDate(Timestamp creationDate) {
 		this.creationDate = creationDate;
-	}
-
-	/**
-	 * New Algorithm hibernate object, uri needs to be configured.
-	 */
-	public Algorithm() {
 	}
 
 	public int getIdAlgorithm() {

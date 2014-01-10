@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 /**
  * Hibernate class LinkType.
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  *
  */
 @Entity
@@ -26,12 +26,6 @@ public class LinkType implements Serializable {
     private long idLinkType;
     @Column(name = "uri", unique = false, nullable = false, length = 100)
     private String uri;
-	
-	public LinkType(long idLinkType, String uri) {
-		super();
-		this.idLinkType = idLinkType;
-		this.uri = uri;
-	}
 
 	public LinkType() {
 	}

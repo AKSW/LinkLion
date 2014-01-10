@@ -8,23 +8,19 @@ import javax.persistence.Table;
 
 /**
  * Hibernate class MappingHasSource.
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  *
  */
 @Entity
 @Table(name="MappingHasSource")
 public class MappingHasSource implements Serializable {
-
-	public MappingHasSource(String hashMapping, int idSource, String type) {
-		super();
-		this.hashMapping = hashMapping;
-		this.idSource = idSource;
-		this.type = type;
+	
+	public MappingHasSource() {
 	}
 
 	private static final long serialVersionUID = 1L;
 	private String hashMapping;
-	private int idSource;
+	private long idSource;
 	private String type;
 	
 	@Id
@@ -37,11 +33,11 @@ public class MappingHasSource implements Serializable {
 	}
 	
 	@Id
-	public int getIdSource() {
+	public long getIdSource() {
 		return idSource;
 	}
 	
-	public void setIdSource(int idSource) {
+	public void setIdSource(long idSource) {
 		this.idSource = idSource;
 	}
 	

@@ -4,23 +4,13 @@ import java.io.Serializable;
 import javax.persistence.*;
 
 /**
- * Hibernate object Framework describing the link discovery framwork.
- * @author markus
+ * Hibernate object Framework describing the link discovery framework.
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  *
  */
 @Entity
 @Table(name="Framework")
 public class Framework implements Serializable {
-	
-	public Framework(int idFramework, String url, String name,
-			String lastVersion, long idOwner) {
-		super();
-		this.idFramework = idFramework;
-		this.url = url;
-		this.name = name;
-		this.lastVersion = lastVersion;
-		this.idOwner = idOwner;
-	}
 
 	private static final long serialVersionUID = 1L;
 	private int idFramework;
@@ -28,6 +18,9 @@ public class Framework implements Serializable {
 	private String name;
 	private String lastVersion;
 	private long idOwner;
+	
+	public Framework() {
+	}
 	
 	@Id
 	public int getIdFramework() {

@@ -16,7 +16,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 /**
  * @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>
- * @author Markus Nentwig
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  */
 public class MD5Utils {
 	

@@ -3,6 +3,10 @@ package de.linkinglod.service;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+/**
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
+ *
+ */
 public class InitSessionFactory {
 	   /** The single instance of hibernate SessionFactory */
 	   private static SessionFactory sessionFactory;

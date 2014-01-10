@@ -8,17 +8,14 @@ import javax.persistence.Table;
 
 /**
  * Hibernate class MappingUsesMapping.
- * @author markus
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  *
  */
 @Entity
 @Table(name="MappingUsesMapping")
 public class MappingUsesMapping implements Serializable {
 
-	public MappingUsesMapping(String mappingOne, String mappingTwo) {
-		super();
-		this.mappingOne = mappingOne;
-		this.mappingTwo = mappingTwo;
+	public MappingUsesMapping() {
 	}
 
 	private static final long serialVersionUID = 1L;
