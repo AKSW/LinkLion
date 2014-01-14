@@ -17,10 +17,10 @@ public class Link implements Serializable {
 
 	private static final long serialVersionUID = 1L;
     @Id
-    @Column(name = "hashLink", unique = true, nullable = false, length = 132)
+    @Column(name = "hashLink", unique = true, nullable = false, length = 128)
 	private String hashLink;
-	private long o1Id;
-	private long o2Id;
+	private long res1Id;
+	private long res2Id;
 	private long linkType;
 	private double similarity;
 	private String hashMapping;
@@ -34,20 +34,20 @@ public class Link implements Serializable {
     	this.hashLink = hash; 
     }
 
-	public long getO1Id() {
-		return o1Id;
+	public long getRes1Id() {
+		return res1Id;
 	}
 
-	public void setO1Id(long o1Id) {
-		this.o1Id = o1Id;
+	public void setRes1Id(long res1Id) {
+		this.res1Id = res1Id;
 	}
 
-	public long getO2Id() {
-		return o2Id;
+	public long getRes2Id() {
+		return res2Id;
 	}
 
-	public void setO2Id(long o2Id) {
-		this.o2Id = o2Id;
+	public void setRes2Id(long res2Id) {
+		this.res2Id = res2Id;
 	}
 
 	public long getLinkType() {
@@ -73,7 +73,4 @@ public class Link implements Serializable {
 	public void setHashMapping(String hashMapping) {
 		this.hashMapping = hashMapping;
 	}
-	
-
-
 }

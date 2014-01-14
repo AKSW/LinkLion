@@ -18,6 +18,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
+ * 
+ * NOT much longer NEEDED, deprecated.
+ * 
  * TODO look for objects which are a literal and not URI
  * TODO testing
  * TODO where do we need to differentiate between literals/resources for objects?

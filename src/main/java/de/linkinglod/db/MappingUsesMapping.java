@@ -40,6 +40,4 @@ public class MappingUsesMapping implements Serializable {
 		this.mappingTwo = mappingTwo;
 	}
 	
-	
-
 }

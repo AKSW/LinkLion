@@ -2,6 +2,7 @@ package de.linkinglod.db;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -20,8 +21,10 @@ public class MappingHasSource implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String hashMapping;
+    @Column(unique = true, nullable = false)
 	private long idSource;
-	private String type;
+    @Column(length = 512)
+	private String sourceType;
 	
 	@Id
 	public String getHashMapping() {
@@ -41,12 +44,12 @@ public class MappingHasSource implements Serializable {
 		this.idSource = idSource;
 	}
 	
-	public String getType() {
-		return type;
+	public String getSourceType() {
+		return sourceType;
 	}
 	
-	public void setType(String type) {
-		this.type = type;
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
 	}
 
 	

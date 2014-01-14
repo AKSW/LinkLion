@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
@@ -58,6 +56,7 @@ public class DBCommunication implements Writer {
 
 	// load properties
 	private Property propSubject = ontoModel.getProperty(rdf + "subject");
+	// check occurrence if more than sameAs links are supported/needed
 	private Property propPredicate = ontoModel.getProperty(rdf + "predicate");
 	private Property propObject = ontoModel.getProperty(rdf + "object");
 	private Property wasDerivedFrom = ontoModel.getProperty(prov + "wasDerivedFrom");
@@ -75,7 +74,7 @@ public class DBCommunication implements Writer {
 	}
 	
 	/**
-	 * Temp main.
+	 * Temp main. Not needed!?
 	 * @param args
 	 * @throws SQLException 
 	 * @throws ClassNotFoundException 
@@ -97,7 +96,9 @@ public class DBCommunication implements Writer {
 	}
 
 	/**
+	 * Complete processing of the given Jena model, each statement is parsed and, if needed, mapped to the database via Hibernate.
 	 * @param dbModel
+	 * @param graph
 	 */
 	@Override
 	public void write(String graph, Model jenaModel) {
@@ -123,18 +124,15 @@ public class DBCommunication implements Writer {
 		for (Statement statement: listModel) {
 
 			// S, P, O of single triple
-			Resource subject = statement.getSubject();     
-			Property predicate = statement.getPredicate(); 
-			RDFNode object = statement.getObject();
-			String s = subject.toString();
-			String p = predicate.toString();
-			String o = object.toString();
+			String subject = statement.getSubject().toString();
+			String predicate = statement.getPredicate().toString();
+			String object = statement.getObject().toString();
 			
 			// isMappingCreated ensures no unneeded DB query at this point
 			if (!isMappingCreated) {
-				if (p.equals(wasDerivedFrom.toString())) {					
+				if (predicate.equals(wasDerivedFrom.toString())) {					
 					try {
-						hashMappingUrl = createMapping(o);
+						hashMappingUrl = createMapping(object);
 						isMappingCreated = true;
 					}
 					catch (ConstraintViolationException e) {
@@ -143,59 +141,61 @@ public class DBCommunication implements Writer {
 			}
 
 			// which RDFSResource is S, P, O in the new Link object
-			if (p.equals(propSubject.toString())) {
+			if (predicate.equals(propSubject.toString())) {
 				++objOverall;
 				try {
-					linkSubject = createRDFSResource(o);
+					linkSubject = createRDFSResource(object);
 				}
 				catch (ConstraintViolationException e) {
 					++objAlreadyExisting;
 					
 					// object is already in DB: get object from DB, return id
-					List<RDFSResource> resList = getIdFromDb(RDFSResource.class, o, "uri");
+					List<RDFSResource> resList = getIdFromDb(RDFSResource.class, object, "uri");
 					linkSubject = resList.get(0).getIdResource();
 
 				} // TODO finally block? check if linkObject is still 0?
 			}
-			else if (p.equals(propPredicate.toString())) {
+			else if (predicate.equals(propPredicate.toString())) {
 
+				// TODO this is only an assumption: if one statement is sameAs, others are MAYBE not sameAs
+				// but at the moment only sameAs is supported!
 				if (isSameAs) {
 					linkPredicate = sameAs;
 				}
 				else {
 					try {
-						linkPredicate = createLinkType(o);
-						if (p.equals("http://www.w3.org/2002/07/owl#sameAs")) {
+						linkPredicate = createLinkType(object);
+						if (predicate.equals("http://www.w3.org/2002/07/owl#sameAs")) {
 							sameAs = linkPredicate;
 							isSameAs = true;
 						}
 					}
 					catch (ConstraintViolationException e) {
-						LinkType lt = (LinkType) getDbObject(LinkType.class, o);
+						LinkType lt = (LinkType) getDbObject(LinkType.class, object);
 						linkPredicate = lt.getIdLinkType();
 					}
 				}
 			}
-			else if (p.equals(propObject.toString())) {
+			else if (predicate.equals(propObject.toString())) {
 				++objOverall;
 				try {
-					linkObject = createRDFSResource(o);
+					linkObject = createRDFSResource(object);
 				}
 				catch (ConstraintViolationException e) {
 					++objAlreadyExisting;
 					
 					// object is already in DB: get object from DB, return id
-					List<RDFSResource> resList = getIdFromDb(RDFSResource.class, o, "uri");
+					List<RDFSResource> resList = getIdFromDb(RDFSResource.class, object, "uri");
 					linkObject = resList.get(0).getIdResource();
 				} // TODO finally block? check if linkObject is still 0?
 			}
 
 			if (linkSubject != 0 && linkPredicate != 0 && linkObject != 0) {
 				try {
-					createLink(s, linkSubject, linkPredicate, linkObject, hashMappingUrl);
+					createLink(subject, linkSubject, linkPredicate, linkObject, hashMappingUrl);
 				}
 				catch (ConstraintViolationException e) {
-					System.out.println("Link already existing: " + s);
+					System.out.println("Link already existing: " + subject);
 				}
 				
 				linkSubject = 0;
@@ -203,21 +203,21 @@ public class DBCommunication implements Writer {
 				linkObject = 0;
 			}
 
-			if (p.equals(hasSource.toString()) || p.equals(hasTarget.toString())) {
+			if (predicate.equals(hasSource.toString()) || predicate.equals(hasTarget.toString())) {
 				try {
-					long idSource = createSource(o);
+					long idSource = createSource(object);
 					createMappingHasSource(idSource, hashMappingUrl);
 				}
 				catch (ConstraintViolationException e) {
-					System.out.println("Source or source/mapping relation already existing: " + o);
+					System.out.println("Source or source/mapping relation already existing: " + object);
 				}
 			}
 			
 			// TODO User
 			// TODO Framework
-			if (p.equals(wasGeneratedBy.toString())) {
+			if (predicate.equals(wasGeneratedBy.toString())) {
 				try {
-					createAlgorithm(o, hashMappingUrl);
+					createAlgorithm(object, hashMappingUrl);
 					System.out.println("Algorithm added");
 				}
 				catch (ConstraintViolationException e) {
@@ -226,11 +226,11 @@ public class DBCommunication implements Writer {
 			}
 			
 			// TODO not working in test, enable later, not EVERY generatedAtTime is valid for the mapping
-			if (p.equals(generatedAtTime.toString()) ) { //&& s.equals(hashMappingUrl)) { 
-				Mapping mapping = (Mapping) getDbObject(Mapping.class, s);	
+			if (predicate.equals(generatedAtTime.toString()) ) { //&& s.equals(hashMappingUrl)) { 
+				Mapping mapping = (Mapping) getDbObject(Mapping.class, subject);	
 
 				// discard ^^xsd:date at the end
-				String time = SQLUtils.convertDateSeparators(o.substring(0, o.lastIndexOf("^") - 1));
+				String time = SQLUtils.convertDateSeparators(object.substring(0, object.lastIndexOf("^") - 1));
 				Timestamp value = Timestamp.valueOf(time);
 				
 				mapping.setTimeGenerated(value);
@@ -247,6 +247,12 @@ public class DBCommunication implements Writer {
 		System.out.println(objAlreadyExisting + "objects already existing out of " + objOverall + " objects overall.");
 	}
 
+	/**
+	 * Create a new MappingHasSource in database (via Hibernate).
+	 * @param idSource
+	 * @param hashMappingUrl
+	 * @throws ConstraintViolationException
+	 */
 	private void createMappingHasSource(long idSource, String hashMappingUrl) throws ConstraintViolationException {
 		MappingHasSource mhs = new MappingHasSource();
 		mhs.setIdSource(idSource);
@@ -270,7 +276,7 @@ public class DBCommunication implements Writer {
 	}
 
 	/**
-	 * Creates an algorithm, url needs to be unique, is NOT good implemented for now!
+	 * Creates an algorithm in the database (via Hibernate), url needs to be unique, is NOT good implemented for now!
 	 * @param algoUri
 	 * @param hashMappingUrl
 	 * @throws MySQLIntegrityConstraintViolationException 
@@ -296,7 +302,9 @@ public class DBCommunication implements Writer {
 	/**
 	 * Get db session and search for string in specific column (based on parameter targetCol) of table.
 	 * 
-	 * Likely to be not needed for all classes. Primary Key and other indexed structures can return error code if object is already created.
+	 * TODO Check if this is fixed now: Likely to be not needed for all classes. Primary Key and other 
+	 * indexed structures can return error code if object is already created.
+	 * 
 	 * @param <T> table to be searched in
 	 * @param targetString search criterion
 	 * @param targetCol search in this column
@@ -314,6 +322,7 @@ public class DBCommunication implements Writer {
 	}
 
 	/**
+	 * Search for a specific column in the database table of the given Java class.
 	 * @param myClass
 	 * @param targetString
 	 * @param criteria
@@ -340,7 +349,7 @@ public class DBCommunication implements Writer {
 	}
 
 	/**
-	 * Create a new RDFSResource with unique ID.
+	 * Create a new RDFSResource (via Hibernate) with unique ID.
 	 * @param uri
 	 * @return Unique ID of the newly generated RDFSResource
 	 * @throws MySQLIntegrityConstraintViolationException 
@@ -373,7 +382,7 @@ public class DBCommunication implements Writer {
 	}
 	
 	/**
-	 * Create a new LinkType with unique ID.
+	 * Create a new LinkType (via Hibernate) with unique ID.
 	 * @param uri
 	 * @return Unique ID of the newly generated LinkType
 	 * @throws MySQLIntegrityConstraintViolationException 
@@ -388,7 +397,7 @@ public class DBCommunication implements Writer {
 	}
 	
 	/**
-	 * test
+	 *  Create a User object in the database (via Hibernate).
 	 * @return
 	 * @throws MySQLIntegrityConstraintViolationException 
 	 */
@@ -404,7 +413,7 @@ public class DBCommunication implements Writer {
 	}
 
 	/**
-	 * Create a Link object in the database and return the hashLink of the already saved link.
+	 * Create a Link object in the database (via Hibernate) and return the hashLink of the already saved link.
 	 * @param hashLink
 	 * @param subject subject
 	 * @param predicate predicate
@@ -418,8 +427,8 @@ public class DBCommunication implements Writer {
 		Link link = new Link();
 
 		link.setHashLink(hashLink);
-		link.setO1Id(subject);
-		link.setO2Id(object);
+		link.setRes1Id(subject);
+		link.setRes2Id(object);
 		link.setLinkType(predicate);
 		link.setHashMapping(hashMappingUrl);
 		
@@ -429,7 +438,7 @@ public class DBCommunication implements Writer {
 	}
 
 	/**
-	 * Create a Mapping object in the database.
+	 * Create a Mapping object in the database (via Hibernate).
 	 * @param hashUrl
 	 * @return 
 	 * @throws MySQLIntegrityConstraintViolationException 
