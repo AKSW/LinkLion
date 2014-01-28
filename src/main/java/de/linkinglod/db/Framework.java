@@ -1,6 +1,7 @@
 package de.linkinglod.db;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
 
 /**
@@ -13,7 +14,10 @@ import javax.persistence.*;
 public class Framework implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private int idFramework;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "idFramework", unique = true, nullable = false)
+	private long idFramework;
 	private String url;
 	private String name;
 	private String lastVersion;
@@ -22,12 +26,11 @@ public class Framework implements Serializable {
 	public Framework() {
 	}
 	
-	@Id
-	public int getIdFramework() {
+	public long getIdFramework() {
 		return idFramework;
 	}
 	
-	public void setIdFramework(int idFramework) {
+	public void setIdFramework(long idFramework) {
 		this.idFramework = idFramework;
 	}
 	

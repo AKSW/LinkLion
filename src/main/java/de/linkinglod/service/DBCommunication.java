@@ -4,7 +4,6 @@ import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -22,6 +21,7 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import de.linkinglod.db.Algorithm;
+import de.linkinglod.db.Framework;
 import de.linkinglod.db.MappingHasSource;
 import de.linkinglod.db.RDFSResource;
 import de.linkinglod.db.Link;
@@ -46,6 +46,7 @@ public class DBCommunication implements Writer {
 	private static String localServer = LLProp.getString("DBCommunication.localServer");
 	
 	private Model ontoModel = OntologyLoader.getOntModel();
+	private User fakeUser = null;
 
 	// load namespaces
 	private String rdf = ontoModel.getNsPrefixURI("rdf");
@@ -102,6 +103,8 @@ public class DBCommunication implements Writer {
 	 */
 	@Override
 	public void write(String graph, Model jenaModel) {
+		
+		log.debug("DBCommunication.write()");
 
 		if (jenaModel.isEmpty()) {
 			System.out.println("saveModel(): jenaModel.isEmpty(): " + jenaModel.isEmpty());
@@ -149,9 +152,8 @@ public class DBCommunication implements Writer {
 				catch (ConstraintViolationException e) {
 					++objAlreadyExisting;
 					
-					// object is already in DB: get object from DB, return id
-					List<RDFSResource> resList = getIdFromDb(RDFSResource.class, object, "uri");
-					linkSubject = resList.get(0).getIdResource();
+					RDFSResource res = (RDFSResource) getDbObjectFromAttr(RDFSResource.class, object, "uri");
+					linkSubject = res.getIdResource();
 
 				} // TODO finally block? check if linkObject is still 0?
 			}
@@ -171,7 +173,7 @@ public class DBCommunication implements Writer {
 						}
 					}
 					catch (ConstraintViolationException e) {
-						LinkType lt = (LinkType) getDbObject(LinkType.class, object);
+						LinkType lt = (LinkType) getDbObjectFromId(LinkType.class, object);
 						linkPredicate = lt.getIdLinkType();
 					}
 				}
@@ -184,9 +186,8 @@ public class DBCommunication implements Writer {
 				catch (ConstraintViolationException e) {
 					++objAlreadyExisting;
 					
-					// object is already in DB: get object from DB, return id
-					List<RDFSResource> resList = getIdFromDb(RDFSResource.class, object, "uri");
-					linkObject = resList.get(0).getIdResource();
+					RDFSResource res = (RDFSResource) getDbObjectFromAttr(RDFSResource.class, object, "uri");
+					linkObject = res.getIdResource();
 				} // TODO finally block? check if linkObject is still 0?
 			}
 
@@ -195,7 +196,7 @@ public class DBCommunication implements Writer {
 					createLink(subject, linkSubject, linkPredicate, linkObject, hashMappingUrl);
 				}
 				catch (ConstraintViolationException e) {
-					System.out.println("Link already existing: " + subject);
+					log.debug("Link already existing: " + subject);
 				}
 				
 				linkSubject = 0;
@@ -209,7 +210,7 @@ public class DBCommunication implements Writer {
 					createMappingHasSource(idSource, hashMappingUrl);
 				}
 				catch (ConstraintViolationException e) {
-					System.out.println("Source or source/mapping relation already existing: " + object);
+					log.debug("Source or source/mapping relation already existing: " + object);
 				}
 			}
 			
@@ -218,7 +219,7 @@ public class DBCommunication implements Writer {
 			if (predicate.equals(wasGeneratedBy.toString())) {
 				try {
 					createAlgorithm(object, hashMappingUrl);
-					System.out.println("Algorithm added");
+					log.debug("Algorithm added");
 				}
 				catch (ConstraintViolationException e) {
 					
@@ -226,25 +227,63 @@ public class DBCommunication implements Writer {
 			}
 			
 			// TODO not working in test, enable later, not EVERY generatedAtTime is valid for the mapping
-			if (predicate.equals(generatedAtTime.toString()) ) { //&& s.equals(hashMappingUrl)) { 
-				Mapping mapping = (Mapping) getDbObject(Mapping.class, subject);	
+			if (predicate.equals(generatedAtTime.toString())) { 
 
-				// discard ^^xsd:date at the end
-				String time = SQLUtils.convertDateSeparators(object.substring(0, object.lastIndexOf("^") - 1));
+				String timeAndTimezone = SQLUtils.convertDateSeparators(object);
+				String time = SQLUtils.toTimestamp(timeAndTimezone);
 				Timestamp value = Timestamp.valueOf(time);
 				
-				mapping.setTimeGenerated(value);
-				
-				try {
-					getSessionAndSave(mapping);
-				} catch (ConstraintViolationException e) {
-					e.printStackTrace();
+				if (subject.equals(hashMappingUrl)) {
+					Mapping mapping = (Mapping) getDbObjectFromId(Mapping.class, subject);
+					mapping.setTimeGenerated(value);
+
+					try {
+						getSessionAndSave(mapping);
+					} catch (ConstraintViolationException e) {
+						e.printStackTrace();
+					}
+					log.debug("Mapping Date added");
 				}
-				System.out.println("Date added");
+				if (subject.contains("http://www.linklion.org/algorithm/")) { // TODO rework
+					Algorithm algo = (Algorithm) getDbObjectFromAttr(Algorithm.class, subject, "url");
+					algo.setCreationDate(value);
+
+					try {
+						getSessionAndSave(algo);
+					} catch (ConstraintViolationException e) {
+						e.printStackTrace();
+					}
+					log.debug("Algorithm Date added");
+				}
+			}
+			
+			// Framework
+			if (predicate.equals(wasGeneratedBy.toString())) {
+				try {
+					createFramework(object);
+				}
+				catch (ConstraintViolationException e) {
+					log.debug("Framework already existing: " + object);
+				}
 			}
 		}
 		
+		InitSessionFactory.getInstance().getCurrentSession().close();
 		System.out.println(objAlreadyExisting + "objects already existing out of " + objOverall + " objects overall.");
+	}
+
+	/**
+	 * Create a new Framework in database (via Hibernate).
+	 * @param name
+	 * @return
+	 */
+	private long createFramework(String name) {
+		Framework f = new Framework();
+		f.setName(name);
+		f.setIdOwner(fakeUser.getIdUser());
+		
+		getSessionAndSave(f);			
+		return f.getIdFramework();
 	}
 
 	/**
@@ -262,34 +301,25 @@ public class DBCommunication implements Writer {
 	}
 
 	/**
-	 * Get a specific DB object, only working if primary key is String
-	 * @param myClass table to search in
-	 * @param searchTerm name of object to fetch
-	 * @return resulting object of class myClass
-	 */
-	private <T> Object getDbObject(Class<T> myClass, String searchTerm) {
-		Session session = InitSessionFactory.getInstance().getCurrentSession();
-		@SuppressWarnings("unused")
-		Transaction tx = session.beginTransaction();
-		
-		return session.load(myClass, new String(searchTerm));
-	}
-
-	/**
 	 * Creates an algorithm in the database (via Hibernate), url needs to be unique, is NOT good implemented for now!
-	 * @param algoUri
+	 * @param algoUrl
 	 * @param hashMappingUrl
 	 * @throws MySQLIntegrityConstraintViolationException 
 	 */
-	private void createAlgorithm(String algoUri, String hashMappingUrl) throws ConstraintViolationException {
+	private void createAlgorithm(String algoUrl, String hashMappingUrl) throws ConstraintViolationException {
 		// TODO not really unique
 		Algorithm algorithm = new Algorithm();
-		algorithm.setUri(algoUri);
+		algorithm.setUrl(algoUrl);
 		algorithm.setHashMapping(hashMappingUrl);
 		
 		getSessionAndSave(algorithm);
 	}
 
+	/**
+	 * @param uri
+	 * @return
+	 * @throws ConstraintViolationException
+	 */
 	private long createSource(String uri) throws ConstraintViolationException {
 		Source source = new Source();
 		source.setUri(uri);
@@ -297,6 +327,22 @@ public class DBCommunication implements Writer {
 		getSessionAndSave(source);
 		
 		return source.getIdSource();
+	}
+
+	/**
+	 * Get a specific DB object, only working if primary key is String
+	 * @param myClass table to search in
+	 * @param searchTerm name of object to fetch
+	 * @return resulting object of class myClass
+	 */
+	private <T> Object getDbObjectFromId(Class<T> myClass, String searchTerm) {
+		Session session = InitSessionFactory.getInstance().getCurrentSession();
+		@SuppressWarnings("unused")
+		Transaction tx = session.beginTransaction();
+		
+		Object dbObject = session.load(myClass, new String(searchTerm));
+		
+		return dbObject;
 	}
 	
 	/**
@@ -310,7 +356,7 @@ public class DBCommunication implements Writer {
 	 * @param targetCol search in this column
 	 * @return list of instances applying to criterion
 	 */
-	private <T> List<T> getIdFromDb(Class<T> myClass, String targetString, String targetCol) {
+	private <T> Object getDbObjectFromAttr(Class<T> myClass, String targetString, String targetCol) {
 		Session session = InitSessionFactory.getInstance().getCurrentSession();
 		@SuppressWarnings("unused")
 		Transaction tx = session.beginTransaction();
@@ -318,7 +364,7 @@ public class DBCommunication implements Writer {
 		
 		criteria = createRestrictions(myClass, targetString, targetCol, criteria);
 		
-		return criteria.list();
+		return criteria.list().get(0);
 	}
 
 	/**
@@ -366,8 +412,9 @@ public class DBCommunication implements Writer {
 	/**
 	 * Establish a session to the database and save the (generic) hibernate object.
 	 * @param hibObject
+	 * TODO where to end session?
 	 */
-	private <T> void getSessionAndSave(T hibObject) throws ConstraintViolationException {
+	public <T> void getSessionAndSave(T hibObject) throws ConstraintViolationException {
 		
 		Session session = InitSessionFactory.getInstance().getCurrentSession();
 		Transaction tx = session.beginTransaction();
@@ -404,9 +451,7 @@ public class DBCommunication implements Writer {
 	private User createUser() throws ConstraintViolationException {
 		User testUser = new User();
 		
-		long idUser = 3;
 		testUser.setName("foo bar");
-		testUser.setIdUser(idUser);
 		getSessionAndSave(testUser);
 
 		return testUser;
@@ -449,9 +494,15 @@ public class DBCommunication implements Writer {
 
 		Mapping mapping = new Mapping();
 		mapping.setHashMapping(hashUrl);
+		mapping.setIdOwner(fakeUser.getIdUser());
+		mapping.setIdUploader(fakeUser.getIdUser());
 		
 		getSessionAndSave(mapping);
 		
 		return mapping.getHashMapping();
+	}
+
+	public void createUser(User demoUser) {
+		fakeUser = demoUser;
 	}
 }

@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -17,19 +19,22 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.PropertyConfigurator;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.FormDataParam;
 
 import de.linkinglod.db.User;
 import de.linkinglod.io.Reader;
 import de.linkinglod.rdf.RDFMappingProcessor;
 import de.linkinglod.rdf.TripleStoreWriter;
-
  
 /**
  * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
@@ -65,17 +70,29 @@ public class UploadFileService implements Reader {
     	System.out.println("generateModelFromStream().isEmpty(): " + model.isEmpty());
     	
     	RDFMappingProcessor processor = new RDFMappingProcessor(fileLocation);
+    	TripleStoreWriter tsw = new TripleStoreWriter();
+    	DBCommunication dbComm = new DBCommunication();
     	
+    	/*
+    	 * TODO  note: Hibernate User() should not be used here, it is only for creating (hibernate) database User() objects! 
+    	 * TODO REWORK this if users are implemented!
+    	 */
     	User demoUser = new User(); // TODO next: manage user login
-    	demoUser.setIdUser(1);
+    	// idUser is created with auto_increment
     	demoUser.setName("Demo User");
+		try {
+	    	dbComm.getSessionAndSave(demoUser);
+		} catch (ConstraintViolationException e) {
+			e.printStackTrace();
+		}
+    	
     	modelOut = processor.transform(model, demoUser, new Date());
     	
-//    	TripleStoreWriter tsw = new TripleStoreWriter();
-//    	tsw.write(LLProp.getString("TripleStore.graph"), modelOut);
-//    	tsw.write(LLProp.getString("TripleStore.graph"), OntologyLoader.getOntModel());
+    	tsw.write(LLProp.getString("TripleStore.graph"), modelOut);
+    	tsw.write(LLProp.getString("TripleStore.graph"), OntologyLoader.getOntModel());
     	
-    	DBCommunication dbComm = new DBCommunication();
+    	dbComm.createUser(demoUser);
+    	
     	dbComm.write("TripleStore.graph", modelOut);
     	dbComm.write("TripleStore.graph", OntologyLoader.getOntModel());
     	

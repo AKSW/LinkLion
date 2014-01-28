@@ -11,7 +11,7 @@
 		</layout>
 	</appender>
 
-	<logger name="de.linkinglod" level="TRACE" />
+	<!--  <logger name="de.linkinglod" level="TRACE" /> -->
 	
 	<logger name="org.hibernate.SQL" additivity="false">
 		<level value="DEBUG" />

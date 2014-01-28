@@ -21,9 +21,14 @@ public class Mapping implements Serializable {
 	@Id
     @Column(name = "hashMapping", unique = true, nullable = false, length = 132)
 	private String hashMapping;
+    @Column(name = "idFramework", nullable = false, length = 11)
+	private long idFramework;
+    private String semanticType;
 	private Timestamp timeGenerated;
 	private long idOwner;
 	private long idUploader;
+	private long idLinkType;
+	
 	
 	/**
 	 *  Create a Mapping hibernate object.
@@ -60,5 +65,21 @@ public class Mapping implements Serializable {
 	}
 	public void setIdUploader(long idUploader) {
 		this.idUploader = idUploader;
+	}
+
+	public long getIdLinkType() {
+		return idLinkType;
+	}
+
+	public void setIdLinkType(long idLinkType) {
+		this.idLinkType = idLinkType;
+	}
+
+	public String getSemanticType() {
+		return semanticType;
+	}
+
+	public void setSemanticType(String semanticType) {
+		this.semanticType = semanticType;
 	}
 }

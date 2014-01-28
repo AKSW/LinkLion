@@ -28,8 +28,8 @@ public class Algorithm implements Serializable {
 	private int idFramework;
 	@Column(name = "hashMapping", nullable = false)
 	private String hashMapping;
-	@Column(name = "uri", nullable = false)
-	private String uri;
+	@Column(name = "url", nullable = false)
+	private String url;
 	private String parameters;
     private Timestamp creationDate;
 
@@ -71,12 +71,12 @@ public class Algorithm implements Serializable {
 		this.hashMapping = hashMapping;
 	}
 
-	public String getUri() {
-		return uri;
+	public String getUrl() {
+		return url;
 	}
 
-	public void setUri(String uri) {
-		this.uri = uri;
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	public String getParameters() {
