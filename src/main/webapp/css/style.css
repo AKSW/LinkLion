@@ -1,4 +1,4 @@
-.sintony {
+div, h1, h2, h3, h4, .sintony {
 	font-family: 'Sintony', sans-serif;
 }
 
@@ -7,6 +7,64 @@
 	font-weight: bold;
 }
 
-.config-item {
-	margin: 5px;
+.centered-text {
+	text-align: center;
+}
+
+.align-text {
+	position: relative;
+	top: 7px; 
+}
+
+#header {
+	box-shadow: 0px 3px 7px rgba(0, 0, 0, 0.2);
+}
+
+.jumbotron {
+    background-size: cover;
+    background-image: url("../images/uni-leipzig.jpg");
+    background-position: bottom;
+    /* The url is relative to the document, not to the css file! */
+    /* Prefer absolute urls to avoid confusion. */
+    -ms-behavior: url("backgroundsize.min.htc");
+    color: #ffffff;
+    text-shadow: 1px 1px 0px #333333;
+    box-shadow: 0px -3px 7px rgba(0, 0, 0, 0.2) inset;
+}
+
+#logo {
+	margin-top: 58px;
+}
+
+#buttons {
+	margin-top: 20px;
+}
+
+#configuration {
+	padding-top: 0;
+}
+
+#configuration h4 {
+	padding-left: 20px;
+}
+
+.browse-file {
+	position:absolute;
+	z-index:2;
+	top:0;
+	left:0;
+	filter: alpha(opacity=0);
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+	opacity:0;
+	background-color:transparent;
+	color:transparent;
+}
+
+#new-framework .input-group, #new-algorithm .input-group, #dataset-details .input-group {
+	margin-bottom: 5px;
+}
+
+#vocabulary th {
+	width: 200px;
+	padding-left: 15px;
 }
