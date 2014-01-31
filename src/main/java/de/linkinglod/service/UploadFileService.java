@@ -173,6 +173,7 @@ public class UploadFileService implements Reader {
 	 */
 	private static InputStream generateStreamFromFile(String fileLocation) throws FileNotFoundException {
 		InputStream stream = null;
+		
 		stream = new FileInputStream(fileLocation);
 		log.debug("File " + fileLocation + " read.");
 		
@@ -187,6 +188,16 @@ public class UploadFileService implements Reader {
 	public Model generateModelFromStream(InputStream stream) {
 		
 		Model model = ModelFactory.createDefaultModel();
+		
+		// TODO support different InputFormats like "RDF/XML", "N-TRIPLE", "TURTLE" (or "TTL") and "N3".
+		// Malformed statements have to be corrected/deleted manually, 
+		// create error page for this:
+		// org.apache.jena.riot.RiotException: [line: 1, col: 94] Unknown char: /(47;0x002F)
+		// (example statement for this sort of error (missing <> in object): 
+		// <http://create.canterbury.ac.uk/id/subject/DJK> 
+		//   <http://www.w3.org/2002/07/owl#sameAs> 
+		//   https://eprints.soas.ac.uk/id/subject/DJK .
+		// )
 		model.read(stream, null, LLProp.getString("tripleInputFormat"));
 		log.debug("Read " + model.size() + " elements.");
 

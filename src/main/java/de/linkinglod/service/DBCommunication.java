@@ -173,7 +173,7 @@ public class DBCommunication implements Writer {
 						}
 					}
 					catch (ConstraintViolationException e) {
-						LinkType lt = (LinkType) getDbObjectFromId(LinkType.class, object);
+						LinkType lt = (LinkType) getDbObjectFromAttr(LinkType.class, object, "uri");
 						linkPredicate = lt.getIdLinkType();
 					}
 				}
@@ -339,7 +339,7 @@ public class DBCommunication implements Writer {
 		Session session = InitSessionFactory.getInstance().getCurrentSession();
 		@SuppressWarnings("unused")
 		Transaction tx = session.beginTransaction();
-		
+		// LinkType sameAs
 		Object dbObject = session.load(myClass, new String(searchTerm));
 		
 		return dbObject;
@@ -386,6 +386,9 @@ public class DBCommunication implements Writer {
 			}
 			else if (myClass.equals(Link.class)) {
 				criteria.add(Restrictions.eq("hashLink", targetString));
+			}
+			else if (myClass.equals(LinkType.class)) {
+				criteria.add(Restrictions.eq("uri", targetString));
 			}
 		}
 		else {

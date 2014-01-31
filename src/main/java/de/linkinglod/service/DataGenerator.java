@@ -67,9 +67,8 @@ public class DataGenerator {
     	//model.write(System.out, "N-TRIPLE");
     	
     	dbComm = new DBCommunication();
-
-		dbComm.write(LLProp.getString("TripleStore.graph"), model);
     	
+		dbComm.write(LLProp.getString("TripleStore.graph"), model);
 	}
 	
 	/**
@@ -80,23 +79,26 @@ public class DataGenerator {
 	 */
 	private static InputStream generateStreamFromFile(String fileLocation) throws FileNotFoundException {
 		InputStream stream = null;
+		
 		stream = new FileInputStream(fileLocation);
 		log.debug("File " + fileLocation + " read.");
 		
 		return stream;
 	}
-	
+
 	/**
 	 * Build a Jena model from stream.
 	 * @param stream
 	 * @return
+	 * @throws IOException 
 	 */
-	public static Model generateModelFromStream(InputStream stream) {
-		
+	public static Model generateModelFromStream(InputStream stream) throws IOException {
 		Model model = ModelFactory.createDefaultModel();
+				
 		model.read(stream, null, LLProp.getString("tripleInputFormat"));
 		log.debug("Read " + model.size() + " elements.");
-
+        stream.close();  
+        
 		return model;
 	}
 
