@@ -42,7 +42,7 @@ public class DBCommunication implements Writer {
 	private static Logger log = LoggerFactory.getLogger(DBCommunication.class);
 	private static String user = LLProp.getString("DBCommunication.user");
 	private static String password = LLProp.getString("DBCommunication.password");
-	private static String server = LLProp.getString("DBCommunication.server");
+	//private static String server = LLProp.getString("DBCommunication.server");
 	private static String localServer = LLProp.getString("DBCommunication.localServer");
 	
 	private Model ontoModel = OntologyLoader.getOntModel();
