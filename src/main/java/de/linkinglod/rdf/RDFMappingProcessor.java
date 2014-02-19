@@ -3,7 +3,6 @@ package de.linkinglod.rdf;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -16,7 +15,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.sun.jersey.multipart.FormDataBodyPart;
 
 import de.linkinglod.db.User;
 import de.linkinglod.io.MappingProcessor;
@@ -51,6 +49,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 	
 	private Model ontoModel = OntologyLoader.getOntModel();
 	private Model modelOut = ModelFactory.createDefaultModel();
+	private Resource mapping;
 	
 	private String mappingURI;
 	private String ns = LLProp.getString("ns");
@@ -84,14 +83,11 @@ public class RDFMappingProcessor implements MappingProcessor {
 	private Resource mapClass = ontoModel.getResource(llont + "Mapping");
 	private Resource lnkClass = ontoModel.getResource(llont + "Link");
 	
-	// create mapping instance of type Mapping
-	private Resource mapping = modelOut.createResource(getMappingURI(), mapClass);
-	
 	private Property hasSource = ontoModel.getProperty(llont + "hasSource");
 	private Property hasTarget = ontoModel.getProperty(llont + "hasTarget");
 
 	// link namespace
-	String lnkString = ns + lim + LLProp.getString("vocabularyLink") + lim;
+	private String lnkString = ns + lim + LLProp.getString("vocabularyLink") + lim;
 	
 	/**
 	 * Constructor
@@ -101,6 +97,9 @@ public class RDFMappingProcessor implements MappingProcessor {
 	public RDFMappingProcessor(String file) throws IOException {
 		String hash = MD5Utils.computeChecksum(file);
 		mappingURI = ns + lim + vocMap + lim + hash;
+		
+		// create mapping instance of type Mapping
+		mapping = modelOut.createResource(mappingURI, mapClass);
 	}
 
 	@Override
@@ -109,7 +108,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 		// copy prefixes (see class Javadoc above)
 		modelOut.setNsPrefixes(ontoModel.getNsPrefixMap());
 		Literal dateLiteral = modelOut.createTypedLiteral(XMLUtils.toXSD(timeStamp), XSDDatatype.XSDdateTime);
-
+		
 		// add mapping properties
 		modelOut.add(mapping, genAt, dateLiteral)
 			.add(mapping, wasGenBy, algorithm)
