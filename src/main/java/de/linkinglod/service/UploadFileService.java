@@ -65,36 +65,14 @@ public class UploadFileService implements Reader {
 	public Response uploadFile(FormDataMultiPart form) throws IOException, URISyntaxException {
 		log.debug("File upload service triggered!");
 
-		FormDataBodyPart filePart = form.getField("file");
-        ContentDisposition headerOfFilePart =  filePart.getContentDisposition();
-        InputStream stream = filePart.getValueAs(InputStream.class);
-        
-        // all names from the form data (start.html)
-//        String newFwName = form.getField("new-framework-name").getValue();
-//        String newFwVersion = form.getField("new-framework-version").getValue();
-//        String newFwUrl = form.getField("new-framework-url").getValue();
-//        String newAlgName = form.getField("new-algorithm-name").getValue();
-//        String newAlgVersion = form.getField("new-algorithm-version").getValue();
-//        String newAlgUrl = form.getField("new-algorithm-url").getValue();
-//        String sourceUri = form.getField("source-uri").getValue();
-//        String sourceName = form.getField("source-name").getValue();
-//        String targetUri = form.getField("target-uri").getValue();
-//        String targetName = form.getField("target-name").getValue();
-        
-        Map<String, List<FormDataBodyPart>> formParts = form.getFields();
-        
-		fileLocation = System.getProperty("java.io.tmpdir") + headerOfFilePart.getFileName();
-		writeSourceToFile(stream, fileLocation);
+		writeSourceFromFormToFile(form);
 		
 		// TODO model read from fileLocation needed? perhaps read from stream?
 		Model model = read(fileLocation);
     	System.out.println("generateModelFromStream().isEmpty(): " + model.isEmpty());
     	
     	RDFMappingProcessor processor = new RDFMappingProcessor(fileLocation);
-    	processor.setDataset1(formParts.get("source-name").get(0).getValue());
-    	processor.setDataset2(formParts.get("target-name").get(0).getValue());
-    	processor.setAlgorithm(formParts.get("new-algorithm-name").get(0).getValue());
-    	processor.setFramework(formParts.get("new-framework-name").get(0).getValue());
+    	processor = readFormAndAddToRDFProc(form, processor);
     	
     	TripleStoreWriter tsw = new TripleStoreWriter();
     	DBCommunication dbComm = new DBCommunication();
@@ -123,8 +101,7 @@ public class UploadFileService implements Reader {
     	dbComm.write("TripleStore.graph", modelOut);
     	dbComm.write("TripleStore.graph", OntologyLoader.getOntModel());
     	
-		String fileOutLocation = System.getProperty("java.io.tmpdir") + headerOfFilePart.getFileName() + "_out";
-		writeModifiedDataToFile(fileOutLocation);
+ 		writeModifiedDataToFile(form);
 		
 		// FIXME Adding this throws an exception, but on line 162. Investigate why.
 //		File f = new File(fileOutLocation);
@@ -136,6 +113,28 @@ public class UploadFileService implements Reader {
 		return Response.status(200).entity("<html><head><meta http-equiv='refresh' content='0;url=../../success.html'></head></html>").build();
 	}
 	
+	private RDFMappingProcessor readFormAndAddToRDFProc(FormDataMultiPart form,
+			RDFMappingProcessor processor) {
+        Map<String, List<FormDataBodyPart>> formParts = form.getFields();
+        
+    	processor.setDatasetAndType(formParts.get("source-name").get(0).getValue(), 
+    			form.getField("source-uri").getValue(), 
+    			"source");
+    	processor.setDatasetAndType(formParts.get("target-name").get(0).getValue(), 
+    			form.getField("target-uri").getValue(), 
+    			"target");
+    	processor.setFramework(formParts.get("new-framework-name").get(0).getValue(),
+    			formParts.get("new-framework-version").get(0).getValue(),
+    			formParts.get("new-framework-url").get(0).getValue()
+    			);
+    	processor.setAlgorithm(formParts.get("new-algorithm-name").get(0).getValue(),
+    			formParts.get("new-algorithm-version").get(0).getValue(),
+    			formParts.get("new-algorithm-url").get(0).getValue()
+    			);
+
+        return processor;
+	}
+
 	/**
 	 * Read file and create Jena model.
 	 * @param stream
@@ -163,12 +162,15 @@ public class UploadFileService implements Reader {
 	 * @param fileLocation
 	 * @throws IOException 
 	 */
-	private void writeSourceToFile(InputStream stream, String fileLocation) throws IOException {
-
+	private void writeSourceFromFormToFile(FormDataMultiPart form) throws IOException {
+		FormDataBodyPart filePart = form.getField("file");
+        ContentDisposition headerOfFilePart =  filePart.getContentDisposition();
+        InputStream stream = filePart.getValueAs(InputStream.class);
+		fileLocation = System.getProperty("java.io.tmpdir") + headerOfFilePart.getFileName();
 		OutputStream out = new FileOutputStream(new File(fileLocation));
+		
 		int read = 0;
 		byte[] bytes = new byte[1024];
-
 		out = new FileOutputStream(new File(fileLocation));
 		while ((read = stream.read(bytes)) != -1) {
 			out.write(bytes, 0, read);
@@ -177,9 +179,11 @@ public class UploadFileService implements Reader {
 		out.close();
 	}
 
-	private void writeModifiedDataToFile(String fileLocation) throws IOException {
+	private void writeModifiedDataToFile(FormDataMultiPart form) throws IOException {
+		String fileName = form.getField("file").getContentDisposition().getFileName();
+		String fileOutLocation = System.getProperty("java.io.tmpdir") + fileName + "_out";
 
-		OutputStream out = new FileOutputStream(new File(fileLocation));
+		OutputStream out = new FileOutputStream(new File(fileOutLocation));
 		modelOut.write(out, LLProp.getString("tripleOutputFormat"));
 		out.close();
 	}

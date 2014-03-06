@@ -18,7 +18,6 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import de.linkinglod.db.User;
 import de.linkinglod.io.MappingProcessor;
-import de.linkinglod.service.LLProp;
 import de.linkinglod.service.OntologyLoader;
 import de.linkinglod.util.MD5Utils;
 import de.linkinglod.util.XMLUtils;
@@ -36,6 +35,7 @@ import de.linkinglod.util.XMLUtils;
  * dcterms	http://purl.org/dc/terms/						<br/>
  * llont	http://www.linklion.org/ontology#				<br/>
  * llalg	http://www.linklion.org/algorithm/				<br/>
+ * lllink	http://www.linklion.org/link/					<br/>
  * lldat	http://www.linklion.org/dataset/				<br/>
  * llfw		http://www.linklion.org/framework/				<br/>
  * llmap	http://www.linklion.org/mapping/				<br/>
@@ -52,43 +52,45 @@ public class RDFMappingProcessor implements MappingProcessor {
 	private Resource mapping;
 	
 	private String mappingURI;
-	private String ns = LLProp.getString("ns");
-	private String lim = LLProp.getString("delimiter");
-	private String vocMap = LLProp.getString("vocabularyMapping");
 	
 	// load namespaces
 	private String rdf = ontoModel.getNsPrefixURI("rdf");
 	private String prov = ontoModel.getNsPrefixURI("prov");
+	private String foaf = ontoModel.getNsPrefixURI("foaf");
+	private String doap = ontoModel.getNsPrefixURI("doap");
+	private String voidVoc = ontoModel.getNsPrefixURI("void");
 	private String llont = ontoModel.getNsPrefixURI("llont");
 	private String llalg = ontoModel.getNsPrefixURI("llalg");
+	private String lllink = ontoModel.getNsPrefixURI("lllink");
 	private String lldat = ontoModel.getNsPrefixURI("lldat");
 	private String llfw = ontoModel.getNsPrefixURI("llfw");
+	private String llmap = ontoModel.getNsPrefixURI("llmap");
 	
 	// load properties
-	private Property propS = ontoModel.getProperty(rdf + "subject");
-	private Property propP = ontoModel.getProperty(rdf + "predicate");
-	private Property propO = ontoModel.getProperty(rdf + "object");
-	private Property propM = ontoModel.getProperty(prov + "wasDerivedFrom");
-	private Property genAt = ontoModel.getProperty(prov + "generatedAtTime");
+	private Property rdfSubject = ontoModel.getProperty(rdf + "subject");
+	private Property rdfPredicate = ontoModel.getProperty(rdf + "predicate");
+	private Property rdfObject = ontoModel.getProperty(rdf + "object");
+	private Property wasDerivedFrom = ontoModel.getProperty(prov + "wasDerivedFrom");
+	private Property generatedAtTime = ontoModel.getProperty(prov + "generatedAtTime");
 	private Property wasGenBy = ontoModel.getProperty(prov + "wasGeneratedBy");
 	private Property wasAssocWith = ResourceFactory.createProperty(prov + "wasAssociatedWith");
+	private Property isVersionOf = ontoModel.getProperty(prov + "isVersionOf");
 
 	// load individuals/literals (for demo only)
 	private Resource algorithm = ontoModel.getResource(llalg + "GenericAlgorithm");
-	private Resource dataset1 = ontoModel.getResource(lldat + "GenericDataset-1");
-	private Resource dataset2 = ontoModel.getResource(lldat + "GenericDataset-2");
-	private Resource framework = ontoModel.getResource(llfw + "GenericFramework-1-0");
+	private Resource sourceDs = ontoModel.getResource(lldat + "GenericDataset-1");
+	private Resource targetDs = ontoModel.getResource(lldat + "GenericDataset-2");
+	private Resource fwVersion = ontoModel.getResource(llfw + "GenericFramework-1-0");
 
 	// load classes
 	private Resource mapClass = ontoModel.getResource(llont + "Mapping");
 	private Resource lnkClass = ontoModel.getResource(llont + "Link");
-	
+	private Resource algClass = ontoModel.getResource(llont + "Algorithm");
+	private Resource fwClass = ontoModel.getResource(llont + "LDFramework");
+	private Resource fwvClass = ontoModel.getResource(llont + "LDFrameworkVersion");	
 	private Property hasSource = ontoModel.getProperty(llont + "hasSource");
 	private Property hasTarget = ontoModel.getProperty(llont + "hasTarget");
 
-	// link namespace
-	private String lnkString = ns + lim + LLProp.getString("vocabularyLink") + lim;
-	
 	/**
 	 * Constructor
 	 * @param file
@@ -96,7 +98,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 	 */
 	public RDFMappingProcessor(String file) throws IOException {
 		String hash = MD5Utils.computeChecksum(file);
-		mappingURI = ns + lim + vocMap + lim + hash;
+		mappingURI = llmap + hash;
 		
 		// create mapping instance of type Mapping
 		mapping = modelOut.createResource(mappingURI, mapClass);
@@ -110,11 +112,11 @@ public class RDFMappingProcessor implements MappingProcessor {
 		Literal dateLiteral = modelOut.createTypedLiteral(XMLUtils.toXSD(timeStamp), XSDDatatype.XSDdateTime);
 		
 		// add mapping properties
-		modelOut.add(mapping, genAt, dateLiteral)
+		modelOut.add(mapping, generatedAtTime, dateLiteral)
 			.add(mapping, wasGenBy, algorithm)
-			.add(mapping, hasSource, dataset1)
-			.add(mapping, hasTarget, dataset2)
-			.add(algorithm, wasAssocWith, framework);
+			.add(mapping, hasSource, sourceDs)
+			.add(mapping, hasTarget, targetDs)
+			.add(algorithm, wasAssocWith, fwVersion);
 
 		// iterate over statements, reify and add to model
 		StmtIterator modelIterator = modelIn.listStatements();
@@ -126,12 +128,13 @@ public class RDFMappingProcessor implements MappingProcessor {
 
 			String linkMD5 = MD5Utils.computeChecksum(s, p, o);
 			
-			Resource link = modelOut.createResource(lnkString + linkMD5, lnkClass);
+			//Resource link = modelOut.createResource(lnkString + linkMD5, lnkClass);
+			Resource link = modelOut.createResource(lllink + linkMD5, lnkClass);
 
-			modelOut.add(link, propS, s)
-				.add(link, propP, p)
-				.add(link, propO, o)
-				.add(link, propM, mapping);
+			modelOut.add(link, rdfSubject, s)
+				.add(link, rdfPredicate, p)
+				.add(link, rdfObject, o)
+				.add(link, wasDerivedFrom, mapping);
 		}
 		
 		return modelOut;
@@ -165,47 +168,93 @@ public class RDFMappingProcessor implements MappingProcessor {
 	}
 
 	/**
-	 * Create new Resource for a algorithm, using the common linklion ontology and the name from the form data
+	 * Create new Resource for a algorithm, add to modelOut, using the linklion ontology and the name, version, url from the form data
 	 * @param algName
+	 * @param algVersion 
+	 * @param algUrl 
 	 */
-	public void setAlgorithm(String algName) {
-		this.algorithm = ResourceFactory.createResource(llalg + algName);
+	public void setAlgorithm(String algName, String algVersion, String algUrl) {
+		Property foafHomepage = ontoModel.getProperty(foaf + "homepage");
+		Property doapVersion = ontoModel.getProperty(doap + "version");
+		
+		Resource alg = modelOut.createResource(llalg + algName, algClass);
+		this.algorithm = alg;
+
+		modelOut.add(alg, foafHomepage, ResourceFactory.createResource(algUrl))
+				.add(alg, doapVersion, algVersion);
 	}
 
 	public Resource getDataset1() {
-		return dataset1;
+		return sourceDs;
 	}
 
 	/**
 	 * Create new Resource for a source dataset, using the common linklion ontology and the name from the form data
-	 * @param sourceName
+	 * @param name
+	 * @param uri
+	 * @param type
 	 */
-	public void setDataset1(String sourceName) {
-		this.dataset1 = ResourceFactory.createResource(lldat + sourceName);
-	}
-
-	public Resource getDataset2() {
-		return dataset2;
-	}
-
-	/**
-	 * Create new Resource for a target dataset, using the common linklion ontology and the name from the form data
-	 * @param targetName
-	 */
-	public void setDataset2(String targetName) {
-		this.dataset2 = ResourceFactory.createResource(lldat + targetName);
+	public void setDatasetAndType(String name, String uri, String type) {
+		//TODO version for datasets
+		Resource dsClass = ontoModel.getResource(voidVoc + "Dataset");
+		Property foafPage = ontoModel.getProperty(foaf + "page");
+		
+		Resource dataset = modelOut.createResource(lldat + name, dsClass);
+		if (type.equals("source")) {
+			this.sourceDs = dataset;
+		}
+		else if (type.equals("target")) {
+			this.targetDs = dataset;
+		}
+		
+		modelOut.add(dataset, foafPage, uri);	
 	}
 	
 	public Resource getFramework() {
-		return framework;
+		return fwVersion;
 	}
 
 	/**
-	 * Create new Resource for a framework, using the common linklion ontology and the name from the form data
+	 * Create new Resource for a framework, add to modelOut, using the linklion ontology and the name, url, version from the form data
 	 * @param fwName
+	 * @param fwUrl 
+	 * @param fwVersion 
 	 */
-	public void setFramework(String fwName) {
-		this.framework = ResourceFactory.createResource(llfw + fwName);
+	public void setFramework(String fwName, String fwVersion, String fwUrl) {
+		Property foafHomepage = ontoModel.getProperty(foaf + "homepage");
+		Property doapRelease = ontoModel.getProperty(doap + "release");
+		Property doapRevision = ontoModel.getProperty(doap + "revision");
+		
+		Resource fw = modelOut.createResource(llfw + fwName, fwClass);
+		
+		String convertedVersion = convVersToResourceFormat(fwVersion);
+		String fwvName = llfw + fwName + convertedVersion;
+		Resource fwv = modelOut.createResource(fwvName, fwvClass);
+		this.fwVersion = fwv;
+
+		modelOut.add(fw, foafHomepage, ResourceFactory.createResource(fwUrl))
+				.add(fw, doapRelease, ResourceFactory.createResource(fwvName))
+				.add(fwv, doapRevision, fwVersion)
+				.add(fwv, isVersionOf, fw);
 	}
 
+	/**
+	 * Return all numbers contained in a string separated by -, insert starting -, omit trailing -
+	 * TODO support filtering of chars which are not allowed in urls
+	 * @param fwVersion
+	 * @return result
+	 */
+	private String convVersToResourceFormat(String fwVersion) {
+		String result =  fwVersion.replaceAll("[^0-9]","-");
+		result = result.replaceAll("[-]+", "-");
+				
+		if (!result.startsWith("-")) {
+			result = "-" + result;	
+		}
+		if (result.endsWith("-")) {
+			result = result.substring(0, result.length()-1);
+		}
+		
+		return result;
+	}
 }
