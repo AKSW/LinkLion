@@ -7,6 +7,7 @@
     <!ENTITY prov "http://www.w3.org/ns/prov#" >
     <!ENTITY foaf "http://xmlns.com/foaf/0.1/" >
     <!ENTITY doap "http://usefulinc.com/ns/doap#" >
+    <!ENTITY lllink "http://www.linklion.org/link/" >
     <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
     <!ENTITY llmap "http://www.linklion.org/mapping/" >
     <!ENTITY lldat "http://www.linklion.org/dataset/" >
@@ -25,6 +26,7 @@
      xmlns:llmap="http://www.linklion.org/mapping/"
      xmlns:prov="http://www.w3.org/ns/prov#"
      xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:lllink="http://www.linklion.org/link/"
      xmlns:llalg="http://www.linklion.org/algorithm/"
      xmlns:void="http://rdfs.org/ns/void#"
      xmlns:dcterms="http://purl.org/dc/terms/"
@@ -219,21 +221,7 @@
         <rdfs:subClassOf rdf:resource="&prov;Activity"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&prov;wasAssociatedWith"/>
-                <onClass rdf:resource="&llont;LDFrameworkVersion"/>
-                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
                 <onProperty rdf:resource="&llont;parameters"/>
-                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
-                <onDataRange rdf:resource="&xsd;string"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&foaf;name"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
                 <onDataRange rdf:resource="&xsd;string"/>
             </Restriction>
@@ -243,6 +231,20 @@
                 <onProperty rdf:resource="&prov;generatedAtTime"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
                 <onDataRange rdf:resource="&xsd;dateTime"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&prov;wasAssociatedWith"/>
+                <onClass rdf:resource="&llont;LDFrameworkVersion"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&foaf;name"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;string"/>
             </Restriction>
         </rdfs:subClassOf>
     </Class>
@@ -297,14 +299,14 @@
         <rdfs:subClassOf rdf:resource="&prov;Entity"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&rdf;predicate"/>
-                <onClass rdf:resource="&rdfs;Resource"/>
+                <onProperty rdf:resource="&prov;wasDerivedFrom"/>
+                <onClass rdf:resource="&llont;Mapping"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&rdf;subject"/>
+                <onProperty rdf:resource="&rdf;predicate"/>
                 <onClass rdf:resource="&rdfs;Resource"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
             </Restriction>
@@ -318,8 +320,8 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&prov;wasDerivedFrom"/>
-                <onClass rdf:resource="&llont;Mapping"/>
+                <onProperty rdf:resource="&rdf;subject"/>
+                <onClass rdf:resource="&rdfs;Resource"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
             </Restriction>
         </rdfs:subClassOf>
@@ -332,6 +334,13 @@
     <Class rdf:about="&llont;Mapping">
         <rdfs:label xml:lang="en">Mapping</rdfs:label>
         <rdfs:subClassOf rdf:resource="&prov;Entity"/>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&prov;generatedAtTime"/>
+                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
+                <onDataRange rdf:resource="&xsd;dateTime"/>
+            </Restriction>
+        </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&llont;hasSource"/>
@@ -351,13 +360,6 @@
                 <onProperty rdf:resource="&llont;storedAt"/>
                 <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
                 <onDataRange rdf:resource="&xsd;anyURI"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&prov;generatedAtTime"/>
-                <qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</qualifiedCardinality>
-                <onDataRange rdf:resource="&xsd;dateTime"/>
             </Restriction>
         </rdfs:subClassOf>
     </Class>
@@ -385,64 +387,6 @@
     <!-- http://www.w3.org/ns/prov#Entity -->
 
     <Class rdf:about="&prov;Entity"/>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Individuals
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://www.linklion.org/algorithm/GenericAlgorithm -->
-
-    <NamedIndividual rdf:about="&llalg;GenericAlgorithm">
-        <rdf:type rdf:resource="&llont;Algorithm"/>
-        <prov:generatedAtTime rdf:datatype="&xsd;dateTime">2013-11-29T10:34:44+01:00</prov:generatedAtTime>
-        <foaf:name>Generic Algorithm</foaf:name>
-        <prov:wasAssociatedWith rdf:resource="&llont;GenericFramework-1-0"/>
-    </NamedIndividual>
-    
-
-
-    <!-- http://www.linklion.org/dataset/GenericDataset-1 -->
-
-    <NamedIndividual rdf:about="&lldat;GenericDataset-1">
-        <rdf:type rdf:resource="&void;Dataset"/>
-    </NamedIndividual>
-    
-
-
-    <!-- http://www.linklion.org/dataset/GenericDataset-2 -->
-
-    <NamedIndividual rdf:about="&lldat;GenericDataset-2">
-        <rdf:type rdf:resource="&void;Dataset"/>
-    </NamedIndividual>
-    
-
-
-    <!-- http://www.linklion.org/framework/GenericFramework -->
-
-    <NamedIndividual rdf:about="&llfw;GenericFramework">
-        <rdf:type rdf:resource="&llont;LDFramework"/>
-        <foaf:name>Generic Framework</foaf:name>
-        <doap:release rdf:resource="&llont;GenericFramework-1-0"/>
-    </NamedIndividual>
-    
-
-
-    <!-- http://www.linklion.org/ontology#GenericFramework-1-0 -->
-
-    <NamedIndividual rdf:about="&llont;GenericFramework-1-0">
-        <rdf:type rdf:resource="&llont;LDFrameworkVersion"/>
-        <doap:revision rdf:datatype="&xsd;string">1.0</doap:revision>
-        <dcterms:license rdf:datatype="&xsd;anyURI">http://www.gnu.org/licenses/gpl.html</dcterms:license>
-    </NamedIndividual>
 </rdf:RDF>
 
 

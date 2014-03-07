@@ -1,9 +1,10 @@
 package de.linkinglod.io;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 
@@ -15,9 +16,9 @@ public interface MappingProcessor {
 	
 	Set<Property> getLinkTypes();
 	
-	List<Set<String>> getNameSpaces();
+	Map<String, String> getNameSpaces();
 	
-	Date getTimeStamp();
+	Literal getTimeStamp();
 	
 	String getMappingURI();
 }

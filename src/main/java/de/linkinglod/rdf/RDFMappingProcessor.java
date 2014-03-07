@@ -1,8 +1,11 @@
 package de.linkinglod.rdf;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -49,47 +52,35 @@ public class RDFMappingProcessor implements MappingProcessor {
 	
 	private Model ontoModel = OntologyLoader.getOntModel();
 	private Model modelOut = ModelFactory.createDefaultModel();
-	private Resource mapping;
-	
-	private String mappingURI;
-	
-	// load namespaces
-	private String rdf = ontoModel.getNsPrefixURI("rdf");
-	private String prov = ontoModel.getNsPrefixURI("prov");
-	private String foaf = ontoModel.getNsPrefixURI("foaf");
-	private String doap = ontoModel.getNsPrefixURI("doap");
-	private String voidVoc = ontoModel.getNsPrefixURI("void");
-	private String llont = ontoModel.getNsPrefixURI("llont");
-	private String llalg = ontoModel.getNsPrefixURI("llalg");
-	private String lllink = ontoModel.getNsPrefixURI("lllink");
-	private String lldat = ontoModel.getNsPrefixURI("lldat");
-	private String llfw = ontoModel.getNsPrefixURI("llfw");
-	private String llmap = ontoModel.getNsPrefixURI("llmap");
+	private Map<String, String> ns = ontoModel.getNsPrefixMap();
 	
 	// load properties
-	private Property rdfSubject = ontoModel.getProperty(rdf + "subject");
-	private Property rdfPredicate = ontoModel.getProperty(rdf + "predicate");
-	private Property rdfObject = ontoModel.getProperty(rdf + "object");
-	private Property wasDerivedFrom = ontoModel.getProperty(prov + "wasDerivedFrom");
-	private Property generatedAtTime = ontoModel.getProperty(prov + "generatedAtTime");
-	private Property wasGenBy = ontoModel.getProperty(prov + "wasGeneratedBy");
-	private Property wasAssocWith = ResourceFactory.createProperty(prov + "wasAssociatedWith");
-	private Property isVersionOf = ontoModel.getProperty(prov + "isVersionOf");
-
-	// load individuals/literals (for demo only)
-	private Resource algorithm = ontoModel.getResource(llalg + "GenericAlgorithm");
-	private Resource sourceDs = ontoModel.getResource(lldat + "GenericDataset-1");
-	private Resource targetDs = ontoModel.getResource(lldat + "GenericDataset-2");
-	private Resource fwVersion = ontoModel.getResource(llfw + "GenericFramework-1-0");
+	private Property rdfSubject = ontoModel.getProperty(ns.get("rdf") + "subject");
+	private Property rdfPredicate = ontoModel.getProperty(ns.get("rdf") + "predicate");
+	private Property rdfObject = ontoModel.getProperty(ns.get("rdf") + "object");
+	private Property wasDerivedFrom = ontoModel.getProperty(ns.get("prov") + "wasDerivedFrom");
+	private Property generatedAtTime = ontoModel.getProperty(ns.get("prov") + "generatedAtTime");
+	private Property wasGenBy = ontoModel.getProperty(ns.get("prov") + "wasGeneratedBy");
+	private Property wasAssocWith = ResourceFactory.createProperty(ns.get("prov") + "wasAssociatedWith");
+	private Property isVersionOf = ontoModel.getProperty(ns.get("prov") + "isVersionOf");
 
 	// load classes
-	private Resource mapClass = ontoModel.getResource(llont + "Mapping");
-	private Resource lnkClass = ontoModel.getResource(llont + "Link");
-	private Resource algClass = ontoModel.getResource(llont + "Algorithm");
-	private Resource fwClass = ontoModel.getResource(llont + "LDFramework");
-	private Resource fwvClass = ontoModel.getResource(llont + "LDFrameworkVersion");	
-	private Property hasSource = ontoModel.getProperty(llont + "hasSource");
-	private Property hasTarget = ontoModel.getProperty(llont + "hasTarget");
+	private Resource mapClass = ontoModel.getResource(ns.get("llont") + "Mapping");
+	private Resource lnkClass = ontoModel.getResource(ns.get("llont") + "Link");
+	private Resource algClass = ontoModel.getResource(ns.get("llont") + "Algorithm");
+	private Resource fwClass = ontoModel.getResource(ns.get("llont") + "LDFramework");
+	private Resource fwvClass = ontoModel.getResource(ns.get("llont") + "LDFrameworkVersion");	
+	private Property hasSource = ontoModel.getProperty(ns.get("llont") + "hasSource");
+	private Property hasTarget = ontoModel.getProperty(ns.get("llont") + "hasTarget");
+
+	// individuals/literals
+	private Resource algorithm;
+	private Resource sourceDs;
+	private Resource targetDs;
+	private Resource fwVersion;
+	private Resource mapping;
+	private String mappingURI;
+	private Literal dateLiteral;
 
 	/**
 	 * Constructor
@@ -97,8 +88,9 @@ public class RDFMappingProcessor implements MappingProcessor {
 	 * @throws IOException
 	 */
 	public RDFMappingProcessor(String file) throws IOException {
-		String hash = MD5Utils.computeChecksum(file);
-		mappingURI = llmap + hash;
+				
+		// mapping uri using file hash
+		mappingURI = ns.get("llmap") + MD5Utils.computeChecksum(file);
 		
 		// create mapping instance of type Mapping
 		mapping = modelOut.createResource(mappingURI, mapClass);
@@ -109,7 +101,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 		MD5Utils.reset();
 		// copy prefixes (see class Javadoc above)
 		modelOut.setNsPrefixes(ontoModel.getNsPrefixMap());
-		Literal dateLiteral = modelOut.createTypedLiteral(XMLUtils.toXSD(timeStamp), XSDDatatype.XSDdateTime);
+		dateLiteral = modelOut.createTypedLiteral(XMLUtils.toXSD(timeStamp), XSDDatatype.XSDdateTime);
 		
 		// add mapping properties
 		modelOut.add(mapping, generatedAtTime, dateLiteral)
@@ -128,8 +120,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 
 			String linkMD5 = MD5Utils.computeChecksum(s, p, o);
 			
-			//Resource link = modelOut.createResource(lnkString + linkMD5, lnkClass);
-			Resource link = modelOut.createResource(lllink + linkMD5, lnkClass);
+			Resource link = modelOut.createResource(ns.get("lllink") + linkMD5, lnkClass);
 
 			modelOut.add(link, rdfSubject, s)
 				.add(link, rdfPredicate, p)
@@ -147,15 +138,13 @@ public class RDFMappingProcessor implements MappingProcessor {
 	}
 
 	@Override
-	public List<Set<String>> getNameSpaces() {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<String, String> getNameSpaces() {
+		return ns;
 	}
 
 	@Override
-	public Date getTimeStamp() {
-		// TODO Auto-generated method stub
-		return null;
+	public Literal getTimeStamp() {
+		return dateLiteral;
 	}
 
 	@Override
@@ -173,21 +162,32 @@ public class RDFMappingProcessor implements MappingProcessor {
 	 * @param algVersion 
 	 * @param algUrl 
 	 */
-	public void setAlgorithm(String algName, String algVersion, String algUrl) {
-		Property foafHomepage = ontoModel.getProperty(foaf + "homepage");
-		Property doapVersion = ontoModel.getProperty(doap + "version");
+	public void setAlgorithm(String algName, String algUrl) {
+		Property foafHomepage = ontoModel.getProperty(ns.get("foaf") + "homepage");
 		
-		Resource alg = modelOut.createResource(llalg + algName, algClass);
+		Resource alg = modelOut.createResource(ns.get("llalg") + encodeURI(algName), algClass);
 		this.algorithm = alg;
 
-		modelOut.add(alg, foafHomepage, ResourceFactory.createResource(algUrl))
-				.add(alg, doapVersion, algVersion);
+		modelOut.add(alg, foafHomepage, ResourceFactory.createResource(algUrl));
 	}
 
-	public Resource getDataset1() {
+	public Resource getSourceDataset() {
 		return sourceDs;
 	}
 
+	public Resource getTargetDataset() {
+		return targetDs;
+	}
+
+	private String encodeURI(String uri) {
+		try {
+			return URLEncoder.encode(uri.replaceAll(" ", "_"), "ISO-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			// never happens because encoding is a constant
+			return null;
+		}
+	}
+	
 	/**
 	 * Create new Resource for a source dataset, using the common linklion ontology and the name from the form data
 	 * @param name
@@ -196,10 +196,10 @@ public class RDFMappingProcessor implements MappingProcessor {
 	 */
 	public void setDatasetAndType(String name, String uri, String type) {
 		//TODO version for datasets
-		Resource dsClass = ontoModel.getResource(voidVoc + "Dataset");
-		Property foafPage = ontoModel.getProperty(foaf + "page");
+		Resource dsClass = ontoModel.getResource(ns.get("void") + "Dataset");
+		Property foafPage = ontoModel.getProperty(ns.get("foaf") + "page");
 		
-		Resource dataset = modelOut.createResource(lldat + name, dsClass);
+		Resource dataset = modelOut.createResource(ns.get("lldat") + encodeURI(name), dsClass);
 		if (type.equals("source")) {
 			this.sourceDs = dataset;
 		}
@@ -221,14 +221,14 @@ public class RDFMappingProcessor implements MappingProcessor {
 	 * @param fwVersion 
 	 */
 	public void setFramework(String fwName, String fwVersion, String fwUrl) {
-		Property foafHomepage = ontoModel.getProperty(foaf + "homepage");
-		Property doapRelease = ontoModel.getProperty(doap + "release");
-		Property doapRevision = ontoModel.getProperty(doap + "revision");
+		Property foafHomepage = ontoModel.getProperty(ns.get("foaf") + "homepage");
+		Property doapRelease = ontoModel.getProperty(ns.get("doap") + "release");
+		Property doapRevision = ontoModel.getProperty(ns.get("doap") + "revision");
 		
-		Resource fw = modelOut.createResource(llfw + fwName, fwClass);
+		Resource fw = modelOut.createResource(ns.get("llfw") + encodeURI(fwName), fwClass);
 		
 		String convertedVersion = convVersToResourceFormat(fwVersion);
-		String fwvName = llfw + fwName + convertedVersion;
+		String fwvName = ns.get("llver") + encodeURI(fwName) + convertedVersion;
 		Resource fwv = modelOut.createResource(fwvName, fwvClass);
 		this.fwVersion = fwv;
 

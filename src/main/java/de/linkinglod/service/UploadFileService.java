@@ -85,7 +85,7 @@ public class UploadFileService implements Reader {
     	// idUser is created with auto_increment
     	demoUser.setName("Demo User");
 		try {
-	    	dbComm.getSessionAndSave(demoUser);
+//	    	dbComm.getSessionAndSave(demoUser);
 		} catch (ConstraintViolationException e) {
 			e.printStackTrace();
 		}
@@ -128,7 +128,7 @@ public class UploadFileService implements Reader {
     			formParts.get("new-framework-url").get(0).getValue()
     			);
     	processor.setAlgorithm(formParts.get("new-algorithm-name").get(0).getValue(),
-    			formParts.get("new-algorithm-version").get(0).getValue(),
+//    			formParts.get("new-algorithm-version").get(0).getValue(),
     			formParts.get("new-algorithm-url").get(0).getValue()
     			);
 

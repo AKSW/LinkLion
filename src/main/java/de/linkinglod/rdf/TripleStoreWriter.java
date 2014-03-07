@@ -27,7 +27,7 @@ public class TripleStoreWriter implements Writer {
 		String password = LLProp.getString("TripleStore.password");
 		
 		// connect to Virtuoso instance
-		VirtGraph vg = new VirtGraph(graph, localServer , user, password);
+		VirtGraph vg = new VirtGraph(graph, localServer, user, password);
 		
 		// convert triples
 		Iterator<Statement> it = m.listStatements();
