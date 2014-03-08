@@ -15,6 +15,11 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
     <![endif]-->
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/script.js"></script>
 	<jsp:useBean id="bean" class="de.linkinglod.beans.StartPage" />
   </head>
   <body>
@@ -86,12 +91,12 @@
 		  </button>
 		  <ul class="dropdown-menu" role="menu">
 		    <c:forEach items="${bean.frameworks}" var="fw">
-		    	<li role="presentation"><a href="javascript:void(0);" onclick='$("#selected-framework").html($(this).html()); new_framework(false); check();'>${fw.value}</a></li>
+		    	<li role="presentation"><a href="javascript:void(0);" onclick='frameworkTrigger("${fw.value}", "${fw.key}");'>${fw.value}</a></li>
   			</c:forEach>
 		    <li role="presentation" class="divider"></li>
-		    <li role="presentation"><a href="javascript:void(0);" onclick='$("#selected-framework").html($(this).html()); new_framework(true); check();'><i>Add new framework</i></a></li>
+		    <li role="presentation"><a href="javascript:void(0);" onclick='frameworkTrigger("", "");'><i>Add new framework</i></a></li>
 		  </ul>
-		  
+		  <input type="hidden" name="existing-framework-uri" id="existing-framework-uri" value="">
 			&nbsp;
 			<span class='label label-info' id="selected-framework"></span>
 		</div>
@@ -201,10 +206,5 @@
     </div> <!-- /container -->
 </div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://code.jquery.com/jquery.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/script.js"></script>
   </body>
 </html>

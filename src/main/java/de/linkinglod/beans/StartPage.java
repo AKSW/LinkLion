@@ -13,7 +13,7 @@ public class StartPage {
 	public HashMap<String, String> getFrameworks() {
 		
 		frameworks = new HashMap<>();
-		frameworks.put("http://limes.sf.org", "LIMES &mdash; http://limes.sf.org");
+		frameworks.put("http://www.linklion.org/version/HASHCODE", "LIMES v0.8 &mdash; http://limes.sf.org");
 		return frameworks;
 		
 	}

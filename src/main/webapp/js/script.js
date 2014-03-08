@@ -25,6 +25,18 @@ function new_algorithm(nf) {
 	}
 }
 
+function frameworkTrigger(name, uri) {
+	// frontend
+	if(name == "")
+		$("#selected-framework").html("Add new framework");
+	else
+		$("#selected-framework").html(name);
+	new_framework(false);
+	check();
+	// backend
+	$("#existing-framework-uri").val(uri);
+}
+
 $(document).ready(function () {
 	$(check());
 	$(new_framework(false));

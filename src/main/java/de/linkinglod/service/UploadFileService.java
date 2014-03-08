@@ -123,15 +123,17 @@ public class UploadFileService implements Reader {
     	processor.setDatasetAndType(formParts.get("target-name").get(0).getValue(), 
     			form.getField("target-uri").getValue(), 
     			"target");
-    	// TODO:
-    	// - add input type=hidden (url, name)
-    	// - update it via js
-    	// - call it here and check content
-    	// - possibly, add new framework (rename the following)
-    	processor.setFramework(formParts.get("new-framework-name").get(0).getValue(),
-    			formParts.get("new-framework-version").get(0).getValue(),
-    			formParts.get("new-framework-url").get(0).getValue()
-    			);
+    	
+    	// TODO test this
+    	String existingFwName = formParts.get("existing-framework-name").get(0).getValue();
+    	if(existingFwName.equals(""))
+    		processor.addNewFramework(formParts.get("new-framework-name").get(0).getValue(),
+    				formParts.get("new-framework-version").get(0).getValue(),
+    				formParts.get("new-framework-url").get(0).getValue()
+    				);
+    	else
+    		processor.setFramework(formParts.get("existing-framework-uri").get(0).getValue());
+    	
     	processor.setAlgorithm(formParts.get("new-algorithm-name").get(0).getValue(),
 //    			formParts.get("new-algorithm-version").get(0).getValue(),
     			formParts.get("new-algorithm-url").get(0).getValue()

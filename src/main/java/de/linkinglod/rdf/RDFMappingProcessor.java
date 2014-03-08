@@ -58,6 +58,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 	private Property rdfSubject = ontoModel.getProperty(ns.get("rdf") + "subject");
 	private Property rdfPredicate = ontoModel.getProperty(ns.get("rdf") + "predicate");
 	private Property rdfObject = ontoModel.getProperty(ns.get("rdf") + "object");
+	private Property rdfsLabel = ontoModel.getProperty(ns.get("rdfs") + "label");
 	private Property wasDerivedFrom = ontoModel.getProperty(ns.get("prov") + "wasDerivedFrom");
 	private Property generatedAtTime = ontoModel.getProperty(ns.get("prov") + "generatedAtTime");
 	private Property wasGenBy = ontoModel.getProperty(ns.get("prov") + "wasGeneratedBy");
@@ -168,7 +169,8 @@ public class RDFMappingProcessor implements MappingProcessor {
 		Resource alg = modelOut.createResource(ns.get("llalg") + encodeURI(algName), algClass);
 		this.algorithm = alg;
 
-		modelOut.add(alg, foafHomepage, ResourceFactory.createResource(algUrl));
+		modelOut.add(alg, foafHomepage, ResourceFactory.createResource(algUrl))
+				.add(alg, rdfsLabel, algName);
 	}
 
 	public Resource getSourceDataset() {
@@ -207,7 +209,8 @@ public class RDFMappingProcessor implements MappingProcessor {
 			this.targetDs = dataset;
 		}
 		
-		modelOut.add(dataset, foafPage, uri);	
+		modelOut.add(dataset, foafPage, uri)
+				.add(dataset, rdfsLabel, name);	
 	}
 	
 	public Resource getFramework() {
@@ -220,7 +223,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 	 * @param fwUrl 
 	 * @param fwVersion 
 	 */
-	public void setFramework(String fwName, String fwVersion, String fwUrl) {
+	public void addNewFramework(String fwName, String fwVersion, String fwUrl) {
 		Property foafHomepage = ontoModel.getProperty(ns.get("foaf") + "homepage");
 		Property doapRelease = ontoModel.getProperty(ns.get("doap") + "release");
 		Property doapRevision = ontoModel.getProperty(ns.get("doap") + "revision");
@@ -230,12 +233,15 @@ public class RDFMappingProcessor implements MappingProcessor {
 		String convertedVersion = convVersToResourceFormat(fwVersion);
 		String fwvName = ns.get("llver") + encodeURI(fwName) + convertedVersion;
 		Resource fwv = modelOut.createResource(fwvName, fwvClass);
+		
 		this.fwVersion = fwv;
 
 		modelOut.add(fw, foafHomepage, ResourceFactory.createResource(fwUrl))
 				.add(fw, doapRelease, ResourceFactory.createResource(fwvName))
+				.add(fw, rdfsLabel, fwName)
 				.add(fwv, doapRevision, fwVersion)
-				.add(fwv, isVersionOf, fw);
+				.add(fwv, isVersionOf, fw)
+				.add(fwv, rdfsLabel, fwvName);
 	}
 
 	/**
@@ -256,5 +262,10 @@ public class RDFMappingProcessor implements MappingProcessor {
 		}
 		
 		return result;
+	}
+
+	public void setFramework(String fwURI) {
+		Resource fwv = modelOut.createResource(fwURI);
+		this.fwVersion = fwv;
 	}
 }
