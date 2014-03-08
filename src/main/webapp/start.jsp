@@ -96,7 +96,7 @@
 		    <li role="presentation" class="divider"></li>
 		    <li role="presentation"><a href="javascript:void(0);" onclick='frameworkTrigger("", "");'><i>Add new framework</i></a></li>
 		  </ul>
-		  <input type="hidden" name="existing-framework-uri" id="existing-framework-uri" value="">
+		  <input type="text" name="existing-framework-uri" id="existing-framework-uri" value="">
 			&nbsp;
 			<span class='label label-info' id="selected-framework"></span>
 		</div>
@@ -130,10 +130,13 @@
 		    <span class="sr-only">Toggle Dropdown</span>
 		  </button>
 		  <ul class="dropdown-menu" role="menu">
-		    <li role="presentation"><a href="javascript:void(0);" onclick='$("#selected-algorithm").html($(this).html()); new_algorithm(false); check();'>Generic Algorithm</a></li>
+		    <c:forEach items="${bean.algorithms}" var="alg">
+		    	<li role="presentation"><a href="javascript:void(0);" onclick='algorithmTrigger("${alg.value}", "${alg.key}");'>${alg.value}</a></li>
+  			</c:forEach>
 		    <li role="presentation" class="divider"></li>
-		    <li role="presentation"><a href="javascript:void(0);" onclick='$("#selected-algorithm").html($(this).html()); new_algorithm(true); check();'><i>Add new algorithm</i></a></li>
+		    <li role="presentation"><a href="javascript:void(0);" onclick='algorithmTrigger("", "");'><i>Add new algorithm</i></a></li>
 		  </ul>
+			<input type="text" name="existing-algorithm-uri" id="existing-algorithm-uri" value="">
 			&nbsp;
 			<span class='label label-info' id="selected-algorithm"></span>
 		</div>

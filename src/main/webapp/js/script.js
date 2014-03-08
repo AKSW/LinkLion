@@ -27,14 +27,31 @@ function new_algorithm(nf) {
 
 function frameworkTrigger(name, uri) {
 	// frontend
-	if(name == "")
+	if(name == "") {
 		$("#selected-framework").html("Add new framework");
-	else
+		new_framework(true);
+	} else {
 		$("#selected-framework").html(name);
-	new_framework(false);
+		new_framework(false);
+	}
 	check();
 	// backend
 	$("#existing-framework-uri").val(uri);
+}
+
+
+function algorithmTrigger(name, uri) {
+	// frontend
+	if(name == "") {
+		$("#selected-algorithm").html("Add new algorithm");
+		new_algorithm(true);
+	} else {
+		$("#selected-algorithm").html(name);
+		new_algorithm(false);
+	}
+	check();
+	// backend
+	$("#existing-algorithm-uri").val(uri);
 }
 
 $(document).ready(function () {

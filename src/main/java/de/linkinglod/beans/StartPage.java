@@ -8,6 +8,7 @@ import java.util.HashMap;
  */
 public class StartPage {
 	
+	private HashMap<String, String> algorithms;
 	private HashMap<String, String> frameworks;
 
 	public HashMap<String, String> getFrameworks() {
@@ -15,6 +16,14 @@ public class StartPage {
 		frameworks = new HashMap<>();
 		frameworks.put("http://www.linklion.org/version/HASHCODE", "LIMES v0.8 &mdash; http://limes.sf.org");
 		return frameworks;
+		
+	}
+	
+	public HashMap<String, String> getAlgorithms() {
+		
+		algorithms = new HashMap<>();
+		algorithms.put("http://www.linklion.org/algorithm/HASHCODE", "EAGLE &mdash; http://eagle.aksw.org");
+		return algorithms;
 		
 	}
 	

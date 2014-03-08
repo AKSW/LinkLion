@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -124,20 +123,22 @@ public class UploadFileService implements Reader {
     			form.getField("target-uri").getValue(), 
     			"target");
     	
-    	// TODO test this
-    	String existingFwName = formParts.get("existing-framework-name").get(0).getValue();
-    	if(existingFwName.equals(""))
+    	String existingFwURI = formParts.get("existing-framework-uri").get(0).getValue();
+    	if(existingFwURI.equals(""))
     		processor.addNewFramework(formParts.get("new-framework-name").get(0).getValue(),
     				formParts.get("new-framework-version").get(0).getValue(),
     				formParts.get("new-framework-url").get(0).getValue()
     				);
     	else
-    		processor.setFramework(formParts.get("existing-framework-uri").get(0).getValue());
+    		processor.setFramework(existingFwURI);
     	
-    	processor.setAlgorithm(formParts.get("new-algorithm-name").get(0).getValue(),
-//    			formParts.get("new-algorithm-version").get(0).getValue(),
-    			formParts.get("new-algorithm-url").get(0).getValue()
-    			);
+    	String existingAlgoURI = formParts.get("existing-algorithm-uri").get(0).getValue();
+    	if(existingAlgoURI.equals(""))
+	    	processor.addNewAlgorithm(formParts.get("new-algorithm-name").get(0).getValue(),
+	    			formParts.get("new-algorithm-url").get(0).getValue()
+	    			);
+    	else
+    		processor.setAlgorithm(existingAlgoURI);
 
         return processor;
 	}

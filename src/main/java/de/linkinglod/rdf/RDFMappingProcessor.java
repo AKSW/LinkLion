@@ -163,7 +163,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 	 * @param algVersion 
 	 * @param algUrl 
 	 */
-	public void setAlgorithm(String algName, String algUrl) {
+	public void addNewAlgorithm(String algName, String algUrl) {
 		Property foafHomepage = ontoModel.getProperty(ns.get("foaf") + "homepage");
 		
 		Resource alg = modelOut.createResource(ns.get("llalg") + encodeURI(algName), algClass);
@@ -265,7 +265,12 @@ public class RDFMappingProcessor implements MappingProcessor {
 	}
 
 	public void setFramework(String fwURI) {
-		Resource fwv = modelOut.createResource(fwURI);
+		Resource fwv = ResourceFactory.createResource(fwURI);
 		this.fwVersion = fwv;
+	}
+
+	public void setAlgorithm(String algURI) {
+		Resource alg = ResourceFactory.createResource(algURI);
+		this.algorithm = alg;
 	}
 }
