@@ -19,4 +19,9 @@
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+	    <servlet-name>Start</servlet-name>
+	    <jsp-file>/start.jsp</jsp-file>
+	</servlet>
+
 </web-app>

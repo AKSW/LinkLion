@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
   <head>
     <title>Upload mapping | LinkLion - A portal for link discovery.</title>
@@ -14,6 +15,7 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
     <![endif]-->
+	<jsp:useBean id="bean" class="de.linkinglod.beans.StartPage" />
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation" id="header">
@@ -83,10 +85,13 @@
 		    <span class="sr-only">Toggle Dropdown</span>
 		  </button>
 		  <ul class="dropdown-menu" role="menu">
-		    <li role="presentation"><a href="javascript:void(0);" onclick='$("#selected-framework").html($(this).html()); new_framework(false); check();'>Generic Framework</a></li>
+		    <c:forEach items="${bean.frameworks}" var="fw">
+		    	<li role="presentation"><a href="javascript:void(0);" onclick='$("#selected-framework").html($(this).html()); new_framework(false); check();'>${fw.value}</a></li>
+  			</c:forEach>
 		    <li role="presentation" class="divider"></li>
 		    <li role="presentation"><a href="javascript:void(0);" onclick='$("#selected-framework").html($(this).html()); new_framework(true); check();'><i>Add new framework</i></a></li>
 		  </ul>
+		  
 			&nbsp;
 			<span class='label label-info' id="selected-framework"></span>
 		</div>

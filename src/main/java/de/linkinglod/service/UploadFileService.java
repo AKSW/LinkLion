@@ -123,6 +123,11 @@ public class UploadFileService implements Reader {
     	processor.setDatasetAndType(formParts.get("target-name").get(0).getValue(), 
     			form.getField("target-uri").getValue(), 
     			"target");
+    	// TODO:
+    	// - add input type=hidden (url, name)
+    	// - update it via js
+    	// - call it here and check content
+    	// - possibly, add new framework (rename the following)
     	processor.setFramework(formParts.get("new-framework-name").get(0).getValue(),
     			formParts.get("new-framework-version").get(0).getValue(),
     			formParts.get("new-framework-url").get(0).getValue()

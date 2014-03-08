@@ -123,6 +123,21 @@
   		<artifactId>slf4j-simple</artifactId>
   		<version>1.7.5</version>
   	</dependency>
-  </dependencies>
+	<dependency>
+		<groupId>javax.servlet</groupId>
+		<artifactId>jsp-api</artifactId>
+		<version>2.1</version>
+	</dependency>
+	<dependency>
+		<groupId>javax.servlet</groupId>
+		<artifactId>servlet-api</artifactId>
+		<version>2.5</version>
+	</dependency>
+	<dependency>
+		<groupId>javax.servlet</groupId>
+		<artifactId>jstl</artifactId>
+		<version>1.2</version>
+	</dependency>
+</dependencies>
   <packaging>war</packaging>
 </project>
