@@ -63,7 +63,6 @@ public class RDFMappingProcessor implements MappingProcessor {
 	private Property generatedAtTime = ontoModel.getProperty(ns.get("prov") + "generatedAtTime");
 	private Property wasGenBy = ontoModel.getProperty(ns.get("prov") + "wasGeneratedBy");
 	private Property wasAssocWith = ResourceFactory.createProperty(ns.get("prov") + "wasAssociatedWith");
-	private Property isVersionOf = ontoModel.getProperty(ns.get("prov") + "isVersionOf");
 
 	// load classes
 	private Resource mapClass = ontoModel.getResource(ns.get("llont") + "Mapping");
@@ -237,10 +236,9 @@ public class RDFMappingProcessor implements MappingProcessor {
 		this.fwVersion = fwv;
 
 		modelOut.add(fw, foafHomepage, ResourceFactory.createResource(fwUrl))
-				.add(fw, doapRelease, ResourceFactory.createResource(fwvName))
 				.add(fw, rdfsLabel, fwName)
+				.add(fw, doapRelease, fwv)
 				.add(fwv, doapRevision, fwVersion)
-				.add(fwv, isVersionOf, fw)
 				.add(fwv, rdfsLabel, fwvName);
 	}
 
