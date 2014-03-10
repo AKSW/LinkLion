@@ -74,7 +74,7 @@ public class UploadFileService implements Reader {
     	processor = readFormAndAddToRDFProc(form, processor);
     	
     	TripleStoreWriter tsw = new TripleStoreWriter();
-    	DBCommunication dbComm = new DBCommunication();
+//    	DBCommunication dbComm = new DBCommunication();
     	
     	/*
     	 * TODO  note: Hibernate User() should not be used here, it is only for creating (hibernate) database User() objects! 
@@ -95,10 +95,10 @@ public class UploadFileService implements Reader {
     	tsw.write(LLProp.getString("TripleStore.graph"), modelOut);
     	tsw.write(LLProp.getString("TripleStore.graph"), OntologyLoader.getOntModel());
     	
-    	dbComm.createUser(demoUser);
-    	
-    	dbComm.write("TripleStore.graph", modelOut);
-    	dbComm.write("TripleStore.graph", OntologyLoader.getOntModel());
+//    	dbComm.createUser(demoUser);
+//    	
+//    	dbComm.write("TripleStore.graph", modelOut);
+//    	dbComm.write("TripleStore.graph", OntologyLoader.getOntModel());
     	
  		writeModifiedDataToFile(form);
 		
@@ -116,27 +116,57 @@ public class UploadFileService implements Reader {
 			RDFMappingProcessor processor) {
         Map<String, List<FormDataBodyPart>> formParts = form.getFields();
         
-    	processor.setDatasetAndType(formParts.get("source-name").get(0).getValue(), 
-    			form.getField("source-uri").getValue(), 
-    			"source");
-    	processor.setDatasetAndType(formParts.get("target-name").get(0).getValue(), 
-    			form.getField("target-uri").getValue(), 
-    			"target");
-    	
-    	String existingFwURI = formParts.get("existing-framework-uri").get(0).getValue();
-    	if(existingFwURI.equals(""))
-    		processor.addNewFramework(formParts.get("new-framework-name").get(0).getValue(),
-    				formParts.get("new-framework-version").get(0).getValue(),
-    				formParts.get("new-framework-url").get(0).getValue()
-    				);
+        String sourceName = "";
+        String sourceUri = "";
+        if (formParts.containsKey("source-name") && formParts.containsKey("source-uri")) {
+        	sourceName = formParts.get("source-name").get(0).getValue();
+        	sourceUri = form.getField("source-uri").getValue();
+        	
+        	processor.setDatasetAndType(sourceName, sourceUri, "source");
+        }
+        String targetName = "";
+        String targetUri = "";
+        if (formParts.containsKey("target-name") && formParts.containsKey("target-uri")) {
+        	targetName = formParts.get("target-name").get(0).getValue();
+        	targetUri = form.getField("target-uri").getValue();
+        	
+        	processor.setDatasetAndType(targetName, targetUri, "target");
+        }
+        	
+    	String existingFwURI = "";
+    	String newFwName = "";
+    	String newFwUrl = "";
+    	String newFwVersion = "";
+    	if (formParts.containsKey("existing-framework-uri")) {
+    		existingFwURI = formParts.get("existing-framework-uri").get(0).getValue();
+    	}
+    	if (existingFwURI.equals("") 
+    			&& formParts.containsKey("new-framework-name")
+    			&& formParts.containsKey("new-framework-url")
+    			&& formParts.containsKey("new-framework-version")) {
+    		newFwName = formParts.get("new-framework-name").get(0).getValue();
+    		newFwUrl = formParts.get("new-framework-url").get(0).getValue();
+    		newFwVersion = formParts.get("new-framework-version").get(0).getValue();
+    		
+    		processor.addNewFramework(newFwName, newFwUrl, newFwVersion);
+    	}
     	else
     		processor.setFramework(existingFwURI);
     	
-    	String existingAlgoURI = formParts.get("existing-algorithm-uri").get(0).getValue();
-    	if(existingAlgoURI.equals(""))
-	    	processor.addNewAlgorithm(formParts.get("new-algorithm-name").get(0).getValue(),
-	    			formParts.get("new-algorithm-url").get(0).getValue()
-	    			);
+    	String existingAlgoURI = "";
+    	String newAlgoName = "";
+    	String newAlgoUrl = "";
+    	if (formParts.containsKey("existing-algorithm-uri")) {
+    		existingAlgoURI = formParts.get("existing-algorithm-uri").get(0).getValue();
+    	}
+    	if (existingAlgoURI.equals("")
+    			&& formParts.containsKey("new-algorithm-name")
+    			&& formParts.containsKey("new-algorithm-url")) {
+    		newAlgoName = formParts.get("new-algorithm-name").get(0).getValue();
+    		newAlgoUrl = formParts.get("new-algorithm-url").get(0).getValue();
+    		
+	    	processor.addNewAlgorithm(newAlgoName, newAlgoUrl);
+    	}
     	else
     		processor.setAlgorithm(existingAlgoURI);
 
