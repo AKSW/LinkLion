@@ -5,15 +5,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+
 import com.hp.hpl.jena.rdf.model.*;
 
-import de.linkinglod.db.User;
 import de.linkinglod.rdf.RDFMappingProcessor;
 
+
 import java.security.*;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,34 +52,30 @@ public class DataGenerator {
 	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 		InputStream stream = generateStreamFromFile(LLProp.getString("fileLocation"));
+
 		System.out.println("Stream generated: ");
-		
+
 		Model model = generateModelFromStream(stream);
 		System.out.println("Model generated with " + model.size() + " elements.");
-		
-//		System.out.println("tmpdir :" + System.getProperty("java.io.tmpdir"));
-//    	Map<String, String> nsMap = model.getNsPrefixMap();
-//    	System.out.println("nsMap.toString(): " + nsMap.toString());
-//    	Collection<String> colNs = nsMap.values();
-//    	for (String s: colNs) {
-//    		System.out.println(s);
-//    	}
 				
 		RDFMappingProcessor mappingProcessor = new RDFMappingProcessor(LLProp.getString("fileLocation"));
 		
-    	User demoUser = new User(); // TODO next: manage user login
-    	demoUser.setIdUser(1);
-    	demoUser.setName("Demo User");
-    	
-    	model = mappingProcessor.transform(model, demoUser, new Date());
+//    	User demoUser = new User(); // TODO next: manage user login
+//    	demoUser.setIdUser(1);
+//    	demoUser.setName("Demo User");
+//    	
+//    	model = mappingProcessor.transform(model, demoUser, new Date());
 
+		
+		
+		
     	//model.write(System.out, "N-TRIPLE");
     	
     	//dbComm = new DBCommunication();
     	
 		//dbComm.write(LLProp.getString("TripleStore.graph"), model);
 	}
-	
+
 	/**
 	 * Generate an InputStream from the file.
 	 * @param fileLocation

@@ -82,15 +82,17 @@ public class MD5Utils {
 	
 	/**
 	 * Generates MD5 hash of the file content.
-	 * @param file
+	 * @param filePathAndName
 	 * @return
 	 * @throws IOException
 	 * @throws NoSuchAlgorithmException
 	 */
-	public static String computeChecksum(String file) throws IOException {
+	public static String computeChecksum(String filePathAndName) throws IOException {
 		
-		FileInputStream fis = new FileInputStream(new File(file));
-		return DigestUtils.md5Hex(fis);
+		FileInputStream fis = new FileInputStream(new File(filePathAndName));
+		String result = DigestUtils.md5Hex(fis);
+		
+		return result;
 		
 	}
 	
