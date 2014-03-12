@@ -19,13 +19,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.hibernate.exception.ConstraintViolationException;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.sun.jersey.core.header.ContentDisposition;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
@@ -35,6 +34,7 @@ import de.linkinglod.db.User;
 import de.linkinglod.io.Reader;
 import de.linkinglod.rdf.RDFMappingProcessor;
 import de.linkinglod.rdf.TripleStoreWriter;
+import de.linkinglod.util.MD5Utils;
  
 /**
  * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
@@ -44,7 +44,6 @@ import de.linkinglod.rdf.TripleStoreWriter;
 @Path("/file")
 public class UploadFileService implements Reader {
 	
-	private String fileLocation = "";
 	private Model modelOut;
 	private static Logger log = LoggerFactory.getLogger(UploadFileService.class);
 
@@ -59,48 +58,40 @@ public class UploadFileService implements Reader {
 	@POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-//	public Response uploadFile(@FormDataParam("file") InputStream stream,
-//							   @FormDataParam("file") FormDataContentDisposition fileDetail) throws IOException, URISyntaxException {
 	public Response uploadFile(FormDataMultiPart form) throws IOException, URISyntaxException {
 		log.debug("File upload service triggered!");
 
-		writeSourceFromFormToFile(form);
+		String sourceFileName = form.getField("file").getContentDisposition().getFileName();
+		String filePathAndName = writeSourceFileToDisk(form);
 		
 		// TODO model read from fileLocation needed? perhaps read from stream?
-		Model model = read(fileLocation);
+		Model model = read(filePathAndName);
     	System.out.println("generateModelFromStream().isEmpty(): " + model.isEmpty());
     	
-    	RDFMappingProcessor processor = new RDFMappingProcessor(fileLocation);
+    	RDFMappingProcessor processor = new RDFMappingProcessor(filePathAndName);
     	processor = readFormAndAddToRDFProc(form, processor);
     	
     	TripleStoreWriter tsw = new TripleStoreWriter();
-    	DBCommunication dbComm = new DBCommunication();
+//    	DBCommunication dbComm = new DBCommunication();
     	
-    	/*
-    	 * TODO  note: Hibernate User() should not be used here, it is only for creating (hibernate) database User() objects! 
-    	 * TODO REWORK this if users are implemented!
-    	 */
+    	// TODO  note: Hibernate User() should not be used here, it is only for creating (hibernate) database User() objects! 
+    	// REWORK this if users are implemented!
     	User demoUser = new User(); // TODO next: manage user login
-    	// idUser is created with auto_increment
     	demoUser.setName("Demo User");
-		try {
-//	    	dbComm.getSessionAndSave(demoUser);
-		} catch (ConstraintViolationException e) {
-			e.printStackTrace();
-		}
-    	
+
 		// TODO User is NOT used in triple store in any way.
     	modelOut = processor.transform(model, demoUser, new Date());
     	
     	tsw.write(LLProp.getString("TripleStore.graph"), modelOut);
     	tsw.write(LLProp.getString("TripleStore.graph"), OntologyLoader.getOntModel());
     	
-    	dbComm.createUser(demoUser);
+//    	dbComm.createUser(demoUser);
+//    	
+//    	dbComm.write("TripleStore.graph", modelOut);
+//    	dbComm.write("TripleStore.graph", OntologyLoader.getOntModel());
     	
-    	dbComm.write("TripleStore.graph", modelOut);
-    	dbComm.write("TripleStore.graph", OntologyLoader.getOntModel());
-    	
- 		writeModifiedDataToFile(form);
+    	// TODO check later, IF this is needed. Source file + speed is more important in the beginning.
+ 		//writeModifiedDataToFile(sourceFileName);
 		
 		// FIXME Adding this throws an exception, but on line 162. Investigate why.
 //		File f = new File(fileOutLocation);
@@ -141,11 +132,20 @@ public class UploadFileService implements Reader {
     	else
     		processor.setFramework(existingFwURI);
     	
-    	String existingAlgoURI = formParts.get("existing-algorithm-uri").get(0).getValue();
-    	if(existingAlgoURI.equals(""))
-	    	processor.addNewAlgorithm(formParts.get("new-algorithm-name").get(0).getValue(),
-	    			formParts.get("new-algorithm-url").get(0).getValue()
-	    			);
+    	String existingAlgoURI = "";
+    	String newAlgoName = "";
+    	String newAlgoUrl = "";
+    	if (formParts.containsKey("existing-algorithm-uri")) {
+    		existingAlgoURI = formParts.get("existing-algorithm-uri").get(0).getValue();
+    	}
+    	if (existingAlgoURI.equals("")
+    			&& formParts.containsKey("new-algorithm-name")
+    			&& formParts.containsKey("new-algorithm-url")) {
+    		newAlgoName = formParts.get("new-algorithm-name").get(0).getValue();
+    		newAlgoUrl = formParts.get("new-algorithm-url").get(0).getValue();
+    		
+	    	processor.addNewAlgorithm(newAlgoName, newAlgoUrl);
+    	}
     	else
     		processor.setAlgorithm(existingAlgoURI);
 
@@ -174,30 +174,121 @@ public class UploadFileService implements Reader {
  
 	/**
 	 * Save uploaded file to specified location.
-	 * TODO should we save the file? It's redundant, but easy to download afterwards.
-	 * @param stream
-	 * @param fileLocation
-	 * @throws IOException 
+	 * @param form
+	 * @return 
+	 * @throws IOException
 	 */
-	private void writeSourceFromFormToFile(FormDataMultiPart form) throws IOException {
-		FormDataBodyPart filePart = form.getField("file");
-        ContentDisposition headerOfFilePart =  filePart.getContentDisposition();
-        InputStream stream = filePart.getValueAs(InputStream.class);
-		fileLocation = System.getProperty("java.io.tmpdir") + headerOfFilePart.getFileName();
-		OutputStream out = new FileOutputStream(new File(fileLocation));
+	private String writeSourceFileToDisk(FormDataMultiPart form) throws IOException {
+		FormDataBodyPart formFile = form.getField("file");
+        String formName =  formFile.getContentDisposition().getFileName();
+        
+        String pathToTest = suggestName(formName);
+		File file = new File(pathToTest);
+		while (file.isFile()) {
+			pathToTest = getNewNameIfHashDiffers(formFile, pathToTest);
+			if (pathToTest == null) {
+				return pathToTest;
+			}
+			file = new File(pathToTest);
+		}
+		
+        InputStream readFormStream = formFile.getValueAs(InputStream.class);
+		writeFile(readFormStream, file);
+		
+		return pathToTest;
+	}
+
+	/**
+	 * Checks if the existing file has the same hash as the file from the form and renames if needed. If hash equals, existing name is used.
+	 * @param formFile
+	 * @param pathToTest
+	 * @return 
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 */
+	private String getNewNameIfHashDiffers(FormDataBodyPart formFile,
+			String pathToTest) throws IOException, FileNotFoundException {
+		InputStream hashFormStream = formFile.getValueAs(InputStream.class);
+
+		String formHash = DigestUtils.md5Hex(hashFormStream);
+		String diskHash = MD5Utils.computeChecksum(pathToTest);
+		
+		if (!formHash.equals(diskHash)) { // hash is different -> new name
+			String nextTry = "";
+			if (pathToTest.endsWith(".nt")) {
+				nextTry = pathToTest.substring(0, pathToTest.length() - 3);
+				nextTry = setNextName(nextTry);
+				nextTry += ".nt";
+			}
+			else {
+				nextTry = setNextName(nextTry);
+			}
+			
+			return nextTry;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Set next name if file hashes are equal.
+	 * @param nextTry 
+	 * @return
+	 */
+	private String setNextName(String nextTry) {
+		if (nextTry.matches(".*\\(\\d*\\)")) { // regex, i.e., abc(12)
+			// number -> number + 1
+			int extractDigitAndInc = Integer.parseInt(nextTry.replaceAll(".*\\((\\d*)\\)", "$1")) + 1;
+			// reconstruct string
+			return nextTry.replaceAll("(.*\\()\\d*(\\))", "$1" + String.valueOf(extractDigitAndInc) + "$2");
+		}
+		else {
+			return nextTry += "(1)";
+		}
+	}
+
+	/**
+	 * Suggest next name for the file name.
+	 * TODO change directory for download, if needed
+	 * @param fName
+	 * @return
+	 */
+	private String suggestName(String fName) {
+		String downloadDir = "download";
+                
+		String suggestPathName = System.getProperty("java.io.tmpdir") 
+				+ System.getProperty("file.separator")
+				+ downloadDir
+				+ System.getProperty("file.separator")
+				+ fName;
+		
+		return suggestPathName;
+	}
+
+	/**
+	 * @param readFormStream stream object where to read from
+	 * @param file file to write to
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	@SuppressWarnings("resource")
+	private void writeFile(InputStream readFormStream, File file)
+			throws FileNotFoundException, IOException {
+		OutputStream out = new FileOutputStream(file);
 		
 		int read = 0;
 		byte[] bytes = new byte[1024];
-		out = new FileOutputStream(new File(fileLocation));
-		while ((read = stream.read(bytes)) != -1) {
+		out = new FileOutputStream(file);
+		while ((read = readFormStream.read(bytes)) != -1) {
 			out.write(bytes, 0, read);
 		}
 		out.flush();
 		out.close();
+		System.out.println("Write file to: " + file.getPath());
+
 	}
 
-	private void writeModifiedDataToFile(FormDataMultiPart form) throws IOException {
-		String fileName = form.getField("file").getContentDisposition().getFileName();
+	private void writeModifiedDataToFile(String fileName) throws IOException {
 		String fileOutLocation = System.getProperty("java.io.tmpdir") + fileName + "_out";
 
 		OutputStream out = new FileOutputStream(new File(fileOutLocation));
@@ -207,25 +298,9 @@ public class UploadFileService implements Reader {
 
 	@Override
 	public Model read(String pathToFile) throws FileNotFoundException {
-		
-		InputStream stream = generateStreamFromFile(pathToFile);
+		InputStream stream = new FileInputStream(pathToFile);
 		
 		return generateModelFromStream(stream);
-	} 
-	
-	/**
-	 * Generate an InputStream from the file.
-	 * @param fileLocation
-	 * @return
-	 * @throws FileNotFoundException
-	 */
-	private static InputStream generateStreamFromFile(String fileLocation) throws FileNotFoundException {
-		InputStream stream = null;
-		
-		stream = new FileInputStream(fileLocation);
-		log.debug("File " + fileLocation + " read.");
-		
-		return stream;
 	}
 	
 	/**
