@@ -1,15 +1,23 @@
-/* 
- * TODO 
- * check if everything is okay (framework, algorithm, new stuff, sources)
- */
+
+var add_framework = false;
+var add_algorithm = false;
+var add_source = false;
+var add_target = false;
+
 function check() {
-	if($("#upload-file-info").html() != "" && $("#selected-framework").html() != "")
+	if($("#upload-file-info").html() != "" &&
+			((!add_framework && $("#selected-framework").html() != "") || (add_framework && $("#new-framework-name").val() != "")) && 
+			((!add_algorithm && $("#selected-algorithm").html() != "") || (add_algorithm && $("#new-algorithm-name").val() != "")) && 
+			((!add_source && $("#selected-source").html() != "") || (add_source && $("#new-source-name").val() != "")) && 
+			((!add_target && $("#selected-target").html() != "") || (add_target && $("#new-target-name").val() != ""))) {
 		$("#submit-button").prop('disabled', false);
+	}
 	else
 		$("#submit-button").prop('disabled', true);
 }
 
 function new_framework(nf) {
+	add_framework = nf;
 	if(nf) {
 		$('#new-framework').show();
 	} else {
@@ -18,6 +26,7 @@ function new_framework(nf) {
 }
 
 function new_algorithm(nf) {
+	add_algorithm = nf;
 	if(nf) {
 		$('#new-algorithm').show();
 	} else {
@@ -26,6 +35,7 @@ function new_algorithm(nf) {
 }
 
 function new_source(nf) {
+	add_source = nf;
 	if(nf) {
 		$('#new-source').show();
 	} else {
@@ -34,6 +44,7 @@ function new_source(nf) {
 }
 
 function new_target(nf) {
+	add_target = nf;
 	if(nf) {
 		$('#new-target').show();
 	} else {
@@ -105,4 +116,6 @@ $(document).ready(function () {
 	$(new_source(false));
 	$(new_target(false));
 	
+	$('#file-tip').tooltip();
+
 });

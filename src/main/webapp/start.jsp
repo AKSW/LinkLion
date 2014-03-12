@@ -40,7 +40,8 @@
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
 					<li><a class="sintony align-text" href="index.html">LinkLion</a></li>
-					<li><a class="sintony align-text" href="start.html">Demo</a></li>
+					<li><a class="sintony align-text" href="start.jsp">Start</a></li>
+					<li><a class="sintony align-text" href="browse.jsp">Browse</a></li>
 					<li><a class="sintony align-text" href="vocabulary.html">Vocabulary</a></li>
 					<li><a class="sintony align-text" href="about.html">About</a></li>
 				</ul>
@@ -51,26 +52,22 @@
 
 	<div style="padding-top: 100px;">
 		<div class="container">
-			<h1>LinkLion Demo</h1>
+			<h1>Start</h1>
 			<hr>
 
-			<ul class="nav nav-tabs">
-				<li class="active"><a href="javascript:void(0);">Upload
-						mapping</a></li>
-				<!-- <li><a href="javascript:void(0);">View</a></li> -->
-			</ul>
 		</div>
 		<div class="container" style="padding-top: 20px;">
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					<h3 class="panel-title sintony">Configuration</h3>
+					<h3 class="panel-title sintony">Upload mapping</h3>
 				</div>
 				<form action="rest/file/upload" method="post"
 					enctype="multipart/form-data" accept-charset="UTF-8">
 					<div class="panel-body" id="configuration">
 						<div class="row">
 							<h4>
-								<small>Load mapping file</small>
+								<small>Load mapping file <a href="javascript:void(0);" id="file-tip" data-toggle="tooltip" 
+									data-placement="right" title="An N-Triples file containing mappings, e.g. &lt;:Source001&gt; &lt;owl:sameAs&gt; &lt;:Target001&gt;.">[?]</a></small>
 							</h4>
 							<div class="col-lg-6">
 
@@ -119,7 +116,7 @@
 
 								<div class="input-group">
 									<span class="input-group-addon">Name</span> <input
-										name="new-framework-name" type="text" class="form-control"
+										name="new-framework-name" id="new-framework-name" type="text" class="form-control"
 										placeholder="New Framework">
 								</div>
 								<div class="input-group">
@@ -169,7 +166,7 @@
 
 								<div class="input-group">
 									<span class="input-group-addon">Name</span> <input
-										name="new-algorithm-name" type="text" class="form-control"
+										name="new-algorithm-name" id="new-algorithm-name" type="text" class="form-control"
 										placeholder="New Algorithm">
 								</div>
 								<div class="input-group">
@@ -214,7 +211,7 @@
 
 								<div class="input-group">
 									<span class="input-group-addon">Name</span> <input
-										name="new-source-name" type="text" class="form-control"
+										name="new-source-name" id="new-source-name" type="text" class="form-control"
 										placeholder="Source Dataset">
 								</div>
 								<div class="input-group">
@@ -257,8 +254,8 @@
 
 								<div class="input-group">
 									<span class="input-group-addon">Name</span> <input
-										name="new-target-name" type="text" class="form-control"
-										placeholder="Source Dataset">
+										name="new-target-name" id="new-target-name" type="text" class="form-control"
+										placeholder="Source Dataset" onchange="check();">
 								</div>
 								<div class="input-group">
 									<span class="input-group-addon">URI Space</span> <input
@@ -268,16 +265,14 @@
 
 							</div>
 						</div>
-						<div class="row">
-							<h4>
+						<div class="row text-center">
+							<h4 style="padding-left: 0;">
 								<small>Upload to the portal</small>
 							</h4>
-							<div class="col-lg-6">
-								<div class="config-item" style="position: relative;">
+								<div class="config-item text-center" style="position: relative;">
 									<input id="submit-button" disabled="disabled" type="submit"
 										value="Upload mapping" class="btn btn-primary" />
 								</div>
-							</div>
 						</div>
 					</div>
 
