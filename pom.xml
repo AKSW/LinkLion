@@ -2,11 +2,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>linkinglod</groupId>
-  <artifactId>LinkingLOD</artifactId>
+  <artifactId>LinkLionPortal</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>LinkingLOD</name>
+  <name>LinkLionPortal</name>
   
   <build>
+    <finalName>${project.artifactId}</finalName> 
     <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>

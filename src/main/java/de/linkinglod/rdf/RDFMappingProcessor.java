@@ -50,6 +50,9 @@ import de.linkinglod.util.XMLUtils;
  */
 public class RDFMappingProcessor implements MappingProcessor {
 	
+	private String fName = "";
+	private String fPathName = "";
+	private String dlMappingURI = "http://www.linklion.org/download/mapping/";
 	private Model ontoModel = OntologyLoader.getOntModel();
 	private Model modelOut = ModelFactory.createDefaultModel();
 	private Map<String, String> ns = ontoModel.getNsPrefixMap();
@@ -63,6 +66,9 @@ public class RDFMappingProcessor implements MappingProcessor {
 	private Property generatedAtTime = ontoModel.getProperty(ns.get("prov") + "generatedAtTime");
 	private Property wasGenBy = ontoModel.getProperty(ns.get("prov") + "wasGeneratedBy");
 	private Property wasAssocWith = ResourceFactory.createProperty(ns.get("prov") + "wasAssociatedWith");
+	private Property hasSource = ontoModel.getProperty(ns.get("llont") + "hasSource");
+	private Property hasTarget = ontoModel.getProperty(ns.get("llont") + "hasTarget");
+	private Property storedAt = ontoModel.getProperty(ns.get("llont") + "storedAt");
 
 	// load classes
 	private Resource mapClass = ontoModel.getResource(ns.get("llont") + "Mapping");
@@ -70,8 +76,6 @@ public class RDFMappingProcessor implements MappingProcessor {
 	private Resource algClass = ontoModel.getResource(ns.get("llont") + "Algorithm");
 	private Resource fwClass = ontoModel.getResource(ns.get("llont") + "LDFramework");
 	private Resource fwvClass = ontoModel.getResource(ns.get("llont") + "LDFrameworkVersion");	
-	private Property hasSource = ontoModel.getProperty(ns.get("llont") + "hasSource");
-	private Property hasTarget = ontoModel.getProperty(ns.get("llont") + "hasTarget");
 
 	// individuals/literals
 	private Resource algorithm;
@@ -79,6 +83,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 	private Resource targetDs;
 	private Resource fwVersion;
 	private Resource mapping;
+	private Resource storagePlace;
 	private String mappingURI;
 	private Literal dateLiteral;
 
@@ -92,6 +97,15 @@ public class RDFMappingProcessor implements MappingProcessor {
 		// mapping uri using file hash
 		mappingURI = ns.get("llmap") + MD5Utils.computeChecksum(file);
 		
+		fPathName = file;
+		if (fPathName.contains("/")) {
+			String[] parts = fPathName.split("/");
+			fName = parts[parts.length - 1];
+		} 
+		else {
+		    throw new IllegalArgumentException("String " + fPathName + " does not contain '/'");
+		}
+		
 		// create mapping instance of type Mapping
 		mapping = modelOut.createResource(mappingURI, mapClass);
 	}
@@ -102,13 +116,15 @@ public class RDFMappingProcessor implements MappingProcessor {
 		// copy prefixes (see class Javadoc above)
 		modelOut.setNsPrefixes(ontoModel.getNsPrefixMap());
 		dateLiteral = modelOut.createTypedLiteral(XMLUtils.toXSD(timeStamp), XSDDatatype.XSDdateTime);
+		storagePlace = modelOut.createResource(dlMappingURI + fName);
 		
 		// add mapping properties
 		modelOut.add(mapping, generatedAtTime, dateLiteral)
 			.add(mapping, wasGenBy, algorithm)
 			.add(mapping, hasSource, sourceDs)
 			.add(mapping, hasTarget, targetDs)
-			.add(algorithm, wasAssocWith, fwVersion);
+			.add(algorithm, wasAssocWith, fwVersion)
+			.add(mapping, storedAt, storagePlace);
 
 		// iterate over statements, reify and add to model
 		StmtIterator modelIterator = modelIn.listStatements();
