@@ -60,7 +60,7 @@ div, h1, h2, h3, h4, .sintony {
 	color:transparent;
 }
 
-#new-framework .input-group, #new-algorithm .input-group, #dataset-details .input-group {
+#new-framework .input-group, #new-algorithm .input-group, #new-source .input-group, #new-target .input-group {
 	margin-bottom: 5px;
 }
 

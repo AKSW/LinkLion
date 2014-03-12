@@ -25,6 +25,22 @@ function new_algorithm(nf) {
 	}
 }
 
+function new_source(nf) {
+	if(nf) {
+		$('#new-source').show();
+	} else {
+		$('#new-source').hide();
+	}
+}
+
+function new_target(nf) {
+	if(nf) {
+		$('#new-target').show();
+	} else {
+		$('#new-target').hide();
+	}
+}
+
 function frameworkTrigger(name, uri) {
 	// frontend
 	if(name == "") {
@@ -54,8 +70,39 @@ function algorithmTrigger(name, uri) {
 	$("#existing-algorithm-uri").val(uri);
 }
 
+function sourceTrigger(name, uri) {
+	// frontend
+	if(name == "") {
+		$("#selected-source").html("Add new dataset");
+		new_source(true);
+	} else {
+		$("#selected-source").html(name);
+		new_source(false);
+	}
+	check();
+	// backend
+	$("#existing-source-uri").val(uri);
+}
+
+function targetTrigger(name, uri) {
+	// frontend
+	if(name == "") {
+		$("#selected-target").html("Add new dataset");
+		new_target(true);
+	} else {
+		$("#selected-target").html(name);
+		new_target(false);
+	}
+	check();
+	// backend
+	$("#existing-target-uri").val(uri);
+}
+
 $(document).ready(function () {
 	$(check());
 	$(new_framework(false));
 	$(new_algorithm(false));
+	$(new_source(false));
+	$(new_target(false));
+	
 });

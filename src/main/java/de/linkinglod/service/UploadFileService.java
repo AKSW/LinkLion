@@ -116,12 +116,21 @@ public class UploadFileService implements Reader {
 			RDFMappingProcessor processor) {
         Map<String, List<FormDataBodyPart>> formParts = form.getFields();
         
-    	processor.setDatasetAndType(formParts.get("source-name").get(0).getValue(), 
-    			form.getField("source-uri").getValue(), 
-    			"source");
-    	processor.setDatasetAndType(formParts.get("target-name").get(0).getValue(), 
-    			form.getField("target-uri").getValue(), 
-    			"target");
+        String existingSrcDsURI = formParts.get("existing-source-uri").get(0).getValue();
+        if(existingSrcDsURI.equals(""))
+	    	processor.addNewDataset(formParts.get("new-source-name").get(0).getValue(), 
+	    			form.getField("new-source-urispace").getValue(), 
+	    			"source");
+        else
+        	processor.setSourceDataset(existingSrcDsURI);
+        
+        String existingTgtDsURI = formParts.get("existing-target-uri").get(0).getValue();
+        if(existingTgtDsURI.equals(""))
+	    	processor.addNewDataset(formParts.get("new-target-name").get(0).getValue(), 
+	    			form.getField("new-target-urispace").getValue(), 
+	    			"target");
+        else
+        	processor.setTargetDataset(existingTgtDsURI);
     	
     	String existingFwURI = formParts.get("existing-framework-uri").get(0).getValue();
     	if(existingFwURI.equals(""))

@@ -190,25 +190,24 @@ public class RDFMappingProcessor implements MappingProcessor {
 	}
 	
 	/**
-	 * Create new Resource for a source dataset, using the common linklion ontology and the name from the form data
+	 * Create new Resource for a dataset, using the common linklion ontology and the name from the form data
 	 * @param name
-	 * @param uri
+	 * @param urisp
 	 * @param type
 	 */
-	public void setDatasetAndType(String name, String uri, String type) {
+	public void addNewDataset(String name, String urisp, String type) {
 		//TODO version for datasets
 		Resource dsClass = ontoModel.getResource(ns.get("void") + "Dataset");
-		Property foafPage = ontoModel.getProperty(ns.get("foaf") + "page");
+		Property urispace = ontoModel.getProperty(ns.get("void") + "uriSpace");
 		
 		Resource dataset = modelOut.createResource(ns.get("lldat") + encodeURI(name), dsClass);
 		if (type.equals("source")) {
 			this.sourceDs = dataset;
-		}
-		else if (type.equals("target")) {
+		} else { // "target"
 			this.targetDs = dataset;
 		}
 		
-		modelOut.add(dataset, foafPage, uri)
+		modelOut.add(dataset, urispace, urisp)
 				.add(dataset, rdfsLabel, name);	
 	}
 	
@@ -230,8 +229,8 @@ public class RDFMappingProcessor implements MappingProcessor {
 		Resource fw = modelOut.createResource(ns.get("llfw") + encodeURI(fwName), fwClass);
 		
 		String convertedVersion = convVersToResourceFormat(fwVersion);
-		String fwvName = ns.get("llver") + encodeURI(fwName) + convertedVersion;
-		Resource fwv = modelOut.createResource(fwvName, fwvClass);
+		String fwvName = fwName + " " + fwVersion;
+		Resource fwv = modelOut.createResource(ns.get("llver") + encodeURI(fwName) + convertedVersion, fwvClass);
 		
 		this.fwVersion = fwv;
 
@@ -270,5 +269,15 @@ public class RDFMappingProcessor implements MappingProcessor {
 	public void setAlgorithm(String algURI) {
 		Resource alg = ResourceFactory.createResource(algURI);
 		this.algorithm = alg;
+	}
+
+	public void setSourceDataset(String dsURI) {
+		Resource ds = ResourceFactory.createResource(dsURI);
+		this.sourceDs = ds;
+	}
+
+	public void setTargetDataset(String dsURI) {
+		Resource ds = ResourceFactory.createResource(dsURI);
+		this.targetDs = ds;
 	}
 }
