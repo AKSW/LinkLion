@@ -63,7 +63,8 @@ public class StartPage {
 	private ArrayList<Dataset> fetchDatasets() {
 		String query = "select * where { ?x a <http://rdfs.org/ns/void#Dataset> . " +
 				"?x <http://rdfs.org/ns/void#uriSpace> ?urispace . " +
-				"?x <http://www.w3.org/2000/01/rdf-schema#label> ?label }";
+				"?x <http://www.w3.org/2000/01/rdf-schema#label> ?label } " +
+				"ORDER BY ?label";
 		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();
@@ -81,7 +82,8 @@ public class StartPage {
 	private ArrayList<FrameworkVersion> fetchFrameworks() {
 		String query = "select * where { ?v a <http://www.linklion.org/ontology#LDFrameworkVersion> . ?f a <http://www.linklion.org/ontology#LDFramework> . " +
 				"?f <http://usefulinc.com/ns/doap#release> ?v . ?f <http://xmlns.com/foaf/0.1/homepage> ?url . " +
-				"?v <http://www.w3.org/2000/01/rdf-schema#label> ?label . ?v <http://usefulinc.com/ns/doap#revision> ?ver }";
+				"?v <http://www.w3.org/2000/01/rdf-schema#label> ?label . ?v <http://usefulinc.com/ns/doap#revision> ?ver } " +
+				"ORDER BY ?label";
 		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();
@@ -100,7 +102,8 @@ public class StartPage {
 	private ArrayList<Algorithm> fetchAlgorithms() {
 		String query = "select * where { ?x a <http://www.linklion.org/ontology#Algorithm> . " +
 				"?x <http://xmlns.com/foaf/0.1/homepage> ?url . " +
-				"?x <http://www.w3.org/2000/01/rdf-schema#label> ?label }";
+				"?x <http://www.w3.org/2000/01/rdf-schema#label> ?label } " +
+				"ORDER BY ?label";
 		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();

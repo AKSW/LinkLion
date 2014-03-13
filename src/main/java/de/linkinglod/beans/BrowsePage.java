@@ -70,7 +70,7 @@ public class BrowsePage {
 				"?x <http://www.linklion.org/ontology#hasTarget> ?t ." +
 				"?s <http://www.w3.org/2000/01/rdf-schema#label> ?src ." +
 				"?t <http://www.w3.org/2000/01/rdf-schema#label> ?tgt" +
-				"}";
+				"} ORDER BY ?src ?tgt";
 		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();
