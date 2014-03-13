@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
-<title>Upload mapping | LinkLion - A portal for link discovery.</title>
+<title>Start | LinkLion - A portal for link discovery.</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="utf-8">
 <!-- Bootstrap -->
@@ -21,6 +21,7 @@
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="js/bootstrap.min.js"></script>
 <script src="js/script.js"></script>
+<script src="js/start.js"></script>
 <jsp:useBean id="bean" class="de.linkinglod.beans.StartPage" />
 </head>
 <body>

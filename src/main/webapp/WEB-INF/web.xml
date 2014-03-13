@@ -5,7 +5,7 @@
 	<display-name>de.linkinglod.service</display-name>
 
 	<servlet>
-		<servlet-name>uploadMapping</servlet-name>
+		<servlet-name>restService</servlet-name>
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>com.sun.jersey.config.property.packages</param-name>
@@ -14,14 +14,9 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
-	<servlet-mapping>
-		<servlet-name>uploadMapping</servlet-name>
+ 	<servlet-mapping>
+		<servlet-name>restService</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
-
-	<servlet>
-	    <servlet-name>Start</servlet-name>
-	    <jsp-file>/start.jsp</jsp-file>
-	</servlet>
 
 </web-app>

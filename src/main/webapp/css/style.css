@@ -44,7 +44,7 @@ div, h1, h2, h3, h4, .sintony {
 	padding-top: 0;
 }
 
-#configuration h4 {
+#configuration h4, #browse-mappings h4 {
 	padding-left: 20px;
 }
 
