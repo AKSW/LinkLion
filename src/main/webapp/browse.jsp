@@ -8,6 +8,7 @@
 <!-- Bootstrap -->
 <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 <link href="css/style.css" rel="stylesheet" media="screen">
+<link href="css/jquery.dynatable.css" rel="stylesheet" media="screen">
 <link href="http://fonts.googleapis.com/css?family=Sintony:400,700"
 	rel="stylesheet" type="text/css">
 <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -22,6 +23,7 @@
 <script src="js/bootstrap.min.js"></script>
 <script src="js/script.js"></script>
 <script src="js/browse.js"></script>
+<script src="js/jquery.dynatable.js"></script>
 <jsp:useBean id="bean" class="de.linkinglod.beans.BrowsePage" />
 </head>
 <body>
@@ -68,28 +70,27 @@
 					<div class="panel-body" id="browse-mappings">
 						<div class="row">
 							<h4>
-								<small>Select mapping from the dropdown menu.</small>
+								<small>Select mapping from the table.</small>
 							</h4>
 							<div class="col-lg-6">
-
-								<div class="config-item btn-group">
-									<button type="button" class="btn btn-default" id="mapping">Select
-										mapping</button>
-									<button type="button" class="btn btn-default dropdown-toggle"
-										data-toggle="dropdown">
-										<span class="caret"></span> <span class="sr-only">Toggle
-											Dropdown</span>
-									</button>
-									<ul class="dropdown-menu" role="menu">
-										<c:forEach items="${bean.mappings}" var="mp">
-											<li role="presentation"><a href="javascript:void(0);"
-												onclick='mappingTrigger("${mp.value}", "${mp.key}");'>${mp.value}</a></li>
-										</c:forEach>
-									</ul>
-									<input type="hidden" name="mapping-uri"
-										id="mapping-uri" value=""> &nbsp; <span
-										class='label label-info' id="selected-mapping"></span>
-								</div>
+							<table id="mappings-table">
+								<thead>
+									<tr>
+										<th>has source</th>
+										<th>has target</th>
+										<th>URI</th>
+									</tr>
+								</thead>
+								<tbody>
+								<c:forEach items="${bean.mappings}" var="mp">
+									<tr>
+										<td>${mp.srcName}</td>
+										<td>${mp.tgtName}</td>
+										<td><a href="${mp.uri}" target="_blank">${mp.uri}</a></td>
+									</tr>
+								</c:forEach>
+								</tbody>
+							</table>
 
 							</div>
 						</div>
@@ -97,11 +98,11 @@
 <!--							<h4 style="padding-left: 0;">
 								<small>Upload to the portal</small>
 							</h4>
--->
 								<div class="config-item text-center" style="position: relative;">
 									<input id="submit-button" disabled="disabled" type="submit"
 										value="Browse mappings" class="btn btn-primary" />
 								</div>
+-->
 						</div>
 					</div>
 

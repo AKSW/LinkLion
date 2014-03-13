@@ -1,7 +1,7 @@
 package de.linkinglod.beans;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -23,21 +23,46 @@ import de.linkinglod.service.LLProp;
  */
 public class BrowsePage {
 
-	private HashMap<String, String> mappings;
+	// hash map of all available mappings
+	private List<Mapping> mappings;
+	// selected mapping
+//	private String mappingURI;
+	
+//	private List<Link> linksByMapping;
 	
 	private String endpoint = LLProp.getString("TripleStore.endpoint");
 	private String graph = LLProp.getString("TripleStore.graph");
 
-	public HashMap<String, String> getMappings() {
+	public List<Mapping> getMappings() {
 		
-		mappings = new HashMap<>();
-		ArrayList<Mapping> mp = fetchMappings();
-		for(Mapping m : mp)
-			mappings.put(m.uri, m.srcName + " &mdash; " + m.tgtName);
+		mappings = fetchMappings();
 		return mappings;
 		
 	}
 	
+//	public List<Link> getLinksByMapping() {
+//		linksByMapping = new ArrayList<Link>();
+//		
+//		String query = "select * where {" +
+//				"?x a <http://www.linklion.org/ontology#Link> ." +
+//				"?x <http://www.w3.org/ns/prov#wasDerivedFrom> <http://www.linklion.org/mapping/"+mappingURI+"> . " +
+//				"?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> ?s . " +
+//				"?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#object> ?o . " +
+//				"}";
+//		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
+//		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
+//		ResultSet results = qexec.execSelect();
+//		while (results.hasNext()) {
+//			QuerySolution n = results.next();
+//			Resource x = n.getResource("x");
+//			Literal s = n.getLiteral("s");
+//			Literal o = n.getLiteral("o");
+//			linksByMapping.add(new Link(x.getURI(), s.getString(), o.getString()));
+//		}
+//		
+//		return linksByMapping;
+//	}
+
 	private ArrayList<Mapping> fetchMappings() {
 		String query = "select * where {" +
 				"?x a <http://www.linklion.org/ontology#Mapping> ." +
@@ -60,13 +85,40 @@ public class BrowsePage {
 		return arr;
 	}
 
+//	public String getMappingURI() {
+//		return mappingURI;
+//	}
+//
+//	public void setMappingURI(String mappingURI) {
+//		this.mappingURI = mappingURI;
+//	}
+
 }
 
-class Mapping {
-	protected String uri, srcName, tgtName;
-	protected Mapping(String uri, String srcName, String tgtName) {
-		this.uri = uri;
-		this.srcName = srcName;
-		this.tgtName = tgtName;
-	}
-}
+
+//class Link {
+//	private String uri, source, target;
+//	public Link(String uri, String source, String target) {
+//		this.setUri(uri);
+//		this.setSource(source);
+//		this.setTarget(target);
+//	}
+//	public String getUri() {
+//		return uri;
+//	}
+//	public void setUri(String uri) {
+//		this.uri = uri;
+//	}
+//	public String getSource() {
+//		return source;
+//	}
+//	public void setSource(String source) {
+//		this.source = source;
+//	}
+//	public String getTarget() {
+//		return target;
+//	}
+//	public void setTarget(String target) {
+//		this.target = target;
+//	}
+//}

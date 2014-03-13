@@ -29,12 +29,12 @@ public class BrowseMappingService {
 		log.debug("Browse mapping service triggered!");
 
 		String mappingURI = form.getFields().get("mapping-uri").get(0).getValue();
+		String mappingID = mappingURI.substring(mappingURI.lastIndexOf("/") + 1);
 		
-		// TODO: Waiting for merging to see what has been done till now.
+		// TODO version 2: build JSON object.
 		
-		String out = "";
-		
-		return Response.status(200).entity(out).build();
+		// redirecting to a human-readable page
+		return Response.status(200).entity("<html><head><meta http-equiv='refresh' content='0;url=../../browse-mapping.jsp?id="+mappingID+"'></head></html>").build();
 	}
 
 }

@@ -60,6 +60,19 @@ div, h1, h2, h3, h4, .sintony {
 	color:transparent;
 }
 
+#mappings-table {
+	margin: 20px 20px 20px 20px;
+}
+
+#mappings-table th {
+	background-color: #006A72;
+	min-width: 150px;
+}
+
+#mappings-table th a {
+	color: #ffffff;
+}
+
 #new-framework .input-group, #new-algorithm .input-group, #new-source .input-group, #new-target .input-group {
 	margin-bottom: 5px;
 }
