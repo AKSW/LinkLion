@@ -257,12 +257,9 @@ public class UploadFileService implements Reader {
 	 * @return
 	 */
 	private String suggestName(String fName) {
-		String downloadDir = "download";
+		String downloadDir = "/u/wditomcat/htdocs/download/mapping";
 		
-		String path = System.getProperty("java.io.tmpdir") 
-				+ System.getProperty("file.separator")
-				+ downloadDir
-				+ System.getProperty("file.separator");
+		String path = downloadDir + System.getProperty("file.separator");
 		
 		return path + fName;
 	}
