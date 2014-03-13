@@ -65,11 +65,12 @@
           <h3 class="sintony"><span class="glyphicon glyphicon-link"></span>&nbsp;&nbsp;Maintain links when projects shut down.</h3>
         </div>
         <div class="col-md-6">
-        	<h2 class="sintony centered-text">Dashboard</h3>
+        	<h2 class="sintony centered-text">Statistics</h3>
         	<table id="dashboard" class="table table-hover table-condensed">
         		<tr><th class="sintony">Frameworks</th><td class="sintony">${bean.numFrameworks}</td>
         		<tr><th class="sintony">Mappings</th><td class="sintony">${bean.numMappings}</td>
         		<tr><th class="sintony">Datasets</th><td class="sintony">${bean.numDatasets}</td>
+        		<tr><th class="sintony">Link types</th><td class="sintony">${bean.numLinkTypes}</td>
         		<tr><th class="sintony">Links</th><td class="sintony">${bean.numLinks}</td>
         		<tr><th class="sintony">Triples</th><td class="sintony">${bean.numTriples}</td>
         	</table>

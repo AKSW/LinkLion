@@ -19,6 +19,7 @@ public class HomePage {
 	private Integer numFrameworks;
 	private Integer numMappings;
 	private Integer numDatasets;
+	private Integer numLinkTypes;
 	private Integer numLinks;
 	private Integer numTriples;
 	
@@ -70,6 +71,18 @@ public class HomePage {
 		ResultSet results = qexec.execSelect();
 		numLinks = results.next().getLiteral("c").getInt();
 		return numLinks;
+	}
+
+	public Integer getNumLinkTypes() {
+		String query = "select (count(distinct ?o) as ?c) where {" +
+				"?x a <http://www.linklion.org/ontology#Link> ." +
+				"?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate> ?o ." +
+				"}";
+		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
+		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
+		ResultSet results = qexec.execSelect();
+		numLinkTypes = results.next().getLiteral("c").getInt();
+		return numLinkTypes;
 	}
 
 

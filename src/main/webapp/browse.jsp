@@ -65,8 +65,8 @@
 				<div class="panel-heading">
 					<h3 class="panel-title sintony">Browse mappings</h3>
 				</div>
-				<form action="rest/browse/mapping" method="post"
-					enctype="multipart/form-data" accept-charset="UTF-8">
+<!-- 				<form action="rest/browse/mapping" method="post"
+					enctype="multipart/form-data" accept-charset="UTF-8">  -->
 					<div class="panel-body" id="browse-mappings">
 						<div class="row">
 							<h4>
@@ -105,8 +105,8 @@
 -->
 						</div>
 					</div>
-
-				</form>
+<!-- 
+				</form> -->
 			</div>
 		<hr>
 		<footer>

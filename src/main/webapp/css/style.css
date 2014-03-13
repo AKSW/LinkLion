@@ -77,6 +77,26 @@ div, h1, h2, h3, h4, .sintony {
 	color: #ffffff;
 }
 
+.dynatable-processing {
+  background: #000;
+  opacity: 0.6;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+.dynatable-processing span {
+  background: #FFF;
+  border: solid 2px #57A957;
+  color: #333;
+  padding: 25px;
+  font-size: 2em;
+  box-shadow: 0px 0px 15px rgba(0,0,0,0.5);
+}
+.dynatable-processing span img {
+  vertical-align: middle;
+}
+
+
 #new-framework .input-group, #new-algorithm .input-group, #new-source .input-group, #new-target .input-group {
 	margin-bottom: 5px;
 }
