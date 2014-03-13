@@ -25,14 +25,15 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand sintony" href="index.html"><img src="images/linklion-icon.png" border="0"></a>
+          <a class="navbar-brand sintony" href="index.jsp"><img src="images/linklion-icon.png" border="0"></a>
         </div>
         <div class="navbar-collapse collapse">
 	      <ul class="nav navbar-nav">
-	        <li><a class="sintony align-text" href="index.html">LinkLion</a></li>
+	        <li><a class="sintony align-text" href="index.jsp">LinkLion</a></li>
 			<li><a class="sintony align-text" href="start.jsp">Start</a></li>
 			<li><a class="sintony align-text" href="browse.jsp">Browse</a></li>
 	        <li><a class="sintony align-text" href="vocabulary.html">Vocabulary</a></li>
+	        <li><a class="sintony align-text" target="_blank" href="http://www.linklion.org:8890/sparql">SPARQL</a></li>
 	        <li><a class="sintony align-text" href="about.html">About</a></li>
 	      </ul>
         </div><!--/.navbar-collapse -->
