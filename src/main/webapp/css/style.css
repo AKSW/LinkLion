@@ -40,6 +40,10 @@ div, h1, h2, h3, h4, .sintony {
 	margin-top: 20px;
 }
 
+#dashboard td {
+	text-align: right;
+}
+
 #configuration {
 	padding-top: 0;
 }

@@ -41,7 +41,7 @@
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
 					<li><a class="sintony align-text" href="index.jsp">LinkLion</a></li>
-					<li><a class="sintony align-text" href="start.jsp">Start</a></li>
+					<li><a class="sintony align-text" href="start.jsp">Upload</a></li>
 					<li><a class="sintony align-text" href="browse.jsp">Browse</a></li>
 					<li><a class="sintony align-text" href="vocabulary.html">Vocabulary</a></li>
 					<li><a class="sintony align-text" target="_blank" href="http://www.linklion.org:8890/sparql">SPARQL</a></li>
@@ -54,7 +54,7 @@
 
 	<div style="padding-top: 100px;">
 		<div class="container">
-			<h1>Start</h1>
+			<h1>Upload</h1>
 			<hr>
 
 		</div>
