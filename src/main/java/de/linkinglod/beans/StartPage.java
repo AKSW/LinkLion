@@ -92,7 +92,7 @@ public class StartPage {
 			Resource url = n.getResource("url");
 			Literal label = n.getLiteral("label");
 			Literal ver = n.getLiteral("ver");
-			arr.add(new FrameworkVersion(v.getURI(), label.getString(), url.getURI(), ver.getFloat()));
+			arr.add(new FrameworkVersion(v.getURI(), label.getString(), url.getURI(), ver.getString()));
 		}
 		return arr;
 	}
@@ -118,9 +118,8 @@ public class StartPage {
 }
 
 class FrameworkVersion {
-	protected String uri, name, url;
-	protected float version;
-	protected FrameworkVersion(String uri, String name, String url, float version) {
+	protected String uri, name, url, version;
+	protected FrameworkVersion(String uri, String name, String url, String version) {
 		this.uri = uri;
 		this.name = name;
 		this.url = url;
