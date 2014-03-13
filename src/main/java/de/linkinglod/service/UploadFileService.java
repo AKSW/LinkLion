@@ -61,12 +61,13 @@ public class UploadFileService implements Reader {
 	public Response uploadFile(FormDataMultiPart form) throws IOException, URISyntaxException {
 		log.debug("File upload service triggered!");
 
-		String sourceFileName = form.getField("file").getContentDisposition().getFileName();
+		//TODO delete file if overall upload was not successful!
 		String filePathAndName = writeSourceFileToDisk(form);
+		System.out.println("filePathAndName: " + filePathAndName);
 		
 		// TODO model read from fileLocation needed? perhaps read from stream?
 		Model model = read(filePathAndName);
-    	System.out.println("generateModelFromStream().isEmpty(): " + model.isEmpty());
+    	System.out.println("model.isEmpty(): " + model.isEmpty());
     	
     	RDFMappingProcessor processor = new RDFMappingProcessor(filePathAndName);
     	processor = readFormAndAddToRDFProc(form, processor);
@@ -91,6 +92,7 @@ public class UploadFileService implements Reader {
 //    	dbComm.write("TripleStore.graph", OntologyLoader.getOntModel());
     	
     	// TODO check later, IF this is needed. Source file + speed is more important in the beginning.
+		//String sourceFileName = form.getField("file").getContentDisposition().getFileName();
  		//writeModifiedDataToFile(sourceFileName);
 		
 		// FIXME Adding this throws an exception, but on line 162. Investigate why.
@@ -110,7 +112,7 @@ public class UploadFileService implements Reader {
         String existingSrcDsURI = formParts.get("existing-source-uri").get(0).getValue();
         if(existingSrcDsURI.equals(""))
 	    	processor.addNewDataset(formParts.get("new-source-name").get(0).getValue(), 
-	    			form.getField("new-source-urispace").getValue(), 
+	    			form.getField("new-source-urispace").getValue(),
 	    			"source");
         else
         	processor.setSourceDataset(existingSrcDsURI);
@@ -185,9 +187,10 @@ public class UploadFileService implements Reader {
         String pathToTest = suggestName(formName);
 		File file = new File(pathToTest);
 		while (file.isFile()) {
+	        String lastExistingFile = pathToTest;
 			pathToTest = getNewNameIfHashDiffers(formFile, pathToTest);
-			if (pathToTest == null) {
-				return pathToTest;
+			if (pathToTest == null) { // file exists, same content
+				return lastExistingFile;
 			}
 			file = new File(pathToTest);
 		}
@@ -255,14 +258,13 @@ public class UploadFileService implements Reader {
 	 */
 	private String suggestName(String fName) {
 		String downloadDir = "download";
-                
-		String suggestPathName = System.getProperty("java.io.tmpdir") 
+		
+		String path = System.getProperty("java.io.tmpdir") 
 				+ System.getProperty("file.separator")
 				+ downloadDir
-				+ System.getProperty("file.separator")
-				+ fName;
+				+ System.getProperty("file.separator");
 		
-		return suggestPathName;
+		return path + fName;
 	}
 
 	/**
@@ -299,16 +301,6 @@ public class UploadFileService implements Reader {
 	@Override
 	public Model read(String pathToFile) throws FileNotFoundException {
 		InputStream stream = new FileInputStream(pathToFile);
-		
-		return generateModelFromStream(stream);
-	}
-	
-	/**
-	 * Build a Jena model from stream.
-	 * @param stream
-	 * @return
-	 */
-	public Model generateModelFromStream(InputStream stream) {
 		
 		Model model = ModelFactory.createDefaultModel();
 		
