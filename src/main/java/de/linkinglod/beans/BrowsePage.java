@@ -68,6 +68,7 @@ public class BrowsePage {
 				"?x a <http://www.linklion.org/ontology#Mapping> ." +
 				"?x <http://www.linklion.org/ontology#hasSource> ?s ." +
 				"?x <http://www.linklion.org/ontology#hasTarget> ?t ." +
+				"?x <http://www.linklion.org/ontology#storedAt> ?store ." +
 				"?s <http://www.w3.org/2000/01/rdf-schema#label> ?src ." +
 				"?t <http://www.w3.org/2000/01/rdf-schema#label> ?tgt" +
 				"} ORDER BY ?src ?tgt";
@@ -80,7 +81,8 @@ public class BrowsePage {
 			Resource m = n.getResource("x");
 			Literal src = n.getLiteral("src");
 			Literal tgt = n.getLiteral("tgt");
-			arr.add(new Mapping(m.getURI(), src.getString(), tgt.getString()));
+			Literal store = n.getLiteral("store");
+			arr.add(new Mapping(m.getURI(), src.getString(), tgt.getString(), store.getString()));
 		}
 		return arr;
 	}

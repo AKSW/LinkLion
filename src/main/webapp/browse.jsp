@@ -79,6 +79,7 @@
 										<th>has source</th>
 										<th>has target</th>
 										<th>URI</th>
+										<th>download</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -87,6 +88,7 @@
 										<td>${mp.srcName}</td>
 										<td>${mp.tgtName}</td>
 										<td><a href="${mp.uri}" target="_blank">${mp.uri}</a></td>
+										<td><a href="${mp.storedAt}" download><span class="glyphicon glyphicon-download"></span></a></td>
 									</tr>
 								</c:forEach>
 								</tbody>

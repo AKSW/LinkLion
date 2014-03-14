@@ -6,12 +6,13 @@ package de.linkinglod.beans;
  */
 public class Mapping {
 	
-	private String uri, srcName, tgtName;
+	private String uri, srcName, tgtName, storedAt;
 	
-	public Mapping(String uri, String srcName, String tgtName) {
-			this.uri = uri;
-			this.srcName = srcName;
-			this.tgtName = tgtName;
+	public Mapping(String uri, String srcName, String tgtName, String storedAt) {
+		this.uri = uri;
+		this.srcName = srcName;
+		this.tgtName = tgtName;
+		this.setStoredAt(storedAt);
 	}
 	public String getUri() {
 		return uri;
@@ -30,6 +31,12 @@ public class Mapping {
 	}
 	public void setTgtName(String tgtName) {
 		this.tgtName = tgtName;
+	}
+	public String getStoredAt() {
+		return storedAt;
+	}
+	public void setStoredAt(String storedAt) {
+		this.storedAt = storedAt;
 	}
 }
 
