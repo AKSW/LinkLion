@@ -45,11 +45,11 @@
 	
 	<h1>LinkLion Ontology Vocabulary</h1><hr>
 
-		<div class="panel panel-default">
+		<div class="panel panel-default" id="Algorithm">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">Algorithm</h3>
 		  </div>
-		  <div class="panel-body">Insert description here.</div>
+		  <div class="panel-body">An algorithm used in the link discovery task, i.e. discovering new links between two datasets. An algorithm is connected to a <a href="#LDFrameworkVersion">:LDFrameworkVersion</a> within a <a href="http://www.w3.org/ns/prov#wasAssociatedWith">prov:wasAssociatedWith</a> property.</div>
 		  <table class="table">
 		    <tr><th>URI<td><a href="http://www.linklion.org/ontology#Algorithm" target="_blank">http://www.linklion.org/ontology#Algorithm</a>
 		    <tr><th>type<td>Class
@@ -58,11 +58,11 @@
 		  </table>
 		</div>
 
-		<div class="panel panel-default">
+		<div class="panel panel-default" id="Link">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">Link</h3>
 		  </div>
-		  <div class="panel-body">Insert description here.</div>
+		  <div class="panel-body">A link discovered during the link discovery process. A link is connected to a <a href="#Mapping">:Mapping</a> using a <a href="http://www.w3.org/ns/prov#wasDerivedFrom">prov:wasDerivedFrom</a> property.</div>
 		  <table class="table">
 		    <tr><th>URI<td><a href="http://www.linklion.org/ontology#Link" target="_blank">http://www.linklion.org/ontology#Link</a>
 		    <tr><th>type<td>Class
@@ -71,11 +71,11 @@
 		  </table>
 		</div>
 
-		<div class="panel panel-default">
+		<div class="panel panel-default" id="LDFramework">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">Link Discovery Framework</h3>
 		  </div>
-		  <div class="panel-body">Insert description here.</div>
+		  <div class="panel-body">A link discovery framework. Each framework has one or more <a href="http://usefulinc.com/ns/doap#release">doap:release</a>s, which belong to the <a href="#LDFrameworkVersion">:LDFrameworkVersion</a> class.</div>
 		  <table class="table">
 		    <tr><th>URI<td><a href="http://www.linklion.org/ontology#LDFramework" target="_blank">http://www.linklion.org/ontology#LDFramework</a>
 		    <tr><th>type<td>Class
@@ -85,11 +85,11 @@
 		  </table>
 		</div>
 
-		<div class="panel panel-default">
+		<div class="panel panel-default" id="LDFrameworkVersion">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">Link Discovery Framework Version</h3>
 		  </div>
-		  <div class="panel-body">Insert description here.</div>
+		  <div class="panel-body">A release of a link discovery framework. A framework version has a <a href="http://usefulinc.com/ns/doap#revision">doap:revision</a> datatype property.</div>
 		  <table class="table">
 		    <tr><th>URI<td><a href="http://www.linklion.org/ontology#LDFrameworkVersion" target="_blank">http://www.linklion.org/ontology#LDFrameworkVersion</a>
 		    <tr><th>type<td>Class
@@ -99,11 +99,11 @@
 		  </table>
 		</div>
 
-		<div class="panel panel-default">
+		<div class="panel panel-default" id="Mapping">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">Mapping</h3>
 		  </div>
-		  <div class="panel-body">Insert description here.</div>
+		  <div class="panel-body">A mapping between two datasets. A mapping is connected to an <a href="#Algorithm">:Algorithm</a> within a <a href="http://www.w3.org/ns/prov#wasGeneratedBy">prov:wasGeneratedBy</a> property. Each mapping has a <a href="http://www.w3.org/ns/prov#generatedAtTime">prov:generatedAtTime</a> datatype property.</div>
 		  <table class="table">
 		    <tr><th>URI<td><a href="http://www.linklion.org/ontology#Mapping" target="_blank">http://www.linklion.org/ontology#Mapping</a>
 		    <tr><th>type<td>Class
@@ -112,11 +112,11 @@
 		  </table>
 		</div>
 
-		<div class="panel panel-default">
+		<div class="panel panel-default" id="hasSource">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">Has Source</h3>
 		  </div>
-		  <div class="panel-body">Insert description here.</div>
+		  <div class="panel-body">Defines the source dataset for a mapping.</div>
 		  <table class="table">
 		    <tr><th>URI<td><a href="http://www.linklion.org/ontology#hasSource" target="_blank">http://www.linklion.org/ontology#hasSource</a>
 		    <tr><th>type<td>Property
@@ -125,11 +125,11 @@
 		  </table>
 		</div>
 
-		<div class="panel panel-default">
+		<div class="panel panel-default" id="hasTarget">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">Has Target</h3>
 		  </div>
-		  <div class="panel-body">Insert description here.</div>
+		  <div class="panel-body">Defines the target dataset for a mapping.</div>
 		  <table class="table">
 		    <tr><th>URI<td><a href="http://www.linklion.org/ontology#hasTarget" target="_blank">http://www.linklion.org/ontology#hasTarget</a>
 		    <tr><th>type<td>Property
@@ -138,11 +138,11 @@
 		  </table>
 		</div>
 
-		<div class="panel panel-default">
+		<div class="panel panel-default" id="parameters">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">Parameters</h3>
 		  </div>
-		  <div class="panel-body">Insert description here.</div>
+		  <div class="panel-body">Defines the parameters for an algorithm.</div>
 		  <table class="table">
 		    <tr><th>URI<td><a href="http://www.linklion.org/ontology#parameters" target="_blank">http://www.linklion.org/ontology#parameters</a>
 		    <tr><th>type<td>Property
@@ -151,11 +151,11 @@
 		  </table>
 		</div>
 
-		<div class="panel panel-default">
+		<div class="panel panel-default" id="storedAt">
 		  <div class="panel-heading">
 		    <h3 class="panel-title">Stored At</h3>
 		  </div>
-		  <div class="panel-body">Insert description here.</div>
+		  <div class="panel-body">Defines the URI where the original mapping file is stored at.</div>
 		  <table class="table">
 		    <tr><th>URI<td><a href="http://www.linklion.org/ontology#storedAt" target="_blank">http://www.linklion.org/ontology#storedAt</a>
 		    <tr><th>type<td>Property
