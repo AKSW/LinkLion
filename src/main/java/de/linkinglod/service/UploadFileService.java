@@ -6,8 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
@@ -60,10 +64,9 @@ public class UploadFileService implements Reader {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadFile(FormDataMultiPart form) throws IOException, URISyntaxException {
 		log.debug("File upload service triggered!");
-
+		
 		//TODO delete file if overall upload was not successful!
 		String filePathAndName = writeSourceFileToDisk(form);
-		System.out.println("filePathAndName: " + filePathAndName);
 		
 		// TODO model read from fileLocation needed? perhaps read from stream?
 		Model model = read(filePathAndName);
@@ -299,8 +302,11 @@ public class UploadFileService implements Reader {
 	public Model read(String pathToFile) throws FileNotFoundException {
 		InputStream stream = new FileInputStream(pathToFile);
 		
-		Model model = ModelFactory.createDefaultModel();
+		CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+		decoder.onMalformedInput(CodingErrorAction.IGNORE);
+		InputStreamReader reader = new InputStreamReader(stream, decoder);
 		
+		Model model = ModelFactory.createDefaultModel();
 		// TODO support different InputFormats like "RDF/XML", "N-TRIPLE", "TURTLE" (or "TTL") and "N3".
 		// Malformed statements have to be corrected/deleted manually, 
 		// create error page for this:
@@ -310,7 +316,7 @@ public class UploadFileService implements Reader {
 		//   <http://www.w3.org/2002/07/owl#sameAs> 
 		//   https://eprints.soas.ac.uk/id/subject/DJK .
 		// )
-		model.read(stream, null, LLProp.getString("tripleInputFormat"));
+		model.read(reader, null, LLProp.getString("tripleInputFormat"));
 		log.debug("Read " + model.size() + " elements.");
 
 		return model;
