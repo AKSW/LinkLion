@@ -4,7 +4,7 @@ $(document).ready(function () {
 			defaultColumnIdStyle: 'trimDash'
 		},
 		inputs: {
-			processingText: 'Loading <img src="../images/loading.gif" />'
+			processingText: 'Loading <img src="../images/loading.gif" border="0"/>'
 		}
 	});
 });

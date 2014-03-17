@@ -96,6 +96,9 @@ div, h1, h2, h3, h4, .sintony {
   vertical-align: middle;
 }
 
+td.dload {
+	text-align: center;
+}
 
 #new-framework .input-group, #new-algorithm .input-group, #new-source .input-group, #new-target .input-group {
 	margin-bottom: 5px;

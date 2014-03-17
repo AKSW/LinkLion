@@ -81,8 +81,8 @@ public class BrowsePage {
 			Resource m = n.getResource("x");
 			Literal src = n.getLiteral("src");
 			Literal tgt = n.getLiteral("tgt");
-			Literal store = n.getLiteral("store");
-			arr.add(new Mapping(m.getURI(), src.getString(), tgt.getString(), store.getString()));
+			Resource store = n.getResource("store");
+			arr.add(new Mapping(m.getURI(), src.getString(), tgt.getString(), store.getURI()));
 		}
 		return arr;
 	}
