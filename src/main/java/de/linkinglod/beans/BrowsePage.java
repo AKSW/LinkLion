@@ -1,6 +1,7 @@
 package de.linkinglod.beans;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.hp.hpl.jena.query.Query;
@@ -36,6 +37,14 @@ public class BrowsePage {
 	public List<Mapping> getMappings() {
 		
 		mappings = fetchMappings();
+		HashMap<String, Integer> lpm = linksPerMapping();
+		for(Mapping m : mappings) {
+			Integer n = lpm.get(m.getUri());
+			if(n != null)
+				m.setNumLinks(n);
+			else
+				m.setNumLinks(0);
+		}
 		return mappings;
 		
 	}
@@ -85,6 +94,24 @@ public class BrowsePage {
 			arr.add(new Mapping(m.getURI(), src.getString(), tgt.getString(), store.getURI()));
 		}
 		return arr;
+	}
+	
+	private HashMap<String, Integer> linksPerMapping() {
+		HashMap<String, Integer> lpm = new HashMap<>();
+		String query = "select ?x (count(?l) as ?links) where { " +
+				"?x a <http://www.linklion.org/ontology#Mapping> . " +
+				"?l <http://www.w3.org/ns/prov#wasDerivedFrom> ?x " +
+				"} GROUP BY ?x";
+		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
+		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
+		ResultSet results = qexec.execSelect();
+		while (results.hasNext()) {
+			QuerySolution n = results.next();
+			Resource x = n.getResource("x");
+			Literal links = n.getLiteral("links");
+			lpm.put(x.getURI(), links.getInt());
+		}
+		return lpm;
 	}
 
 //	public String getMappingURI() {

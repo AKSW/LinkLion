@@ -7,11 +7,12 @@ package de.linkinglod.beans;
 public class Mapping {
 	
 	private String uri, srcName, tgtName, storedAt;
+	private Integer numLinks;
 	
 	public Mapping(String uri, String srcName, String tgtName, String storedAt) {
-		this.uri = uri;
-		this.srcName = srcName;
-		this.tgtName = tgtName;
+		this.setUri(uri);
+		this.setSrcName(srcName);
+		this.setTgtName(tgtName);
 		this.setStoredAt(storedAt);
 	}
 	public String getUri() {
@@ -37,6 +38,12 @@ public class Mapping {
 	}
 	public void setStoredAt(String storedAt) {
 		this.storedAt = storedAt;
+	}
+	public Integer getNumLinks() {
+		return numLinks;
+	}
+	public void setNumLinks(Integer numLinks) {
+		this.numLinks = numLinks;
 	}
 }
 

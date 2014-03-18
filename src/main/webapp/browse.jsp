@@ -80,6 +80,7 @@
 										<th>has target</th>
 										<th>URI</th>
 										<th>download .nt</th>
+										<th>links</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -89,6 +90,7 @@
 										<td>${mp.tgtName}</td>
 										<td><a href="${mp.uri}" target="_blank">${mp.uri}</a></td>
 										<td><a href="${mp.storedAt}" target="_blank"><span class="glyphicon glyphicon-download"></span></a></td>
+										<td>${mp.numLinks}</td>
 									</tr>
 								</c:forEach>
 								</tbody>
