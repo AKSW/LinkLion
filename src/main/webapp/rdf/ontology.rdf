@@ -12,17 +12,17 @@
     <!ENTITY llmap "http://www.linklion.org/mapping/" >
     <!ENTITY lldat "http://www.linklion.org/dataset/" >
     <!ENTITY llver "http://www.linklion.org/version/" >
-    <!ENTITY llont "http://www.linklion.org/ontology#" >
     <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
     <!ENTITY llalg "http://www.linklion.org/algorithm/" >
     <!ENTITY llfw "http://www.linklion.org/framework/" >
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY llont "http://www.linklion.org/ontology#" >
 ]>
 
 
-<rdf:RDF xmlns="http://www.linklion.org/ontology#"
-     xml:base="http://www.linklion.org/ontology"
+<rdf:RDF xmlns="http://www.linklion.org/ns/"
+     xml:base="http://www.linklion.org/ns/"
      xmlns:llmap="http://www.linklion.org/mapping/"
      xmlns:prov="http://www.w3.org/ns/prov#"
      xmlns:foaf="http://xmlns.com/foaf/0.1/"
@@ -31,14 +31,14 @@
      xmlns:void="http://rdfs.org/ns/void#"
      xmlns:dcterms="http://purl.org/dc/terms/"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:llont="http://www.linklion.org/ontology#"
      xmlns:lldat="http://www.linklion.org/dataset/"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:doap="http://usefulinc.com/ns/doap#"
      xmlns:llfw="http://www.linklion.org/framework/"
-     xmlns:llver="http://www.linklion.org/version/">
+     xmlns:llver="http://www.linklion.org/version/"
+     xmlns:llont="http://www.linklion.org/ontology#">
     <owl:Ontology rdf:about="http://www.linklion.org/ontology">
         <rdfs:label xml:lang="en">LinkLion - the Link Discovery Portal</rdfs:label>
         <rdfs:isDefinedBy>http://www.linklion.org/ontology</rdfs:isDefinedBy>
