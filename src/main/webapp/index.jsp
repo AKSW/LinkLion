@@ -47,10 +47,12 @@
 		<div class="centered-text"><img src="images/linklion.png" border="0" id="logo"></div>
         <h1 class="sintony-bold centered-text">LinkLion</h1>
         <h4 class="sintony centered-text">A portal for link discovery.</h4>
-        <div id="buttons" class="sintony centered-text">
+        <div class="sintony centered-text">
+         <div id="buttons" class="sintony btn-group">
         	<a class="btn btn-primary btn-lg sintony" role="button" href="start.jsp"><span class="glyphicon glyphicon-play-circle"></span>&nbsp;&nbsp;Upload</a>
         	<a class="btn btn-primary btn-lg sintony" role="button" href="browse.jsp"><span class="glyphicon glyphicon-book"></span>&nbsp;&nbsp;Browse</a>
         	<a class="btn btn-primary btn-lg sintony" role="button" target="_blank" href="http://www.linklion.org:8890/sparql"><span class="glyphicon glyphicon-question-sign"></span>&nbsp;&nbsp;SPARQL</a>
+       	 </div>
         </div>
       </div>
     </div>
@@ -63,9 +65,14 @@
           <h3 class="sintony"><span class="glyphicon glyphicon-hdd"></span>&nbsp;&nbsp;Store computed links.</h3>
           <h3 class="sintony"><span class="glyphicon glyphicon-stats"></span>&nbsp;&nbsp;Compare different frameworks.</h3>
           <h3 class="sintony"><span class="glyphicon glyphicon-link"></span>&nbsp;&nbsp;Maintain links when projects shut down.</h3>
+          <div class="centered-text">
+	          <div id="readmore" class="sintony btn-group btn-group-sm">
+	          	<a class="btn btn-default btn-lg sintony" role="button" href="about.html">Read more</a>
+	          </div>
+          </div>
         </div>
         <div class="col-md-6">
-        	<h2 class="sintony centered-text">Statistics</h3>
+        	<h2 class="sintony centered-text">Statistics</h2>
         	<table id="dashboard" class="table table-hover table-condensed">
         		<tr><th class="sintony">Frameworks</th><td class="sintony">${bean.numFrameworks}</td>
         		<tr><th class="sintony">Mappings</th><td class="sintony">${bean.numMappings}</td>

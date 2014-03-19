@@ -36,8 +36,8 @@ div, h1, h2, h3, h4, .sintony {
 	margin-top: 58px;
 }
 
-#buttons {
-	margin-top: 20px;
+#buttons, #readmore {
+	margin-top: 10px; 
 }
 
 #dashboard td {
