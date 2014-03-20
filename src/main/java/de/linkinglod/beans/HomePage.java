@@ -1,5 +1,7 @@
 package de.linkinglod.beans;
 
+import java.text.NumberFormat;
+
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -26,7 +28,7 @@ public class HomePage {
 	private String endpoint = LLProp.getString("TripleStore.endpoint");
 	private String graph = LLProp.getString("TripleStore.graph");
 
-	public Integer getNumFrameworks() {
+	public String getNumFrameworks() {
 		String query = "select (count(*) as ?c) where {" +
 				"?x a <http://www.linklion.org/ontology#LDFramework> ." +
 				"}";
@@ -34,11 +36,11 @@ public class HomePage {
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();
 		numFrameworks = results.next().getLiteral("c").getInt();
-		return numFrameworks;
+		return NumberFormat.getInstance().format(numFrameworks);
 	}
 
 
-	public Integer getNumMappings() {
+	public String getNumMappings() {
 		String query = "select (count(*) as ?c) where {" +
 				"?x a <http://www.linklion.org/ontology#Mapping> ." +
 				"}";
@@ -46,11 +48,11 @@ public class HomePage {
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();
 		numMappings = results.next().getLiteral("c").getInt();
-		return numMappings;
+		return NumberFormat.getInstance().format(numMappings);
 	}
 
 
-	public Integer getNumDatasets() {
+	public String getNumDatasets() {
 		String query = "select (count(*) as ?c) where {" +
 				"?x a <http://rdfs.org/ns/void#Dataset> ." +
 				"}";
@@ -58,11 +60,11 @@ public class HomePage {
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();
 		numDatasets = results.next().getLiteral("c").getInt();
-		return numDatasets;
+		return NumberFormat.getInstance().format(numDatasets);
 	}
 
 
-	public Integer getNumLinks() {
+	public String getNumLinks() {
 		String query = "select (count(*) as ?c) where {" +
 				"?x a <http://www.linklion.org/ontology#Link> ." +
 				"}";
@@ -70,10 +72,10 @@ public class HomePage {
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();
 		numLinks = results.next().getLiteral("c").getInt();
-		return numLinks;
+		return NumberFormat.getInstance().format(numLinks);
 	}
 
-	public Integer getNumLinkTypes() {
+	public String getNumLinkTypes() {
 		String query = "select (count(distinct ?o) as ?c) where {" +
 				"?x a <http://www.linklion.org/ontology#Link> ." +
 				"?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate> ?o ." +
@@ -82,11 +84,11 @@ public class HomePage {
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();
 		numLinkTypes = results.next().getLiteral("c").getInt();
-		return numLinkTypes;
+		return NumberFormat.getInstance().format(numLinkTypes);
 	}
 
 
-	public Integer getNumTriples() {
+	public String getNumTriples() {
 		String query = "select (count(*) as ?c) where {" +
 				"?s ?p ?o ." +
 				"}";
@@ -94,7 +96,7 @@ public class HomePage {
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();
 		numTriples = results.next().getLiteral("c").getInt();
-		return numTriples;
+		return NumberFormat.getInstance().format(numTriples);
 	}
 
 }
