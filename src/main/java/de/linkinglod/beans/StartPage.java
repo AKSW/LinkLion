@@ -72,9 +72,9 @@ public class StartPage {
 		while (results.hasNext()) {
 			QuerySolution n = results.next();
 			Resource v = n.getResource("x");
-			Literal uri = n.getLiteral("urispace");
+			Resource uri = n.getResource("urispace");
 			Literal label = n.getLiteral("label");
-			arr.add(new Dataset(v.getURI(), label.getString(), uri.getString()));
+			arr.add(new Dataset(v.getURI(), label.getString(), uri.toString()));
 		}
 		return arr;
 	}
