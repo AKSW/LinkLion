@@ -24,6 +24,8 @@
 <script src="js/script.js"></script>
 <script src="js/browse.js"></script>
 <script src="js/jquery.dynatable.js"></script>
+<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
 <jsp:useBean id="bean" class="de.linkinglod.beans.BrowsePage" />
 </head>
 <body>
