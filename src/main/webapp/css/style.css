@@ -48,7 +48,7 @@ div, h1, h2, h3, h4, .sintony {
 	padding-top: 0;
 }
 
-#configuration h4, #browse-mappings h4 {
+#configuration h4, #browse-mappings h4, #browse-datasets h4 {
 	padding-left: 20px;
 }
 
@@ -64,16 +64,16 @@ div, h1, h2, h3, h4, .sintony {
 	color:transparent;
 }
 
-#mappings-table {
+#mappings-table, #datasets-table {
 	margin: 20px 20px 20px 20px;
 }
 
-#mappings-table th {
+#mappings-table th, #datasets-table th {
 	background-color: #006A72;
 	min-width: 150px;
 }
 
-#mappings-table th a {
+#mappings-table th a, #datasets-table th a {
 	color: #ffffff;
 }
 

@@ -24,8 +24,8 @@
 <script src="js/script.js"></script>
 <script src="js/browse.js"></script>
 <script src="js/jquery.dynatable.js"></script>
-<link rel="icon" href="favicon.ico" type="image/x-icon"/>
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+<link rel="icon" href="favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
 <jsp:useBean id="bean" class="de.linkinglod.beans.BrowsePage" />
 </head>
 <body>
@@ -48,7 +48,8 @@
 					<li><a class="sintony align-text" href="start.jsp">Upload</a></li>
 					<li><a class="sintony align-text" href="browse.jsp">Browse</a></li>
 					<li><a class="sintony align-text" href="vocabulary.html">Vocabulary</a></li>
-	        		<li><a class="sintony align-text" target="_blank" href="http://www.linklion.org:8890/sparql">SPARQL</a></li>
+					<li><a class="sintony align-text" target="_blank"
+						href="http://www.linklion.org:8890/sparql">SPARQL</a></li>
 					<li><a class="sintony align-text" href="about.html">About</a></li>
 				</ul>
 			</div>
@@ -56,64 +57,87 @@
 		</div>
 	</div>
 
-	<div style="padding-top: 100px;">
-		<div class="container">
-			<h1>Browse</h1>
-			<hr>
-
+	<div class="container" style="padding-top: 100px;">
+		<div class="navbar-inner">
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#mapping" data-toggle="tab">Mappings</a></li>
+				<li><a href="#dataset" data-toggle="tab">Datasets</a></li>
+			</ul>
 		</div>
-		<div class="container" style="padding-top: 20px;">
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					<h3 class="panel-title sintony">Browse mappings</h3>
-				</div>
-<!-- 				<form action="rest/browse/mapping" method="post"
-					enctype="multipart/form-data" accept-charset="UTF-8">  -->
+		<div id="myTabContent" class="tab-content">
+			<div id="mapping" class="tab-pane fade in active" style="padding-top: 20px;">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title sintony">Browse mappings</h3>
+					</div>
 					<div class="panel-body" id="browse-mappings">
 						<div class="row">
 							<h4>
-								<small>Select mapping from the table.</small>
+								<small>Click on source or target to view details to a specific mapping.</small>
 							</h4>
 							<div class="col-lg-6">
-							<table id="mappings-table">
-								<thead>
-									<tr>
-										<th>has source</th>
-										<th>has target</th>
-										<th>URI</th>
-										<th>download .nt</th>
-										<th>links</th>
-									</tr>
-								</thead>
-								<tbody>
-								<c:forEach items="${bean.mappings}" var="mp">
-									<tr>
-										<td>${mp.srcName}</td>
-										<td>${mp.tgtName}</td>
-										<td><a href="${mp.uri}" target="_blank">${mp.uri}</a></td>
-										<td><a href="${mp.storedAt}" target="_blank"><span class="glyphicon glyphicon-download"></span></a></td>
-										<td>${mp.numLinks}</td>
-									</tr>
-								</c:forEach>
-								</tbody>
-							</table>
-
+								<table id="mappings-table">
+									<thead>
+										<tr>
+											<th>has source</th>
+											<th>has target</th>
+											<th>download .nt</th>
+											<th>links</th>
+										</tr>
+									</thead>
+									<tbody>
+										<c:forEach items="${bean.mappings}" var="mp">
+											<tr>
+												<td><a href="${mp.uri}" target="_blank">${mp.srcName}</a></td>
+												<td><a href="${mp.uri}" target="_blank">${mp.tgtName}</a></td>
+												<td><a href="${mp.storedAt}" target="_blank"><span
+														class="glyphicon glyphicon-download"></span></a></td>
+												<td>${mp.numLinks}</td>
+											</tr>
+										</c:forEach>
+									</tbody>
+								</table>
 							</div>
 						</div>
-						<div class="row text-center">
-<!--							<h4 style="padding-left: 0;">
-								<small>Upload to the portal</small>
+					</div>
+				</div>
+			</div>
+			<div id="dataset" class="tab-pane fade in" style="padding-top: 20px;">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title sintony">Browse datasets</h3>
+					</div>
+					<div class="panel-body" id="browse-datasets">
+						<div class="row">
+							<h4>
+								<small>Select dataset from the table.</small>
 							</h4>
-								<div class="config-item text-center" style="position: relative;">
-									<input id="submit-button" disabled="disabled" type="submit"
-										value="Browse mappings" class="btn btn-primary" />
-								</div>
--->
+							<div class="col-lg-6">
+								<table id="datasets-table">
+									<thead>
+										<tr>
+											<th>Dataset</th>
+											<th>mappingsAssoc</th>
+											<th>links</th>
+										</tr>
+									</thead>
+									<tbody>
+										<c:forEach items="${bean.datasets}" var="ds">
+											<tr>
+												<td><a href="${ds.llUri}" target="_blank">${ds.label}</a></td>
+												<td>${ds.mCount}</td>
+												<td>${ds.lCount}</td>
+											</tr>
+										</c:forEach>
+									</tbody>
+								</table>
+							</div>
 						</div>
 					</div>
-<!-- 
-				</form> -->
+				</div>
 			</div>
+		</div>
+	</div>
 		<hr>
 		<footer>
 			<p class="sintony">
@@ -123,9 +147,6 @@
 				Leipzig, 2014
 			</p>
 		</footer>
-		</div>
-	</div>
-	<!-- /container -->
-
+		<!-- /container -->
 </body>
 </html>

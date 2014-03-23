@@ -3,6 +3,7 @@ package de.linkinglod.beans;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -20,16 +21,13 @@ import de.linkinglod.service.LLProp;
  * TODO arrange everything without using protected classes
  * 
  * @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>
- *
+ * @author Markus Nentwig <nentwig@informatik.uni-leipzig.de>
  */
 public class BrowsePage {
 
 	// hash map of all available mappings
 	private List<Mapping> mappings;
-	// selected mapping
-//	private String mappingURI;
-	
-//	private List<Link> linksByMapping;
+	private List<RsDataset> datasets;
 	
 	private String endpoint = LLProp.getString("TripleStore.endpoint");
 	private String graph = LLProp.getString("TripleStore.graph");
@@ -46,31 +44,100 @@ public class BrowsePage {
 				m.setNumLinks(0);
 		}
 		return mappings;
+	}
+	
+	public List<RsDataset> getDatasets() {
+		datasets = fetchMappingsPerDataset();
+		
+		// mapping, ds
+		HashMap<String, HashMap<String, String>> distinctDsMa = fetchDistinctMappingDataset();
+		// mapping, lcount
+		HashMap<String, Integer> linksPerMapping = linksPerMapping();
+		// ds, lcount
+		HashMap<String, Integer> linksPerDs = new HashMap<>();
+		for (Map.Entry<String, Integer> lpmEntry : linksPerMapping.entrySet()) {
+			String lpmKey = lpmEntry.getKey();
+			HashMap<String, String> st = distinctDsMa.get(lpmKey);
+			String source = st.keySet().iterator().next();
+			String target = st.values().iterator().next();
+						
+			if (linksPerDs.containsKey(source)) {
+				int value = linksPerDs.get(source) + linksPerMapping.get(lpmKey); 
+				linksPerDs.put(source, value);
+			}
+			else {
+				linksPerDs.put(source, linksPerMapping.get(lpmKey));
+			}
+			
+			if (linksPerDs.containsKey(target)) {
+				int value = linksPerDs.get(target) + linksPerMapping.get(lpmKey); 
+				linksPerDs.put(target, value);
+			}
+			else {
+				linksPerDs.put(target, linksPerMapping.get(lpmKey));
+			}
+		}
+		for (RsDataset ds: datasets) {
+			Integer n = linksPerDs.get(ds.getLlUri());
+			if(n != null)
+				ds.setlCount(n);
+			else
+				ds.setlCount(0);
+		}
+
+		return datasets;
 		
 	}
 	
-//	public List<Link> getLinksByMapping() {
-//		linksByMapping = new ArrayList<Link>();
-//		
-//		String query = "select * where {" +
-//				"?x a <http://www.linklion.org/ontology#Link> ." +
-//				"?x <http://www.w3.org/ns/prov#wasDerivedFrom> <http://www.linklion.org/mapping/"+mappingURI+"> . " +
-//				"?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> ?s . " +
-//				"?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#object> ?o . " +
-//				"}";
-//		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
-//		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
-//		ResultSet results = qexec.execSelect();
-//		while (results.hasNext()) {
-//			QuerySolution n = results.next();
-//			Resource x = n.getResource("x");
-//			Literal s = n.getLiteral("s");
-//			Literal o = n.getLiteral("o");
-//			linksByMapping.add(new Link(x.getURI(), s.getString(), o.getString()));
-//		}
-//		
-//		return linksByMapping;
-//	}
+	private HashMap<String, HashMap<String, String>> fetchDistinctMappingDataset() {
+		String query = "select distinct * where {" +
+				"?m a <http://www.linklion.org/ontology#Mapping> ." +
+				"?m <http://www.linklion.org/ontology#hasSource> ?s ." +
+				"?m <http://www.linklion.org/ontology#hasTarget> ?t ."
+				+ " } ORDER BY ?m ?s ?t";
+		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
+		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
+		ResultSet results = qexec.execSelect();
+		HashMap<String, HashMap<String, String>> map = new HashMap<String, HashMap<String, String>>();
+		while (results.hasNext()) {
+			HashMap<String, String> st = new HashMap<String, String>();
+			QuerySolution n = results.next();
+			Resource mapping = n.getResource("m");
+			Resource s = n.getResource("s");
+			Resource t = n.getResource("t");
+			st.put(s.getURI(), t.getURI());
+			map.put(mapping.getURI(), st);
+		}
+		return map;
+	}
+	
+	private ArrayList<RsDataset> fetchMappingsPerDataset() {
+                System.out.println("fetchMappingsPerDataset()");
+                String query = "select ?ds ?label ?uri (count(?m) as ?mcount) where " +
+                		" { " + 
+                		" ?ds <http://www.w3.org/2000/01/rdf-schema#label> ?label . " +
+                		" ?ds <http://rdfs.org/ns/void#uriSpace> ?uri .  " +
+                		" ?ds a <http://rdfs.org/ns/void#Dataset> .  " +
+                		" { ?m <http://www.linklion.org/ontology#hasSource> ?ds . }  " +
+                		" UNION  " +
+                		" { ?m <http://www.linklion.org/ontology#hasTarget> ?ds . }  " +
+                		" } GROUP BY ?ds ?label ?uri ORDER BY desc(count(?m))";
+		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
+		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
+		ResultSet results = qexec.execSelect();		
+		ArrayList<RsDataset> arr = new ArrayList<>();
+		while (results.hasNext()) {
+			QuerySolution n = results.next();
+			Literal mCount = n.getLiteral("mcount");
+			String mString = mCount.toString();
+			int number = Integer.parseInt(mString.substring(0, mString.indexOf("^")));
+			Resource llUri = n.getResource("ds");
+			Literal label = n.getLiteral("label");
+			Resource uri = n.getResource("uri");
+			arr.add(new RsDataset(uri.getURI(), label.toString(), number, llUri.getURI()));
+		}
+		return arr;
+	}
 
 	private ArrayList<Mapping> fetchMappings() {
 		String query = "select * where {" +
