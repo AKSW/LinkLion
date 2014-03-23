@@ -22,7 +22,7 @@
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="js/bootstrap.min.js"></script>
 <script src="js/script.js"></script>
-<script src="js/browse.js"></script>
+<script src="js/browse-datasets.js"></script>
 <script src="js/jquery.dynatable.js"></script>
 <link rel="icon" href="favicon.ico" type="image/x-icon" />
 <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
@@ -66,49 +66,14 @@
 		<div class="container" style="padding-top: 20px;"> 
 			<div class="navbar-inner">
 				<ul class="nav nav-tabs">
-					<li class="active"><a href="#mapping" data-toggle="tab">Mappings</a></li>
-					<li><a href="#dataset" data-toggle="tab">Datasets</a></li>
+					<li><a href="browse.jsp">Mappings</a></li>
+					<li class="active"><a href="browse-datasets.jsp">Datasets</a></li>
 				</ul>
 			</div>
 			<div id="myTabContent" class="tab-content">
-				<div id="mapping" class="tab-pane fade in active" style="padding-top: 20px;">
-					<div class="panel panel-default">
-						<div class="panel-heading">
-							<h3 class="panel-title sintony">Browse mappings</h3>
-						</div>
-						<div class="panel-body" id="browse-mappings">
-							<div class="row">
-								<h4>
-									<small>Click on source or target to view details to a specific mapping.</small>
-								</h4>
-								<div class="col-lg-6">
-									<table class="table" id="mappings-table">
-										<thead>
-											<tr>
-												<th>has source</th>
-												<th>has target</th>
-												<th>download .nt</th>
-												<th>links per mapping</th>
-											</tr>
-										</thead>
-										<tbody>
-											<c:forEach items="${bean.mappings}" var="mp">
-												<tr>
-													<td><a href="${mp.uri}" target="_blank">${mp.srcName}</a></td>
-													<td><a href="${mp.uri}" target="_blank">${mp.tgtName}</a></td>
-													<td><a href="${mp.storedAt}" target="_blank"><span
-															class="glyphicon glyphicon-download"></span></a></td>
-													<td>${mp.numLinks}</td>
-												</tr>
-											</c:forEach>
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
+				<div id="mapping" class="tab-pane fade in" style="padding-top: 20px;">
 				</div>
-				<div id="dataset" class="tab-pane fade in" style="padding-top: 20px;">
+				<div id="dataset" class="tab-pane fade in active" style="padding-top: 20px;">
 					<div class="panel panel-default">
 						<div class="panel-heading">
 							<h3 class="panel-title sintony">Browse datasets</h3>
@@ -123,8 +88,8 @@
 										<thead>
 											<tr>
 												<th>dataset</th>
-												<th>mappings per dataset</th>
-												<th>links per dataset</th>
+												<th data-dynatable-column="mappingsd">mappings per dataset</th>
+												<th data-dynatable-column="linksd">links per dataset</th>
 											</tr>
 										</thead>
 										<tbody>
