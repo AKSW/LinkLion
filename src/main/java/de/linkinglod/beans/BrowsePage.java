@@ -145,9 +145,10 @@ public class BrowsePage {
 				"?x <http://www.linklion.org/ontology#hasSource> ?s ." +
 				"?x <http://www.linklion.org/ontology#hasTarget> ?t ." +
 				"?x <http://www.linklion.org/ontology#storedAt> ?store ." +
-				"?s <http://www.w3.org/2000/01/rdf-schema#label> ?src ." +
-				"?t <http://www.w3.org/2000/01/rdf-schema#label> ?tgt" +
-				"} ORDER BY ?src ?tgt";
+				"}";
+//				"?s <http://www.w3.org/2000/01/rdf-schema#label> ?src ." +
+//				"?t <http://www.w3.org/2000/01/rdf-schema#label> ?tgt" +
+//				"} ORDER BY ?src ?tgt";
 		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();
@@ -155,10 +156,15 @@ public class BrowsePage {
 		while (results.hasNext()) {
 			QuerySolution n = results.next();
 			Resource m = n.getResource("x");
-			Literal src = n.getLiteral("src");
-			Literal tgt = n.getLiteral("tgt");
+			// TODO restore after having reinstalled Virtuoso
+//			Literal src = n.getLiteral("src");
+//			Literal tgt = n.getLiteral("tgt");
 			Resource store = n.getResource("store");
-			arr.add(new Mapping(m.getURI(), src.getString(), tgt.getString(), store.getURI()));
+			String s = n.getResource("s").getURI();
+			String t = n.getResource("t").getURI();
+			String src1 = s.substring(s.lastIndexOf("/")+1);
+			String tgt1 = t.substring(t.lastIndexOf("/")+1);
+			arr.add(new Mapping(m.getURI(), src1, tgt1, store.getURI()));
 		}
 		return arr;
 	}
