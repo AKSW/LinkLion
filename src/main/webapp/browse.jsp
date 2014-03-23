@@ -66,8 +66,8 @@
 		<div class="container" style="padding-top: 20px;"> 
 			<div class="navbar-inner">
 				<ul class="nav nav-tabs">
-					<li class="active"><a href="#mapping" data-toggle="tab">Mappings</a></li>
-					<li><a href="#dataset" data-toggle="tab">Datasets</a></li>
+					<li class="active"><a href="browse.jsp">Mappings</a></li>
+					<li><a href="browse-datasets.jsp">Datasets</a></li>
 				</ul>
 			</div>
 			<div id="myTabContent" class="tab-content">
@@ -88,7 +88,7 @@
 												<th>has source</th>
 												<th>has target</th>
 												<th>download .nt</th>
-												<th>links per mapping</th>
+												<th data-dynatable-column="linksm">links per mapping</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -109,38 +109,6 @@
 					</div>
 				</div>
 				<div id="dataset" class="tab-pane fade in" style="padding-top: 20px;">
-					<div class="panel panel-default">
-						<div class="panel-heading">
-							<h3 class="panel-title sintony">Browse datasets</h3>
-						</div>
-						<div class="panel-body" id="browse-datasets">
-							<div class="row">
-								<h4>
-									<small>Select dataset from the table.</small>
-								</h4>
-								<div class="col-lg-6">
-									<table class="table" id="datasets-table">
-										<thead>
-											<tr>
-												<th>dataset</th>
-												<th>mappings per dataset</th>
-												<th>links per dataset</th>
-											</tr>
-										</thead>
-										<tbody>
-											<c:forEach items="${bean.datasets}" var="ds">
-												<tr>
-													<td><a href="${ds.llUri}" target="_blank">${ds.label}</a></td>
-													<td>${ds.mCount}</td>
-													<td>${ds.lCount}</td>
-												</tr>
-											</c:forEach>
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
 				</div>
 			</div>
 		<hr>
