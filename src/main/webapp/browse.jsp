@@ -116,8 +116,8 @@
 								<table id="datasets-table">
 									<thead>
 										<tr>
-											<th>Dataset</th>
-											<th>mappingsAssoc</th>
+											<th>dataset</th>
+											<th>mappings</th>
 											<th>links</th>
 										</tr>
 									</thead>

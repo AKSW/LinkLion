@@ -14,8 +14,7 @@ $(document).ready(function () {
 			}
 		}
 	});
-});
-$(document).ready(function () {
+
 	$('#datasets-table').dynatable({
 		inputs: {
 			processingText: 'Loading <img src="../images/loading.gif" border="0"/>'
