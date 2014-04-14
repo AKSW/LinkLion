@@ -13,6 +13,7 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.linkinglod.service.LLProp;
@@ -133,8 +134,12 @@ public class BrowsePage {
 			int number = Integer.parseInt(mString.substring(0, mString.indexOf("^")));
 			Resource llUri = n.getResource("ds");
 			Literal label = n.getLiteral("label");
-			Resource uri = n.getResource("uri");
-			arr.add(new RsDataset(uri.getURI(), label.toString(), number, llUri.getURI()));
+			RDFNode uri;
+			try { // FIXME wrong URIs (as literals) give an exception
+				uri = n.get("uri");
+				arr.add(new RsDataset(uri.toString(), label.toString(), number, llUri.getURI()));
+			} catch (ClassCastException e) {
+			}
 		}
 		return arr;
 	}

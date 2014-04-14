@@ -11,6 +11,7 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.linkinglod.service.LLProp;
@@ -72,9 +73,12 @@ public class StartPage {
 		while (results.hasNext()) {
 			QuerySolution n = results.next();
 			Resource v = n.getResource("x");
-			Resource uri = n.getResource("urispace");
 			Literal label = n.getLiteral("label");
-			arr.add(new Dataset(v.getURI(), label.getString(), uri.toString()));
+			try { // FIXME wrong URIs (as literals) give an exception
+				RDFNode uri = n.get("urispace");
+				arr.add(new Dataset(v.getURI(), label.getString(), uri.toString()));
+			} catch (ClassCastException e) {
+			}
 		}
 		return arr;
 	}

@@ -214,7 +214,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 	public void addNewDataset(String name, String urisp, String type) {
 		//TODO version for datasets
 		Resource dsClass = ontoModel.getResource(ns.get("void") + "Dataset");
-		Property urispace = ontoModel.getProperty(ns.get("void") + "uriSpace");
+		Property urispace = ontoModel.getProperty(ns.get("void") + "uriSpace"); 
 		
 		Resource dataset = modelOut.createResource(ns.get("lldat") + encodeURI(name), dsClass);
 		if (type.equals("source")) {
