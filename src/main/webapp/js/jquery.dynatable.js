@@ -1032,25 +1032,25 @@
 
       // If sorts for this column are already set
       if (sortedByColumn) {
-        // If ascending, then make descending
-        if (value == 1) {
-          for (var i = 0, len = column.sorts.length; i < len; i++) {
-            obj.sorts.add(column.sorts[i], -1);
-          }
-          this.appendArrowDown($link);
-        // If descending, remove sort
-        } else {
-          for (var i = 0, len = column.sorts.length; i < len; i++) {
-            obj.sorts.remove(column.sorts[i]);
-          }
-          this.removeArrow($link);
-        }
-      // Otherwise, if not already set, set to ascending
+    	  // If descending, then make ascending
+    	  if (value == -1) {
+    		  for (var i = 0, len = column.sorts.length; i < len; i++) {
+    			  obj.sorts.add(column.sorts[i], 1);
+    		  }
+    		  this.appendArrowUp($link);
+    		  // If ascending, remove sort
+    	  } else {
+    		  for (var i = 0, len = column.sorts.length; i < len; i++) {
+    			  obj.sorts.remove(column.sorts[i]);
+    		  }
+    		  this.removeArrow($link);
+    	  }
+    	  // Otherwise, if not already set, set to descending
       } else {
-        for (var i = 0, len = column.sorts.length; i < len; i++) {
-          obj.sorts.add(column.sorts[i], 1);
-        }
-        this.appendArrowUp($link);
+    	  for (var i = 0, len = column.sorts.length; i < len; i++) {
+    		  obj.sorts.add(column.sorts[i], -1);
+    	  }
+    	  this.appendArrowDown($link);
       }
     };
 

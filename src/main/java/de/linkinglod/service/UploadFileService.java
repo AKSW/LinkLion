@@ -48,7 +48,6 @@ import de.linkinglod.util.MD5Utils;
 @Path("/file")
 public class UploadFileService implements Reader {
 	
-	private Model modelOut;
 	private static Logger log = LoggerFactory.getLogger(UploadFileService.class);
 
 	/**
@@ -65,26 +64,35 @@ public class UploadFileService implements Reader {
 	public Response uploadFile(FormDataMultiPart form) throws IOException, URISyntaxException {
 		log.debug("File upload service triggered!");
 		
-		//TODO delete file if overall upload was not successful!
+		// 1. process meta data
+		// TODO delete file if overall upload was not successful!
 		String filePathAndName = writeSourceFileToDisk(form);
+		// TODO meta data missing?
+		MD5Utils.reset();
+		String mappingHash = MD5Utils.computeChecksum(filePathAndName);
+		String fileName = getFileName(filePathAndName);
+    	// TODO  note: Hibernate User() should not be used here, it is only for creating (hibernate) database User() objects! 
+    	// REWORK this if users are implemented!
+    	User demoUser = new User();
+    	demoUser.setName("Demo User");
+		// TODO User is NOT used in triple store in any way.
+    	// TODO fix date issue
 		
-		// TODO model read from fileLocation needed? perhaps read from stream?
+		RDFMappingProcessor processor = new RDFMappingProcessor(mappingHash, fileName, demoUser, new Date());
+    	processor = addFormDataToProcessor(form, processor);
+		
+    	// 2. process data
+		// splitSourceIfNeeded
+		
+		// process with transform for each chunk
+		
 		Model model = read(filePathAndName);
     	System.out.println("model.isEmpty(): " + model.isEmpty());
     	
-    	RDFMappingProcessor processor = new RDFMappingProcessor(filePathAndName);
-    	processor = readFormAndAddToRDFProc(form, processor);
-    	
     	TripleStoreWriter tsw = new TripleStoreWriter();
 //    	DBCommunication dbComm = new DBCommunication();
-    	
-    	// TODO  note: Hibernate User() should not be used here, it is only for creating (hibernate) database User() objects! 
-    	// REWORK this if users are implemented!
-    	User demoUser = new User(); // TODO next: manage user login
-    	demoUser.setName("Demo User");
 
-		// TODO User is NOT used in triple store in any way.
-    	modelOut = processor.transform(model, demoUser, new Date());
+    	Model modelOut = processor.transform(model);
     	
     	tsw.write(LLProp.getString("TripleStore.graph"), modelOut);
     	tsw.write(LLProp.getString("TripleStore.graph"), OntologyLoader.getOntModel());
@@ -108,7 +116,7 @@ public class UploadFileService implements Reader {
 		return Response.status(200).entity("<html><head><meta http-equiv='refresh' content='0;url=../../success.html'></head></html>").build();
 	}
 	
-	private RDFMappingProcessor readFormAndAddToRDFProc(FormDataMultiPart form,
+	private RDFMappingProcessor addFormDataToProcessor(FormDataMultiPart form,
 			RDFMappingProcessor processor) {
         Map<String, List<FormDataBodyPart>> formParts = form.getFields();
         
@@ -203,6 +211,16 @@ public class UploadFileService implements Reader {
 		
 		return pathToTest;
 	}
+	
+	private String getFileName(String fullPath) {
+		if (fullPath.contains("/")) {
+			String[] parts = fullPath.split("/");
+			return parts[parts.length - 1];
+		} 
+		else {
+		    throw new IllegalArgumentException("String " + fullPath + " does not contain '/'");
+		}
+	}
 
 	/**
 	 * Checks if the existing file has the same hash as the file from the form and renames if needed. If hash equals, existing name is used.
@@ -255,7 +273,7 @@ public class UploadFileService implements Reader {
 
 	/**
 	 * Suggest next name for the file name.
-	 * TODO change directory for download, if needed
+	 * TODO change directory for download, if needed. dont put that path in here.
 	 * @param fName
 	 * @return
 	 */
@@ -272,6 +290,7 @@ public class UploadFileService implements Reader {
 	 * @param file file to write to
 	 * @throws FileNotFoundException
 	 * @throws IOException
+	 * TODO do a simple check if file is rdf
 	 */
 	@SuppressWarnings("resource")
 	private void writeFile(InputStream readFormStream, File file)
@@ -288,14 +307,6 @@ public class UploadFileService implements Reader {
 		out.close();
 		System.out.println("Write file to: " + file.getPath());
 
-	}
-
-	private void writeModifiedDataToFile(String fileName) throws IOException {
-		String fileOutLocation = System.getProperty("java.io.tmpdir") + fileName + "_out";
-
-		OutputStream out = new FileOutputStream(new File(fileOutLocation));
-		modelOut.write(out, LLProp.getString("tripleOutputFormat"));
-		out.close();
 	}
 
 	@Override
@@ -321,9 +332,4 @@ public class UploadFileService implements Reader {
 
 		return model;
 	}
-
-	public Model getModelOut() {
-		return modelOut;
-	}
-
 }

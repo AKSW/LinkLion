@@ -14,6 +14,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 
 import de.linkinglod.db.User;
 import de.linkinglod.rdf.RDFMappingProcessor;
+import de.linkinglod.util.MD5Utils;
 
 /**
  * Load the ontology as a Jena model. Jena doesn't handle OWL files, so the ontology has to be saved in RDF format.
@@ -61,8 +62,9 @@ public class OntologyLoader {
 		
 		// test for RDFMappingProcessor
 		System.out.println(" --- MODEL OUT --- ");
-		RDFMappingProcessor rmp = new RDFMappingProcessor(ontoFile);
-		Model m2 = rmp.transform(ModelFactory.createDefaultModel(), new User(), new Date());
+		String mappingHash = MD5Utils.computeChecksum(ontoFile);
+		RDFMappingProcessor rmp = new RDFMappingProcessor(mappingHash, ontoFile, new User(), new Date());
+		Model m2 = rmp.transform(ModelFactory.createDefaultModel());
 		m2.add(ontoModel);
 		Iterator<Statement> it2 = m2.listStatements();
 		while(it2.hasNext())

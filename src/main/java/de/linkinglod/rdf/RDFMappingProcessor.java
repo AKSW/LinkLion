@@ -51,7 +51,6 @@ import de.linkinglod.util.XMLUtils;
 public class RDFMappingProcessor implements MappingProcessor {
 	
 	private String fName = "";
-	private String fPathName = "";
 	private String dlMappingURI = "http://www.linklion.org/download/mapping/";
 	private Model ontoModel = OntologyLoader.getOntModel();
 	private Model modelOut = ModelFactory.createDefaultModel();
@@ -89,34 +88,28 @@ public class RDFMappingProcessor implements MappingProcessor {
 
 	/**
 	 * Constructor
-	 * @param file
+	 * @param mappingHash hash of the mapping which should be uploaded
+	 * @param fileName file name without path
+	 * @param date 
+	 * @param demoUser 
 	 * @throws IOException
 	 */
-	public RDFMappingProcessor(String file) throws IOException {
-				
-		// mapping uri using file hash
-		mappingURI = ns.get("llmap") + MD5Utils.computeChecksum(file);
+	public RDFMappingProcessor(String mappingHash, String fileName, User owner, Date timeStamp) throws IOException {
 		
-		fPathName = file;
-		if (fPathName.contains("/")) {
-			String[] parts = fPathName.split("/");
-			fName = parts[parts.length - 1];
-		} 
-		else {
-		    throw new IllegalArgumentException("String " + fPathName + " does not contain '/'");
-		}
-		
-		// create mapping instance of type Mapping
+		fName = fileName;
+		storagePlace = modelOut.createResource(dlMappingURI + fName);
+
+		mappingURI = ns.get("llmap") + mappingHash;
 		mapping = modelOut.createResource(mappingURI, mapClass);
+		
+		dateLiteral = modelOut.createTypedLiteral(XMLUtils.toXSD(timeStamp), XSDDatatype.XSDdateTime);
 	}
 
 	@Override
-	public Model transform(Model modelIn, User owner, Date timeStamp) {
+	public Model transform(Model modelIn) {
 		MD5Utils.reset();
 		// copy prefixes (see class Javadoc above)
 		modelOut.setNsPrefixes(ontoModel.getNsPrefixMap());
-		dateLiteral = modelOut.createTypedLiteral(XMLUtils.toXSD(timeStamp), XSDDatatype.XSDdateTime);
-		storagePlace = modelOut.createResource(dlMappingURI + fName);
 		
 		// add mapping properties
 		modelOut.add(mapping, generatedAtTime, dateLiteral)
@@ -198,7 +191,7 @@ public class RDFMappingProcessor implements MappingProcessor {
 
 	private String encodeURI(String uri) {
 		try {
-			return URLEncoder.encode(uri.replaceAll(" ", "_"), "ISO-8859-1");
+			return URLEncoder.encode(uri.replaceAll(" ", "_"), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			// never happens because encoding is a constant
 			return null;
