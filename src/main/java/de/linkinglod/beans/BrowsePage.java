@@ -102,10 +102,10 @@ public class BrowsePage {
 		HashMap<String, HashMap<String, String>> map = new HashMap<String, HashMap<String, String>>();
 		while (results.hasNext()) {
 			HashMap<String, String> st = new HashMap<String, String>();
-			QuerySolution n = results.next();
-			Resource mapping = n.getResource("m");
-			Resource s = n.getResource("s");
-			Resource t = n.getResource("t");
+			QuerySolution nextLine = results.next();
+			Resource mapping = nextLine.getResource("m");
+			Resource s = nextLine.getResource("s");
+			Resource t = nextLine.getResource("t");
 			st.put(s.getURI(), t.getURI());
 			map.put(mapping.getURI(), st);
 		}
@@ -122,21 +122,22 @@ public class BrowsePage {
                 		" { ?m <http://www.linklion.org/ontology#hasSource> ?ds . }  " +
                 		" UNION  " +
                 		" { ?m <http://www.linklion.org/ontology#hasTarget> ?ds . }  " +
+                		" FILTER isURI(?uri) " +
                 		" } GROUP BY ?ds ?label ?uri ORDER BY desc(count(?m))";
 		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
 		ResultSet results = qexec.execSelect();		
 		ArrayList<RsDataset> arr = new ArrayList<>();
 		while (results.hasNext()) {
-			QuerySolution n = results.next();
-			Literal mCount = n.getLiteral("mcount");
+			QuerySolution nextLine = results.next();
+			Literal mCount = nextLine.getLiteral("mcount");
 			String mString = mCount.toString();
 			int number = Integer.parseInt(mString.substring(0, mString.indexOf("^")));
-			Resource llUri = n.getResource("ds");
-			Literal label = n.getLiteral("label");
+			Resource llUri = nextLine.getResource("ds");
+			Literal label = nextLine.getLiteral("label");
 			RDFNode uri;
 			try { // FIXME wrong URIs (as literals) give an exception
-				uri = n.get("uri");
+				uri = nextLine.get("uri");
 				arr.add(new RsDataset(uri.toString(), label.toString(), number, llUri.getURI()));
 			} catch (ClassCastException e) {
 			}
