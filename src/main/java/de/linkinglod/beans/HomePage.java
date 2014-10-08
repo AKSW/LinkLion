@@ -55,6 +55,8 @@ public class HomePage {
 	public String getNumDatasets() {
 		String query = "select (count(*) as ?c) where {" +
 				"?x a <http://rdfs.org/ns/void#Dataset> ." +
+				"?x <http://rdfs.org/ns/void#uriSpace> ?uri ." +
+				"FILTER isURI(?uri)" +
 				"}";
 		Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery, graph);
