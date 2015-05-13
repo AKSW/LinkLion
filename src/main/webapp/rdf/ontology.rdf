@@ -18,6 +18,7 @@
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
     <!ENTITY llont "http://www.linklion.org/ontology#" >
+    <!ENTITY lden "http://www.linklion.org/lden/" >
 ]>
 
 
@@ -38,7 +39,8 @@
      xmlns:doap="http://usefulinc.com/ns/doap#"
      xmlns:llfw="http://www.linklion.org/framework/"
      xmlns:llver="http://www.linklion.org/version/"
-     xmlns:llont="http://www.linklion.org/ontology#">
+     xmlns:llont="http://www.linklion.org/ontology#"
+     xmlns:lden="http://www.linklion.org/lden/">
     <owl:Ontology rdf:about="http://www.linklion.org/ontology">
         <rdfs:label xml:lang="en">LinkLion - the Link Discovery Portal</rdfs:label>
         <rdfs:isDefinedBy>http://www.linklion.org/ontology</rdfs:isDefinedBy>
